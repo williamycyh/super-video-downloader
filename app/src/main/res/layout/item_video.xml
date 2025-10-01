@@ -10,11 +10,11 @@
 
         <variable
             name="localVideo"
-            type="com.myAllVideoBrowser.data.local.model.LocalVideo" />
+            type="com.example.data.local.model.LocalVideo" />
 
         <variable
             name="videoListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.VideoListener" />
+            type="com.example.tubedown.component.adapter.VideoListener" />
 
     </data>
 

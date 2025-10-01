@@ -6,15 +6,15 @@
 
         <variable
             name="videoInfo"
-            type="com.myAllVideoBrowser.data.local.room.entity.VideoInfo" />
+            type="com.example.data.local.room.entity.VideoInfo" />
 
         <variable
             name="dialogListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.DownloadTabListener" />
+            type="com.example.tubedown.component.adapter.DownloadTabListener" />
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.home.browser.detectedVideos.VideoDetectionTabViewModel" />
+            type="com.example.tubedown.main.home.browser.detectedVideos.VideoDetectionTabViewModel" />
 
     </data>
 

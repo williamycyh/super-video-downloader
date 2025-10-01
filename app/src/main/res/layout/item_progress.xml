@@ -9,7 +9,7 @@
 
         <variable
             name="progressInfo"
-            type="com.myAllVideoBrowser.data.local.room.entity.ProgressInfo" />
+            type="com.example.data.local.room.entity.ProgressInfo" />
 
         <variable
             name="downloadId"
@@ -22,7 +22,7 @@
 
         <variable
             name="progressListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.ProgressListener" />
+            type="com.example.tubedown.component.adapter.ProgressListener" />
 
     </data>
 

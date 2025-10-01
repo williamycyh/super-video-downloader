@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.settings.SettingsViewModel" />
+            type="com.example.tubedown.main.settings.SettingsViewModel" />
 
     </data>
 

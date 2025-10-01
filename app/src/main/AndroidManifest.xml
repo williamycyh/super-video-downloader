@@ -22,8 +22,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting">
 
+        <meta-data android:name="applovin.sdk.key"
+            android:value="4H_0TsIcexuKDttqHWKNaZq2FUgDWF9wRulnqw5T42I8N6m3Hc_1ngS2i_aGfsZb_OgCq3PvA8sQBTqlNCJ7ET"/>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4553141884220416~1588521637"/>
+
         <activity
-            android:name="com.myAllVideoBrowser.ui.main.home.MainActivity"
+            android:name="com.example.tubedown.main.home.MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:hardwareAccelerated="true"
@@ -50,7 +57,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.myAllVideoBrowser.ui.main.player.VideoPlayerActivity"
+            android:name="com.example.tubedown.main.player.VideoPlayerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:hardwareAccelerated="true"
             android:theme="@style/AppTheme" />
@@ -76,7 +83,7 @@
             tools:node="remove" />
 
         <receiver
-            android:name="com.myAllVideoBrowser.util.downloaders.NotificationReceiver"
+            android:name="com.example.util.downloaders.NotificationReceiver"
             android:enabled="true" />
     </application>
 

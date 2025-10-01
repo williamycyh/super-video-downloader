@@ -6,19 +6,19 @@
 
         <import type="android.view.View" />
 
-        <import type="com.myAllVideoBrowser.data.local.model.Proxy" />
+        <import type="com.example.data.local.model.Proxy" />
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.proxies.ProxiesViewModel" />
+            type="com.example.tubedown.main.proxies.ProxiesViewModel" />
 
         <variable
             name="adapter"
-            type="com.myAllVideoBrowser.ui.component.adapter.ProxiesAdapter" />
+            type="com.example.tubedown.component.adapter.ProxiesAdapter" />
 
         <variable
             name="listener"
-            type="com.myAllVideoBrowser.ui.component.adapter.ProxiesListener" />
+            type="com.example.tubedown.component.adapter.ProxiesListener" />
 
     </data>
 

@@ -8,23 +8,23 @@
 
         <import type="android.view.View" />
 
-        <import type="com.myAllVideoBrowser.R" />
+        <import type="com.example.R" />
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.home.browser.webTab.WebTabViewModel" />
+            type="com.example.tubedown.main.home.browser.webTab.WebTabViewModel" />
 
         <variable
             name="videoTabVModel"
-            type="com.myAllVideoBrowser.ui.main.home.browser.detectedVideos.IVideoDetector" />
+            type="com.example.tubedown.main.home.browser.detectedVideos.IVideoDetector" />
 
         <variable
             name="browserMenuListener"
-            type="com.myAllVideoBrowser.ui.main.home.browser.BrowserListener" />
+            type="com.example.tubedown.main.home.browser.BrowserListener" />
 
         <variable
             name="settingsViewModel"
-            type="com.myAllVideoBrowser.ui.main.settings.SettingsViewModel" />
+            type="com.example.tubedown.main.settings.SettingsViewModel" />
     </data>
 
     <FrameLayout
@@ -241,7 +241,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <com.myAllVideoBrowser.ui.component.widget.MovableContainer
+            <com.example.tubedown.component.widget.MovableContainer
                 android:id="@+id/floating_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -287,7 +287,7 @@
                     app:layout_constraintEnd_toEndOf="@+id/fab"
                     app:layout_constraintStart_toStartOf="@+id/fab"
                     app:layout_constraintTop_toTopOf="@+id/fab" />
-            </com.myAllVideoBrowser.ui.component.widget.MovableContainer>
+            </com.example.tubedown.component.widget.MovableContainer>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
 

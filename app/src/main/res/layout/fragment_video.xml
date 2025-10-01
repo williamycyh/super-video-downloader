@@ -8,11 +8,11 @@
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.video.VideoViewModel" />
+            type="com.example.tubedown.main.video.VideoViewModel" />
 
         <variable
             name="mainViewModel"
-            type="com.myAllVideoBrowser.ui.main.home.MainViewModel" />
+            type="com.example.tubedown.main.home.MainViewModel" />
 
     </data>
 

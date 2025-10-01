@@ -48,20 +48,20 @@ android {
         }
     }
     compileSdkVersion build_versions.target_sdk
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
-        }
-    }
+//    signingConfigs {
+//        release {
+//            storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore.jks")
+//            storePassword System.getenv("KEYSTORE_PASSWORD")
+//            keyAlias System.getenv("KEY_ALIAS")
+//            keyPassword System.getenv("KEY_PASSWORD")
+//        }
+//    }
     defaultConfig {
-        applicationId "com.myAllVideoBrowser"
+        applicationId "downloaderpark.highspeed.downloader.park"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
-        versionCode 45
-        versionName "0.6.1"
+        versionCode = 500020
+        versionName = "5.2.0"
         testInstrumentationRunner "util.TestRunner"
 
         if (splitApks) {
@@ -77,6 +77,16 @@ android {
             ndk { abiFilters.addAll(abiFilterList) }
         }
     }
+
+    signingConfigs {
+        register("release") {
+            keyAlias = "downpark29"
+            keyPassword = "downpark29"
+            storeFile = file("downpark29.jks")
+            storePassword = "downpark29"
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -126,7 +136,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    namespace 'com.myAllVideoBrowser'
+    namespace 'com.example'
     lint {
         abortOnError false
     }
@@ -271,6 +281,21 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     implementation 'androidx.core:core-splashscreen:1.0.1'
+
+
+    implementation 'com.applovin:applovin-sdk:13.4.0'
+    implementation 'com.applovin.mediation:inmobi-adapter:10.8.7.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.android.support:recyclerview-v7:28.+'
+    implementation 'com.android.support:customtabs:28.+'
+    implementation 'com.applovin.mediation:mintegral-adapter:16.9.91.0'
+    implementation 'com.applovin.mediation:facebook-adapter:6.20.0.0'
+    implementation 'com.applovin.mediation:unityads-adapter:4.16.1.0'
+    implementation 'com.applovin.mediation:google-adapter:24.6.0.0'
+    implementation 'com.applovin.mediation:vungle-adapter:7.5.1.0'
+
+    implementation("com.google.android.play:review:2.0.2")
+    implementation("com.google.firebase:firebase-config:23.0.0")
 }
 
 ksp {

@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.home.browser.BrowserViewModel" />
+            type="com.example.tubedown.main.home.browser.BrowserViewModel" />
 
     </data>
 
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.myAllVideoBrowser.ui.main.home.browser.CustomViewPager2
+        <com.example.tubedown.main.home.browser.CustomViewPager2
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

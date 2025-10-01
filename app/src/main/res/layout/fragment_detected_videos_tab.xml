@@ -5,11 +5,11 @@
 
         <variable
             name="dialogListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.DownloadTabListener" />
+            type="com.example.tubedown.component.adapter.DownloadTabListener" />
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.home.browser.detectedVideos.VideoDetectionTabViewModel" />
+            type="com.example.tubedown.main.home.browser.detectedVideos.VideoDetectionTabViewModel" />
     </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

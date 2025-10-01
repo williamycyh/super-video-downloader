@@ -9,7 +9,7 @@
 
         <variable
             name="historyItem"
-            type="com.myAllVideoBrowser.data.local.room.entity.HistoryItem" />
+            type="com.example.data.local.room.entity.HistoryItem" />
 
         <variable
             name="historyId"
@@ -17,7 +17,7 @@
 
         <variable
             name="historyListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.HistoryListener" />
+            type="com.example.tubedown.component.adapter.HistoryListener" />
 
     </data>
 

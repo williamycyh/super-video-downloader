@@ -8,7 +8,7 @@
 
         <variable
             name="listener"
-            type="com.myAllVideoBrowser.ui.component.adapter.CandidateFormatListener" />
+            type="com.example.tubedown.component.adapter.CandidateFormatListener" />
 
         <variable
             name="download_candidate"
@@ -20,7 +20,7 @@
 
         <variable
             name="videoInfo"
-            type="com.myAllVideoBrowser.data.local.room.entity.VideoInfo" />
+            type="com.example.data.local.room.entity.VideoInfo" />
 
     </data>
 

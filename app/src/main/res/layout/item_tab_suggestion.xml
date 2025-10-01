@@ -8,11 +8,11 @@
 
         <variable
             name="suggestion"
-            type="com.myAllVideoBrowser.data.local.room.entity.HistoryItem" />
+            type="com.example.data.local.room.entity.HistoryItem" />
 
         <variable
             name="listener"
-            type="com.myAllVideoBrowser.ui.component.adapter.SuggestionTabListener" />
+            type="com.example.tubedown.component.adapter.SuggestionTabListener" />
 
     </data>
 

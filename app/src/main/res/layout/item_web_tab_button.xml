@@ -8,11 +8,11 @@
 
         <variable
             name="webTab"
-            type="com.myAllVideoBrowser.ui.main.home.browser.webTab.WebTab" />
+            type="com.example.tubedown.main.home.browser.webTab.WebTab" />
 
         <variable
             name="tabListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.WebTabsListener" />
+            type="com.example.tubedown.component.adapter.WebTabsListener" />
 
     </data>
 

@@ -8,11 +8,11 @@
 
         <variable
             name="viewModel"
-            type="com.myAllVideoBrowser.ui.main.history.HistoryViewModel" />
+            type="com.example.tubedown.main.history.HistoryViewModel" />
 
         <variable
             name="adapter"
-            type="com.myAllVideoBrowser.ui.component.adapter.HistoryAdapter" />
+            type="com.example.tubedown.component.adapter.HistoryAdapter" />
 
     </data>
 

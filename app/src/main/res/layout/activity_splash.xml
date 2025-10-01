@@ -8,7 +8,7 @@
 
         <variable
                 name="viewModel"
-                type="com.myAllVideoBrowser.ui.main.splash.SplashViewModel"/>
+                type="com.example.tubedown.main.splash.SplashViewModel"/>
 
     </data>
 

@@ -9,7 +9,7 @@
 
         <variable
             name="bookmarkItem"
-            type="com.myAllVideoBrowser.data.local.room.entity.PageInfo" />
+            type="com.example.data.local.room.entity.PageInfo" />
 
         <variable
             name="bookmarkUrl"
@@ -17,7 +17,7 @@
 
         <variable
             name="bookmarksListener"
-            type="com.myAllVideoBrowser.ui.component.adapter.BookmarksListener" />
+            type="com.example.tubedown.component.adapter.BookmarksListener" />
 
     </data>
 
