@@ -42,13 +42,13 @@ public class Video {
     }
 
     public static class TypeInfo {
+        public static final String OTHER = "other";
         public static String M3U8 = "m3u8";
         public static String MP4 = "mp4";
         public static String MOV = "mov";
         public static String WEBM = "webm";
         public static String GP3 = "3gp";
         public static String MKV = "mkv";
-        public static final String OTHER = "other";
     }
 
     public static class SUFFIX {

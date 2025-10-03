@@ -1,9 +1,9 @@
 package com.example.tubedown.component.binding
 
-import androidx.databinding.BindingAdapter
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.databinding.BindingAdapter
 
 object WebViewBinding {
 

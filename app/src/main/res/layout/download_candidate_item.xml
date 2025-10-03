@@ -2,28 +2,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="listener"
-            type="com.example.tubedown.component.adapter.CandidateFormatListener" />
-
-        <variable
-            name="download_candidate"
-            type="String" />
-
-        <variable
-            name="is_candidate_selected"
-            type="Boolean" />
-
-        <variable
-            name="videoInfo"
-            type="com.example.data.local.room.entity.VideoInfo" />
-
-    </data>
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_item"
         android:layout_width="wrap_content"
@@ -72,4 +50,26 @@
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="listener"
+            type="com.example.tubedown.component.adapter.CandidateFormatListener" />
+
+        <variable
+            name="download_candidate"
+            type="String" />
+
+        <variable
+            name="is_candidate_selected"
+            type="Boolean" />
+
+        <variable
+            name="videoInfo"
+            type="com.example.data.local.room.entity.VideoInfo" />
+
+    </data>
 </layout>

@@ -1,9 +1,9 @@
 package com.example.tubedown.component.binding
 
-import androidx.databinding.BindingAdapter
 import android.net.Uri
-import androidx.core.content.FileProvider
 import android.widget.VideoView
+import androidx.core.content.FileProvider
+import androidx.databinding.BindingAdapter
 import java.io.File
 
 object VideoViewBinding {

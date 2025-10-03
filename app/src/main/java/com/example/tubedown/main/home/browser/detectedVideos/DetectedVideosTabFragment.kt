@@ -9,8 +9,8 @@ import androidx.activity.addCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.R
 import com.example.databinding.FragmentDetectedVideosTabBinding
-import com.example.tubedown.component.adapter.VideoInfoAdapter
 import com.example.tubedown.component.adapter.DownloadTabListener
+import com.example.tubedown.component.adapter.VideoInfoAdapter
 import com.example.tubedown.main.base.BaseFragment
 import com.example.tubedown.main.home.MainActivity
 import com.example.tubedown.main.progress.WrapContentLinearLayoutManager

@@ -1,11 +1,11 @@
 package com.example.data.repository
 
-import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.verify
 import com.example.data.local.ProgressLocalDataSource
 import com.example.data.local.room.entity.ProgressInfo
 import com.example.data.local.room.entity.VideoInfo
+import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import io.reactivex.rxjava3.core.Flowable
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +27,8 @@ class ProgressRepositoryImplTest {
 
     @Test
     fun `test get list downloading videos`() {
-        doReturn(Flowable.just(listOf(progressInfo))).`when`(progressLocalDataSource).getProgressInfos()
+        doReturn(Flowable.just(listOf(progressInfo))).`when`(progressLocalDataSource)
+            .getProgressInfos()
         progressRepository.getProgressInfos()
             .test()
             .assertNoErrors()

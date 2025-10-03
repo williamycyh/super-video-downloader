@@ -1,6 +1,10 @@
 package com.example.data.local.room.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.example.data.local.room.entity.AdHost
 
 @Dao
@@ -8,6 +12,7 @@ interface AdHostDao {
 
     @Query("SELECT COUNT(*) FROM AdHost")
     suspend fun getHostsCount(): Int
+
     @Query("SELECT * FROM AdHost")
     suspend fun getAdHosts(): List<AdHost>
 

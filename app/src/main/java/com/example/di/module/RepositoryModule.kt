@@ -1,11 +1,27 @@
 package com.example.di.module
 
-import com.example.data.local.*
+import com.example.data.local.AdBlockHostsLocalDataSource
+import com.example.data.local.ConfigLocalDataSource
+import com.example.data.local.HistoryLocalDataSource
+import com.example.data.local.ProgressLocalDataSource
+import com.example.data.local.TopPagesLocalDataSource
+import com.example.data.local.VideoLocalDataSource
 import com.example.data.remote.AdBlockHostsRemoteDataSource
 import com.example.data.remote.ConfigRemoteDataSource
 import com.example.data.remote.TopPagesRemoteDataSource
 import com.example.data.remote.VideoRemoteDataSource
-import com.example.data.repository.*
+import com.example.data.repository.AdBlockHostsRepository
+import com.example.data.repository.AdBlockHostsRepositoryImpl
+import com.example.data.repository.ConfigRepository
+import com.example.data.repository.ConfigRepositoryImpl
+import com.example.data.repository.HistoryRepository
+import com.example.data.repository.HistoryRepositoryImpl
+import com.example.data.repository.ProgressRepository
+import com.example.data.repository.ProgressRepositoryImpl
+import com.example.data.repository.TopPagesRepository
+import com.example.data.repository.TopPagesRepositoryImpl
+import com.example.data.repository.VideoRepository
+import com.example.data.repository.VideoRepositoryImpl
 import com.example.di.qualifier.LocalData
 import com.example.di.qualifier.RemoteData
 import dagger.Binds
@@ -85,6 +101,7 @@ abstract class RepositoryModule {
     @Binds
     @RemoteData
     abstract fun bindAdBlockHostsRemoteDataSource(adBlockHostsRemoteDataSource: AdBlockHostsRemoteDataSource): AdBlockHostsRepository
+
     @Singleton
     @Binds
     abstract fun bindAdBlockHostsRepositoryImpl(adBlockHostsRepository: AdBlockHostsRepositoryImpl): AdBlockHostsRepository

@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="proxy"
-            type="com.example.data.local.model.Proxy" />
-
-        <variable
-            name="proxiesListener"
-            type="com.example.tubedown.component.adapter.ProxiesListener" />
-
-        <variable
-            name="viewModel"
-            type="com.example.tubedown.main.proxies.ProxiesViewModel" />
-
-        <variable
-            name="isChecked"
-            type="Boolean" />
-
-    </data>
-
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,4 +43,26 @@
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="proxy"
+            type="com.example.data.local.model.Proxy" />
+
+        <variable
+            name="proxiesListener"
+            type="com.example.tubedown.component.adapter.ProxiesListener" />
+
+        <variable
+            name="viewModel"
+            type="com.example.tubedown.main.proxies.ProxiesViewModel" />
+
+        <variable
+            name="isChecked"
+            type="Boolean" />
+
+    </data>
 </layout>

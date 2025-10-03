@@ -2,27 +2,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <import type="com.example.data.local.model.Proxy" />
-
-        <variable
-            name="viewModel"
-            type="com.example.tubedown.main.proxies.ProxiesViewModel" />
-
-        <variable
-            name="adapter"
-            type="com.example.tubedown.component.adapter.ProxiesAdapter" />
-
-        <variable
-            name="listener"
-            type="com.example.tubedown.component.adapter.ProxiesListener" />
-
-    </data>
-
-
     <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/proxies_container"
         android:layout_width="match_parent"
@@ -48,21 +27,6 @@
                     android:orientation="horizontal"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1.2"
-                        android:text="@string/proxy"
-                        android:textSize="24sp" />
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:layout_weight="2"
-                        android:text="@{viewModel.currentProxy.host.toString()}" />
-
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/turn_proxy"
                         android:layout_width="0dp"
@@ -74,15 +38,22 @@
                         app:thumbTint="@color/colorAccent"
                         app:trackDecorationTint="@color/colorAccentDark"
                         app:trackTint="@color/color_gray" />
-                </LinearLayout>
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="16dp"
-                    android:text="@string/http_proxy"
-                    android:textSize="24sp" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_weight="2"
+                        android:text="@{viewModel.currentProxy.host.toString()}" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1.2"
+                        android:text="@string/proxy"
+                        android:textSize="24sp" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -90,20 +61,12 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveProxyButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/host_hint"
-                        app:errorEnabled="true">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/hostEditText"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:text="@{viewModel.userProxy.host}" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/save_proxy" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -149,18 +112,55 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/saveProxyButton"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/save_proxy" />
+                        android:hint="@string/host_hint"
+                        app:errorEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/hostEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:text="@{viewModel.userProxy.host}" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/http_proxy"
+                    android:textSize="24sp" />
             </LinearLayout>
         </ScrollView>
 
     </LinearLayout>
+
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.example.data.local.model.Proxy" />
+
+        <variable
+            name="viewModel"
+            type="com.example.tubedown.main.proxies.ProxiesViewModel" />
+
+        <variable
+            name="adapter"
+            type="com.example.tubedown.component.adapter.ProxiesAdapter" />
+
+        <variable
+            name="listener"
+            type="com.example.tubedown.component.adapter.ProxiesListener" />
+
+    </data>
 
 
 </layout>

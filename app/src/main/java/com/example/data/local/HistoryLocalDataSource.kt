@@ -11,7 +11,7 @@ import javax.inject.Singleton
 class HistoryLocalDataSource @Inject constructor(private val historyDao: HistoryDao) :
     HistoryRepository {
     override fun getAllHistory(): Flowable<List<HistoryItem>> {
-        return  historyDao.getHistory()
+        return historyDao.getHistory()
     }
 
     override fun saveHistory(history: HistoryItem) {

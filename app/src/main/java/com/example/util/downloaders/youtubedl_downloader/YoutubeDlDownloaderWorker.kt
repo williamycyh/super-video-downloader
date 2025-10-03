@@ -9,14 +9,14 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.example.data.local.model.Proxy
 import com.example.data.local.room.entity.VideoFormatEntity
+import com.example.util.AppLogger
 import com.example.util.CookieUtils
+import com.example.util.FileUtil
 import com.example.util.downloaders.generic_downloader.GenericDownloader
 import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
 import com.google.gson.Gson
-import com.example.util.AppLogger
-import com.example.util.FileUtil
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.YoutubeDLResponse

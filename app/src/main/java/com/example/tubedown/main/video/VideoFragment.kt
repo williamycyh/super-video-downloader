@@ -15,7 +15,6 @@ import androidx.core.net.toFile
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.color.MaterialColors
 import com.example.R
 import com.example.data.local.model.LocalVideo
 import com.example.databinding.FragmentVideoBinding
@@ -31,6 +30,7 @@ import com.example.tubedown.main.video.VideoViewModel.Companion.FILE_EXIST_ERROR
 import com.example.util.AppUtil
 import com.example.util.FileUtil
 import com.example.util.IntentUtil
+import com.google.android.material.color.MaterialColors
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
@@ -194,14 +194,15 @@ class VideoFragment : BaseFragment() {
 
     @OptIn(UnstableApi::class)
     private fun startVideo(localVideo: LocalVideo) {
-        startActivity(Intent(
-            requireContext(), VideoPlayerActivity::class.java
-        ).apply {
-            putExtra(VideoPlayerFragment.VIDEO_NAME, localVideo.name)
-            putExtra(
-                VideoPlayerFragment.VIDEO_URL, localVideo.uri.toString()
-            )
-        })
+        startActivity(
+            Intent(
+                requireContext(), VideoPlayerActivity::class.java
+            ).apply {
+                putExtra(VideoPlayerFragment.VIDEO_NAME, localVideo.name)
+                putExtra(
+                    VideoPlayerFragment.VIDEO_URL, localVideo.uri.toString()
+                )
+            })
     }
 
     private fun startVideoWith(localVideo: LocalVideo) {

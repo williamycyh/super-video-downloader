@@ -6,13 +6,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ObservableField
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.color.MaterialColors
 import com.example.R
 import com.example.data.local.room.entity.VideoFormatEntity
 import com.example.data.local.room.entity.VideoInfo
 import com.example.databinding.DownloadCandidateItemBinding
 import com.example.util.FileUtil
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.color.MaterialColors
 
 
 interface DownloadVideoListener {

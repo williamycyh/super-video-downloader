@@ -1,11 +1,11 @@
 package com.example.tubedown.main.video
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.ContentResolver
 import android.content.Context
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.util.FileUtil
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
-import com.example.util.FileUtil
 import org.junit.Before
 import org.junit.Rule
 import java.io.File

@@ -4,7 +4,12 @@ import android.app.Application
 import android.app.DownloadManager
 import android.content.Context
 import com.example.DLApplication
-import com.example.util.*
+import com.example.util.AppUtil
+import com.example.util.FileUtil
+import com.example.util.IntentUtil
+import com.example.util.NotificationsHelper
+import com.example.util.SharedPrefHelper
+import com.example.util.SystemUtil
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

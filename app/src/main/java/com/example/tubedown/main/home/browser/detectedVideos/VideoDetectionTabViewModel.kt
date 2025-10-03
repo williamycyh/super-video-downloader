@@ -1,6 +1,7 @@
 package com.example.tubedown.main.home.browser.detectedVideos
 
 import android.webkit.CookieManager
+import androidx.core.net.toUri
 import androidx.databinding.Observable
 import androidx.databinding.Observable.OnPropertyChangedCallback
 import androidx.databinding.ObservableBoolean
@@ -38,7 +39,6 @@ import java.net.HttpCookie
 import java.net.URL
 import java.util.concurrent.Executors
 import javax.inject.Inject
-import androidx.core.net.toUri
 
 open class VideoDetectionTabViewModel @Inject constructor(
     private val videoRepository: VideoRepository,

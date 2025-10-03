@@ -182,7 +182,9 @@ class CustomFileDownloader(
 
         try {
             inputStream.use { urlStream ->
-                while (!isPaused.get() && !isCanceled.get() && (urlStream.read(buffer).also { bytesRead = it }) >= 0) {
+                while (!isPaused.get() && !isCanceled.get() && (urlStream.read(buffer)
+                        .also { bytesRead = it }) >= 0
+                ) {
                     fileChannel.write(ByteBuffer.wrap(buffer, 0, bytesRead), bytesCopied)
                     bytesCopied += bytesRead
                     copiedBytesChunks[0] = bytesCopied

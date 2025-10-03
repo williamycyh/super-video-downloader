@@ -1,13 +1,13 @@
 package com.example.tubedown.main.splash
 
+//import com.allVideoDownloaderXmaster.OpenForTesting
 import android.annotation.SuppressLint
-import androidx.lifecycle.ViewModelProvider
 import android.content.Intent
-import androidx.databinding.DataBindingUtil
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-//import com.allVideoDownloaderXmaster.OpenForTesting
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.example.R
 import com.example.databinding.ActivitySplashBinding
 import com.example.tubedown.main.base.BaseActivity

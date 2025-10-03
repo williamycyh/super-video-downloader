@@ -1,9 +1,9 @@
 package com.example.data.remote
 
-import com.nhaarman.mockito_kotlin.mock
 import com.example.data.local.model.VideoInfoWrapper
 import com.example.data.local.room.entity.VideoInfo
 import com.example.data.remote.service.VideoService
+import com.nhaarman.mockito_kotlin.mock
 import org.junit.Before
 import org.junit.Test
 

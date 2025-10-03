@@ -6,13 +6,13 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.github.marlonlom.utilities.timeago.TimeAgo
-import com.github.marlonlom.utilities.timeago.TimeAgoMessages
 import com.example.R
 import com.example.data.local.room.entity.HistoryItem
 import com.example.databinding.ItemHistoryBinding
 import com.example.util.ContextUtils
-import java.util.*
+import com.github.marlonlom.utilities.timeago.TimeAgo
+import com.github.marlonlom.utilities.timeago.TimeAgoMessages
+import java.util.Locale
 
 interface HistoryListener {
     fun onHistoryOpenClicked(view: View, id: String)

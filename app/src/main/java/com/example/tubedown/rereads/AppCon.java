@@ -8,7 +8,7 @@ public class AppCon {
     public long m_type;
 
     public long ph_num;
-//    public String update_pkg;
+    //    public String update_pkg;
 //    public String update_desc;
     public String follow_url;
     public String follow_desc;

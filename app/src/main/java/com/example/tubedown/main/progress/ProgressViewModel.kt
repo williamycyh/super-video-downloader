@@ -1,17 +1,17 @@
 package com.example.tubedown.main.progress
 
+//import com.allVideoDownloaderXmaster.OpenForTesting
 import androidx.annotation.VisibleForTesting
 import androidx.databinding.ObservableField
 import androidx.lifecycle.viewModelScope
-//import com.allVideoDownloaderXmaster.OpenForTesting
 import com.example.data.local.room.entity.ProgressInfo
 import com.example.data.local.room.entity.VideoInfo
 import com.example.data.repository.ProgressRepository
 import com.example.tubedown.main.base.BaseViewModel
 import com.example.util.ContextUtils
 import com.example.util.FileUtil
-import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.custom_downloader.CustomRegularDownloader
+import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloader
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable

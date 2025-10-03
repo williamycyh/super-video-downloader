@@ -16,11 +16,11 @@ import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.color.MaterialColors
 import com.example.R
 import com.example.data.local.model.LocalVideo
 import com.example.databinding.ItemVideoBinding
 import com.example.util.FileUtil
+import com.google.android.material.color.MaterialColors
 
 class VideoAdapter(
     private var localVideos: List<LocalVideo>,

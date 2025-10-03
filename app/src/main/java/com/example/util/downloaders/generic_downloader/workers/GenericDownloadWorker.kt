@@ -4,11 +4,11 @@ import android.content.Context
 import android.util.Base64
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.util.AppLogger
 import com.example.util.FileUtil
+import com.example.util.downloaders.generic_downloader.GenericDownloader
 import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.google.gson.Gson
-import com.example.util.AppLogger
-import com.example.util.downloaders.generic_downloader.GenericDownloader
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
@@ -99,11 +99,17 @@ abstract class GenericDownloadWorker(appContext: Context, workerParams: WorkerPa
 
     private fun loadHeaders(taskId: String): Map<String, String> {
         val inpHeaders =
-            GenericDownloader.getInstance().loadHeadersStringFromSharedPreferences(applicationContext, taskId)
+            GenericDownloader.getInstance()
+                .loadHeadersStringFromSharedPreferences(applicationContext, taskId)
         return inpHeaders?.let {
             try {
                 val decodedHeaders =
-                    String(Base64.decode(GenericDownloader.getInstance().decompressString(it), Base64.DEFAULT))
+                    String(
+                        Base64.decode(
+                            GenericDownloader.getInstance().decompressString(it),
+                            Base64.DEFAULT
+                        )
+                    )
 
                 Gson().fromJson(decodedHeaders, Map::class.java) as Map<String, String>
             } catch (e: Exception) {

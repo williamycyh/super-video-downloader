@@ -11,7 +11,6 @@ import javax.inject.Singleton
 class ConfigRemoteDataSource @Inject constructor(
     private val configService: ConfigService
 ) : ConfigRepository {
-
     override fun getSupportedPages(): Flowable<List<SupportedPage>> {
         return configService.getSupportedPages()
     }

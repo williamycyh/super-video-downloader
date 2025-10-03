@@ -27,15 +27,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.R
 import com.example.data.local.room.entity.HistoryItem
 import com.example.data.local.room.entity.VideFormatEntityList
 import com.example.data.local.room.entity.VideoInfo
 import com.example.databinding.FragmentWebTabBinding
+import com.example.tubedown.component.adapter.DownloadTabListener
 import com.example.tubedown.component.adapter.SuggestionTabListener
 import com.example.tubedown.component.adapter.TabSuggestionAdapter
-import com.example.tubedown.component.adapter.DownloadTabListener
 import com.example.tubedown.main.home.browser.BaseWebTabFragment
 import com.example.tubedown.main.home.browser.BrowserFragment
 import com.example.tubedown.main.home.browser.BrowserListener
@@ -60,6 +59,7 @@ import com.example.util.AppUtil
 import com.example.util.FileNameCleaner
 import com.example.util.proxy_utils.CustomProxyController
 import com.example.util.proxy_utils.OkHttpProxyClient
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

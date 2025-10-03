@@ -10,6 +10,10 @@
         android:orientation="vertical"
         tools:context=".ui.main.help.HelpFragment">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -20,8 +24,8 @@
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
                 android:text="@string/instruction"
+                android:textAlignment="center"
                 android:textSize="@dimen/text_medium" />
         </ScrollView>
 
@@ -31,9 +35,5 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/ok" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="100dp" />
     </LinearLayout>
 </FrameLayout>

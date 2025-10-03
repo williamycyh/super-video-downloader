@@ -26,7 +26,7 @@ class TopPagesRemoteDataSource @Inject constructor(
     override fun deletePageInfo(pageInfo: PageInfo) {
     }
 
-    override suspend fun updateLocalStorageFavicons() : Flow<PageInfo> {
+    override suspend fun updateLocalStorageFavicons(): Flow<PageInfo> {
         throw NotImplementedError("updateLocalStorage for remote storage NOT IMPLEMENTED")
     }
 }

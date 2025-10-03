@@ -2,19 +2,19 @@ package com.example.tubedown.rereads;
 
 public class AdUnit {
 
-    public static  String ADUNIT_FULLSCREEN = "550e0ffa25efca86";
+    public static String ADUNIT_FULLSCREEN = "550e0ffa25efca86";
 
 //    public static final String ADUNIT_FULLSCREEN_ACTION = "09859eca7e941ab4";
 //
 //    public static final String ADUNIT_FULLSCREEN_DETAIL = "4590520936356b9a";
 
-    public static  String ADUNIT_NATIVE = "2621b55fa4f9807d";
+    public static String ADUNIT_NATIVE = "2621b55fa4f9807d";
 
     public static String OPEN_APP_AD = "";
 
 //    public static final String ADUNIT_NATIVE_02 = "707e2e2c56b858df";
 
-    public static  String ADUNIT_MIN_NATIVE = "50358210f94f6462";
+    public static String ADUNIT_MIN_NATIVE = "50358210f94f6462";
 
 //    public static final String ADUNIT_banner = "bd140cc054878bf8";
 //

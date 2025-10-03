@@ -26,10 +26,10 @@
         app:showAsAction="ifRoom|collapseActionView" />
 
     <item
-        android:visible="false"
         android:id="@+id/item_open_in_folder"
         android:icon="@drawable/folder_open_24px"
         android:title="@string/video_menu_open_in_folder"
+        android:visible="false"
         app:showAsAction="ifRoom|collapseActionView" />
 
 </menu>

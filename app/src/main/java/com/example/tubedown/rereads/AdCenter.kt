@@ -11,21 +11,23 @@ import com.applovin.sdk.AppLovinSdkInitializationConfiguration
 import com.example.BuildConfig
 import com.google.android.gms.common.util.CollectionUtils
 import java.io.UnsupportedEncodingException
-import java.util.*
+import java.util.LinkedList
+import java.util.Queue
 
 
 abstract class AdCenter {
     var queue: Queue<Int> = LinkedList<Int>()
-    companion object{
+
+    companion object {
         val TAG = "AdCenter"
 
         val isShowAds = true
 
-        fun isAdShow(): Boolean{
+        fun isAdShow(): Boolean {
 //            if (MyApp.getInstance().packageName.contains("pro", true)){
 //                return false
 //            }
-            if(BuildConfig.DEBUG){
+            if (BuildConfig.DEBUG) {
                 return false
             }
 
@@ -50,9 +52,8 @@ abstract class AdCenter {
 //        }
 
 
-
-        fun initMobpuAd(activity: Context){
-            if(!isAdShow()){
+        fun initMobpuAd(activity: Context) {
+            if (!isAdShow()) {
                 return
             }
 
@@ -85,7 +86,8 @@ abstract class AdCenter {
 //            })
 
             // Create the initialization configuration
-            var decodeKey = MydecodeToString("aXh5XzRIXzBUc0ljZXh1S0R0dHFIV0tOYVpxMkZVZ0RXRjl3UnVsbnF3NVQ0Mkk4TjZtM0hjXzFuZ1MyaV9hR2ZzWmJfT2dDcTNQdkE4c1FCVHFsTkNKN0VU")
+            var decodeKey =
+                MydecodeToString("aXh5XzRIXzBUc0ljZXh1S0R0dHFIV0tOYVpxMkZVZ0RXRjl3UnVsbnF3NVQ0Mkk4TjZtM0hjXzFuZ1MyaV9hR2ZzWmJfT2dDcTNQdkE4c1FCVHFsTkNKN0VU")
             val initConfig = AppLovinSdkInitializationConfiguration.builder(decodeKey)
                 .setMediationProvider(AppLovinMediationProvider.MAX)
                 .setSegmentCollection(
@@ -98,7 +100,8 @@ abstract class AdCenter {
 
             val settings = AppLovinSdk.getInstance(activity).settings
             settings.termsAndPrivacyPolicyFlowSettings.isEnabled = false
-            settings.termsAndPrivacyPolicyFlowSettings.privacyPolicyUri = Uri.parse("https://sites.google.com/view/tnvddown/home")
+            settings.termsAndPrivacyPolicyFlowSettings.privacyPolicyUri =
+                Uri.parse("https://sites.google.com/view/tnvddown/home")
 
 
             AppLovinSdk.getInstance(activity).initialize(initConfig) { sdkConfig ->

@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.di.ViewModelKey
 import com.example.tubedown.main.history.HistoryViewModel
-import com.example.tubedown.main.home.browser.BrowserViewModel
 import com.example.tubedown.main.home.MainViewModel
-import com.example.tubedown.main.home.browser.homeTab.BrowserHomeViewModel
+import com.example.tubedown.main.home.browser.BrowserViewModel
 import com.example.tubedown.main.home.browser.detectedVideos.GlobalVideoDetectionModel
-import com.example.tubedown.main.home.browser.webTab.WebTabViewModel
 import com.example.tubedown.main.home.browser.detectedVideos.VideoDetectionTabViewModel
+import com.example.tubedown.main.home.browser.homeTab.BrowserHomeViewModel
+import com.example.tubedown.main.home.browser.webTab.WebTabViewModel
 import com.example.tubedown.main.player.VideoPlayerViewModel
 import com.example.tubedown.main.progress.ProgressViewModel
 import com.example.tubedown.main.proxies.ProxiesViewModel

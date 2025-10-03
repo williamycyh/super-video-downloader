@@ -1,10 +1,10 @@
 package com.example.tubedown.component.binding
 
-import androidx.databinding.BindingAdapter
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 
 object ImageBinding {

@@ -1,9 +1,9 @@
 package com.example.data.local
 
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.verify
 import com.example.data.local.room.dao.VideoDao
 import com.example.data.local.room.entity.VideoInfo
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import org.junit.Before
 import org.junit.Test
 

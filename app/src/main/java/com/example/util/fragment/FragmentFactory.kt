@@ -3,9 +3,9 @@ package com.example.util.fragment
 import androidx.fragment.app.Fragment
 import com.example.tubedown.main.history.HistoryFragment
 import com.example.tubedown.main.home.browser.BrowserFragment
+import com.example.tubedown.main.home.browser.detectedVideos.DetectedVideosTabFragment
 import com.example.tubedown.main.home.browser.homeTab.BrowserHomeFragment
 import com.example.tubedown.main.home.browser.webTab.WebTabFragment
-import com.example.tubedown.main.home.browser.detectedVideos.DetectedVideosTabFragment
 import com.example.tubedown.main.progress.ProgressFragment
 import com.example.tubedown.main.settings.SettingsFragment
 import com.example.tubedown.main.video.VideoFragment

@@ -2,13 +2,18 @@ package com.example.tubedown.main.progress
 
 import android.app.DownloadManager
 import android.database.Cursor
-import com.nhaarman.mockito_kotlin.*
 import com.example.data.local.room.entity.ProgressInfo
 import com.example.data.local.room.entity.VideoInfo
 import com.example.data.repository.ProgressRepository
 import com.example.util.FileUtil
 import com.example.util.scheduler.BaseSchedulers
 import com.example.util.scheduler.StubbedSchedulers
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.doReturn
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.never
+import com.nhaarman.mockito_kotlin.spy
+import com.nhaarman.mockito_kotlin.verify
 import org.junit.Before
 import org.junit.Test
 import java.io.File
