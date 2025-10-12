@@ -2,19 +2,9 @@ package com.ytdlp;
 
 import com.ytdlp.core.VideoInfo;
 import com.ytdlp.core.VideoFormat;
+import com.ytdlp.core.YoutubeDL;
 import com.ytdlp.extractor.InfoExtractor;
-import com.ytdlp.extractor.facebook.FinalFacebookExtractor;
-import com.ytdlp.extractor.instagram.InstagramExtractor;
-import com.ytdlp.extractor.tiktok.AdvancedTikTokExtractor;
-import com.ytdlp.extractor.pornhub.AdvancedPornhubExtractor;
-import com.ytdlp.extractor.xhamster.AdvancedXHamsterExtractor;
-import com.ytdlp.extractor.xnxx.AdvancedXNXXExtractor;
-import com.ytdlp.extractor.xvideos.AdvancedXVideosExtractor;
-import com.ytdlp.extractor.twitter.AdvancedTwitterExtractor;
-import com.ytdlp.extractor.dailymotion.AdvancedDailymotionExtractor;
-import com.ytdlp.extractor.vimeo.AdvancedVimeoExtractor;
-import com.ytdlp.downloader.http.HttpDownloader;
-import com.ytdlp.downloader.hls.HlsDownloader;
+import com.ytdlp.extractor.ExtractorRegistry;
 import com.ytdlp.utils.Logger;
 
 import java.util.*;
@@ -30,6 +20,7 @@ public class YtDlpJava {
     private Logger logger;
     private Map<String, String> options;
     private List<ProgressCallback> progressCallbacks;
+    private ExtractorRegistry extractorRegistry;
     
     /**
      * 进度回调接口
@@ -70,6 +61,7 @@ public class YtDlpJava {
         this.logger = new Logger(true, false, false);
         this.options = new HashMap<>();
         this.progressCallbacks = new ArrayList<>();
+        this.extractorRegistry = new ExtractorRegistry();
         
         // 设置默认选项
         setDefaultOptions();
@@ -246,31 +238,13 @@ public class YtDlpJava {
      * 根据URL自动选择提取器
      */
     private InfoExtractor createExtractor(String url) {
-        // 平台检测映射
-        Map<String, Class<? extends InfoExtractor>> extractorMap = new HashMap<>();
-        extractorMap.put("facebook.com", FinalFacebookExtractor.class);
-        extractorMap.put("instagram.com", InstagramExtractor.class);
-        extractorMap.put("tiktok.com", AdvancedTikTokExtractor.class);
-        extractorMap.put("pornhub.com", AdvancedPornhubExtractor.class);
-        extractorMap.put("xhamster.com", AdvancedXHamsterExtractor.class);
-        extractorMap.put("xnxx.com", AdvancedXNXXExtractor.class);
-        extractorMap.put("xvideos.com", AdvancedXVideosExtractor.class);
-        extractorMap.put("twitter.com", AdvancedTwitterExtractor.class);
-        extractorMap.put("x.com", AdvancedTwitterExtractor.class);  // Twitter新域名
-        extractorMap.put("dailymotion.com", AdvancedDailymotionExtractor.class);
-        extractorMap.put("vimeo.com", AdvancedVimeoExtractor.class);
-        
-        for (Map.Entry<String, Class<? extends InfoExtractor>> entry : extractorMap.entrySet()) {
-            if (url.contains(entry.getKey())) {
-                try {
-                    return entry.getValue().newInstance();
-                } catch (Exception e) {
-                    logger.error("创建提取器失败: {}", e.getMessage());
-                }
-            }
+        try {
+            // 使用ExtractorRegistry来获取合适的提取器
+            return extractorRegistry.getExtractor(url);
+        } catch (Exception e) {
+            logger.error("创建提取器失败: {}", e.getMessage());
+            return null;
         }
-        
-        return null;
     }
     
     /**
@@ -376,26 +350,15 @@ public class YtDlpJava {
      * 下载格式列表
      */
     private boolean downloadFormats(List<VideoFormat> formats, String outputPath) {
-        // 创建一个简单的VideoInfo用于下载
-        VideoInfo dummyInfo = new VideoInfo();
-        dummyInfo.setId("download");
-        dummyInfo.setTitle("Download");
+        // 使用YoutubeDL核心进行下载
+        YoutubeDL youtubeDL = YoutubeDL.getInstance();
         
         for (VideoFormat format : formats) {
             try {
                 logger.info("开始下载格式: {} ({})", format.getFormatId(), format.getExt());
                 
-                boolean success = false;
-                
-                if ("m3u8".equals(format.getExt()) || "hls".equals(format.getProtocol())) {
-                    // HLS下载
-                    HlsDownloader hlsDownloader = new HlsDownloader();
-                    success = hlsDownloader.download(dummyInfo, format, outputPath);
-                } else {
-                    // 普通下载
-                    HttpDownloader downloader = new HttpDownloader();
-                    success = downloader.download(dummyInfo, format, outputPath);
-                }
+                // 使用YoutubeDL的下载功能
+                boolean success = youtubeDL.download(format.getUrl(), outputPath);
                 
                 if (success) {
                     // 通知进度回调
@@ -457,9 +420,9 @@ public class YtDlpJava {
      */
     public static List<String> getSupportedPlatforms() {
         return Arrays.asList(
-            "Facebook", "Instagram", "TikTok", "Pornhub", 
-            "XHamster", "XNXX", "XVideos", "Twitter", 
-            "Dailymotion", "Vimeo"
+            "Facebook", "Instagram", "TikTok", "Twitter", 
+            "Dailymotion", "Vimeo", "Pornhub", "XHamster",
+            "XVideos", "XNXX", "YouTube"
         );
     }
     
@@ -468,10 +431,11 @@ public class YtDlpJava {
      */
     public static boolean isUrlSupported(String url) {
         return url.contains("facebook.com") || url.contains("instagram.com") ||
-               url.contains("tiktok.com") || url.contains("pornhub.com") ||
-               url.contains("xhamster.com") || url.contains("xnxx.com") ||
-               url.contains("xvideos.com") || url.contains("twitter.com") ||
+               url.contains("tiktok.com") || url.contains("twitter.com") ||
                url.contains("x.com") || url.contains("dailymotion.com") ||
-               url.contains("vimeo.com");
+               url.contains("vimeo.com") || url.contains("pornhub.com") ||
+               url.contains("xhamster.com") || url.contains("xvideos.com") ||
+               url.contains("xnxx.com") || url.contains("youtube.com") ||
+               url.contains("youtu.be");
     }
 }
