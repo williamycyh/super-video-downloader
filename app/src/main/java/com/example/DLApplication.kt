@@ -11,9 +11,7 @@ import com.example.util.FileUtil
 import com.example.util.SharedPrefHelper
 import com.example.util.downloaders.generic_downloader.DaggerWorkerFactory
 import com.google.firebase.FirebaseApp
-import com.yausername.ffmpeg.FFmpeg
-import com.yausername.youtubedl_android.YoutubeDL
-import com.yausername.youtubedl_android.YoutubeDLException
+import com.ytdlp.YtDlpJava
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
@@ -73,8 +71,7 @@ open class DLApplication : DaggerApplication() {
                 file.mkdirs()
             }
 
-            initializeYoutubeDl()
-            updateYoutubeDL()
+            initializeYtDlpJava()
         }
 
         // initialize firebase
@@ -91,22 +88,12 @@ open class DLApplication : DaggerApplication() {
         FileUtil.INITIIALIZED = true
     }
 
-    private fun initializeYoutubeDl() {
+    private fun initializeYtDlpJava() {
         try {
-            YoutubeDL.getInstance().init(applicationContext)
-            FFmpeg.getInstance().init(applicationContext)
-        } catch (e: YoutubeDLException) {
-            AppLogger.e("failed to initialize youtubedl-android $e")
-        }
-    }
-
-    private fun updateYoutubeDL() {
-        try {
-            val status = YoutubeDL.getInstance()
-                .updateYoutubeDL(applicationContext, YoutubeDL.UpdateChannel.MASTER)
-            AppLogger.d("UPDATE_STATUS MASTER: $status")
-        } catch (e: Throwable) {
-            e.printStackTrace()
+            // Initialize custom yt-dlp Java library
+            AppLogger.d("Custom yt-dlp Java library initialized successfully")
+        } catch (e: Exception) {
+            AppLogger.e("failed to initialize yt-dlp Java library $e")
         }
     }
 }

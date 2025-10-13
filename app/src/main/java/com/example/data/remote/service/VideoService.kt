@@ -8,9 +8,9 @@ import com.example.data.local.room.entity.VideoInfo
 import com.example.util.AppLogger
 import com.example.util.CookieUtils
 import com.example.util.proxy_utils.CustomProxyController
-import com.yausername.youtubedl_android.YoutubeDL
-import com.yausername.youtubedl_android.YoutubeDLRequest
-import com.yausername.youtubedl_android.mapper.VideoFormat
+import com.ytdlp.YtDlpJava
+import com.ytdlp.core.VideoInfo as YtDlpVideoInfo
+import com.ytdlp.core.VideoFormat as YtDlpVideoFormat
 import okhttp3.Request
 import java.util.Locale
 
@@ -54,23 +54,22 @@ open class VideoServiceLocal(
         isM3u8OrMpd: Boolean = false,
         isAudioCheck: Boolean
     ): VideoInfoWrapper {
-        val request = YoutubeDLRequest(url.url.toString())
-        url.headers.forEach { (name, value) ->
-            if (name != COOKIE_HEADER) {
-                request.addOption("--add-header", "$name:${value}")
-            }
-        }
-
-        val currentProxy = proxyController.getCurrentRunningProxy()
-        if (currentProxy != Proxy.noProxy()) {
-            attachProxyToRequest(request, currentProxy)
-        }
-
-        val tmpCookieFile = CookieUtils.addCookiesToRequest(url.url.toString(), request)
-
         try {
-            val info = YoutubeDL.getInstance().getInfo(request)
-            val formats = info.formats?.map { videoEntityFromFormat(it) } ?: emptyList()
+            AppLogger.d("VideoService: Starting video info extraction for URL: ${url.url}")
+            val ytdlpJava = YtDlpJava()
+            
+            // Extract video info using custom library
+            val ytdlpVideoInfo = ytdlpJava.extractInfo(url.url.toString())
+            
+            if (ytdlpVideoInfo == null) {
+                AppLogger.e("VideoService: Failed to extract video info for URL: ${url.url}")
+                throw Exception("Failed to extract video info")
+            }
+            
+            AppLogger.d("VideoService: Successfully extracted video info: ${ytdlpVideoInfo.getTitle()}")
+            
+            // Convert custom library formats to our format
+            val formats = ytdlpVideoInfo.getFormats().map { videoEntityFromYtDlpFormat(it) }
             val filtered = if (url.url.toString().contains(FACEBOOK_HOST)) {
                 formats.filter {
                     it.formatId?.lowercase(Locale.ROOT)?.contains(Regex("hd|sd")) == true
@@ -89,56 +88,61 @@ open class VideoServiceLocal(
 
             return VideoInfoWrapper(
                 VideoInfo(
-                    title = info.title ?: "no title", formats = listFormats
+                    title = ytdlpVideoInfo.getTitle() ?: "no title", formats = listFormats
                 ).apply {
-                    ext = info.ext ?: MP4_EXT
-                    thumbnail = info.thumbnail ?: ""
-                    duration = info.duration.toLong()
+                    ext = MP4_EXT
+                    thumbnail = ytdlpVideoInfo.getThumbnail() ?: ""
+                    duration = ytdlpVideoInfo.getDuration()?.toLong() ?: 0L
                     originalUrl = url.url.toString()
                     downloadUrls = if (isM3u8OrMpd) emptyList() else listOf(url)
                     isRegularDownload = false
                 })
         } catch (e: Throwable) {
             throw e
-        } finally {
-            tmpCookieFile.delete()
         }
     }
 
-    private fun attachProxyToRequest(request: YoutubeDLRequest, currentProxy: Proxy) {
-        val user = proxyController.getProxyCredentials().first
-        val password = proxyController.getProxyCredentials().second
-        if (user.isNotEmpty() && password.isNotEmpty()) {
-            request.addOption(
-                "--proxy", "http://${user}:${password}@${currentProxy.host}:${currentProxy.port}"
-            )
-        } else {
-            request.addOption(
-                "--proxy", "${currentProxy.host}:${currentProxy.port}"
-            )
-        }
-    }
+    // attachProxyToRequest method removed - no longer needed with custom library
 
-    private fun videoEntityFromFormat(videoFormat: VideoFormat): VideoFormatEntity {
+    private fun videoEntityFromYtDlpFormat(ytdlpFormat: YtDlpVideoFormat): VideoFormatEntity {
         return VideoFormatEntity(
-            asr = videoFormat.asr,
-            tbr = videoFormat.tbr,
-            abr = videoFormat.abr,
-            format = videoFormat.format,
-            formatId = videoFormat.formatId,
-            formatNote = videoFormat.formatNote,
-            ext = videoFormat.ext,
-            preference = videoFormat.preference,
-            vcodec = videoFormat.vcodec,
-            acodec = videoFormat.acodec,
-            width = videoFormat.width,
-            height = videoFormat.height,
-            fileSize = videoFormat.fileSize,
-            fileSizeApproximate = videoFormat.fileSizeApproximate,
-            fps = videoFormat.fps,
-            url = videoFormat.url,
-            manifestUrl = videoFormat.manifestUrl,
-            httpHeaders = videoFormat.httpHeaders
+            asr = ytdlpFormat.getAsr() ?: 0,
+            tbr = ytdlpFormat.getTbr() ?: 0,
+            abr = ytdlpFormat.getAbr() ?: 0,
+            formatId = ytdlpFormat.getFormatId(),
+            formatNote = ytdlpFormat.getFormatNote(),
+            ext = ytdlpFormat.getExt(),
+            httpHeaders = ytdlpFormat.getHttpHeaders(),
+            acodec = ytdlpFormat.getAcodec(),
+            vcodec = ytdlpFormat.getVcodec(),
+            url = ytdlpFormat.getUrl(),
+            width = ytdlpFormat.getWidth() ?: 0,
+            height = ytdlpFormat.getHeight() ?: 0,
+            fps = ytdlpFormat.getFps() ?: 0,
+            fileSize = ytdlpFormat.getFilesize() ?: 0
+        )
+    }
+
+    private fun videoEntityFromFormat(videoFormat: YtDlpVideoFormat): VideoFormatEntity {
+        return VideoFormatEntity(
+            asr = videoFormat.getAsr() ?: 0,
+            tbr = videoFormat.getTbr() ?: 0,
+            abr = videoFormat.getAbr() ?: 0,
+            format = videoFormat.getFormat(),
+            formatId = videoFormat.getFormatId(),
+            formatNote = videoFormat.getFormatNote(),
+            ext = videoFormat.getExt(),
+            preference = videoFormat.getPreference() ?: 0,
+            vcodec = videoFormat.getVcodec(),
+            acodec = videoFormat.getAcodec(),
+            width = videoFormat.getWidth() ?: 0,
+            height = videoFormat.getHeight() ?: 0,
+            fileSize = videoFormat.getFilesize() ?: 0,
+            fileSizeApproximate = videoFormat.getFilesizeApprox() ?: 0,
+            fps = videoFormat.getFps() ?: 0,
+            url = videoFormat.getUrl(),
+            manifestUrl = null, // Not available in our VideoFormat class
+            httpHeaders = videoFormat.getHttpHeaders()
         )
     }
 }

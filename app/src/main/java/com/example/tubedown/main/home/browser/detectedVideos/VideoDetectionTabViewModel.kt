@@ -146,24 +146,34 @@ open class VideoDetectionTabViewModel @Inject constructor(
     }
 
     override fun showVideoInfo() {
-        AppLogger.d("SHOW")
+        AppLogger.d("VideoDetectionTabViewModel: showVideoInfo() called")
         val state = downloadButtonState.get()
+        AppLogger.d("VideoDetectionTabViewModel: Current button state: $state")
+        AppLogger.d("VideoDetectionTabViewModel: Detected videos list size: ${detectedVideosList.get()?.size ?: 0}")
 
         if (state is DownloadButtonStateCanNotDownload) {
             webTabModel?.getTabTextInput()?.get()?.let {
                 if (it.startsWith("http")) {
+                    AppLogger.d("VideoDetectionTabViewModel: Starting page analysis for: $it")
                     viewModelScope.launch(executorRegular) {
                         onStartPage(
                             it.trim(),
                             webTabModel?.userAgent?.get() ?: BrowserFragment.MOBILE_USER_AGENT
                         )
                     }
+                } else {
+                    AppLogger.d("VideoDetectionTabViewModel: URL doesn't start with http: $it")
                 }
+            } ?: run {
+                AppLogger.d("VideoDetectionTabViewModel: No URL available in tab text input")
             }
         }
 
         if (detectedVideosList.get()?.isNotEmpty() == true) {
+            AppLogger.d("VideoDetectionTabViewModel: Showing detected videos dialog")
             showDetectedVideosEvent.call()
+        } else {
+            AppLogger.d("VideoDetectionTabViewModel: No detected videos to show")
         }
     }
 
@@ -205,6 +215,7 @@ open class VideoDetectionTabViewModel @Inject constructor(
 
         verifyVideoLinkJobStorage[taskUrlCleaned] =
             io.reactivex.rxjava3.core.Observable.create { emitter ->
+                AppLogger.d("VideoDetectionTabViewModel: Starting video info extraction for: $taskUrlCleaned")
                 val info = try {
                     videoRepository.getVideoInfo(
                         resourceRequest,
@@ -212,12 +223,15 @@ open class VideoDetectionTabViewModel @Inject constructor(
                         settingsModel.isCheckOnAudio.get()
                     )
                 } catch (e: Throwable) {
+                    AppLogger.e("VideoDetectionTabViewModel: Error extracting video info: ${e.message}")
                     e.printStackTrace()
                     null
                 }
                 if (info != null) {
+                    AppLogger.d("VideoDetectionTabViewModel: Successfully extracted video info: ${info.title}")
                     emitter.onNext(info)
                 } else {
+                    AppLogger.d("VideoDetectionTabViewModel: No video info found, returning empty")
                     emitter.onNext(VideoInfo(id = ""))
                 }
                 emitter.onComplete()

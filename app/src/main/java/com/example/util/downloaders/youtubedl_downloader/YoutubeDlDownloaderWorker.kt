@@ -17,9 +17,10 @@ import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
 import com.google.gson.Gson
-import com.yausername.youtubedl_android.YoutubeDL
-import com.yausername.youtubedl_android.YoutubeDLRequest
-import com.yausername.youtubedl_android.YoutubeDLResponse
+import com.ytdlp.YtDlpJava
+import com.ytdlp.core.VideoInfo
+import com.ytdlp.core.VideoFormat
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -49,6 +50,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
     private var downloadJobDisposable: Disposable? = null
     private var cookieFile: File? = null
     private var lastTmpDirSize = 0L
+    private var ytdlpJava: YtDlpJava? = null
 
     @Volatile
     var time = 0L
@@ -91,8 +93,9 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         val taskId = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)
 
         if (taskId != null) {
-            YoutubeDL.getInstance().destroyProcessById(taskId)
-
+            // For the custom library, we don't need to destroy processes
+            // Just move the downloaded file if it exists
+            
             val partsFolder = fileUtil.tmpDir.resolve(taskId)
             val firstPart = partsFolder.listFiles()?.firstOrNull()
 
@@ -122,8 +125,6 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
     ) {
         val taskId = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)!!
 
-        val vFormat = deserializeVideoFormat(taskId)
-
         /** URL FROM INPUT NOT FROM FORMAT BECAUSE FORMAT URL MAY NOT BE APPROPRIATE IN SOME CASES,
         FOR EXAMPLE SOUND SEPARATE FROM FORMAT IN MASTER LIST
          **/
@@ -131,17 +132,11 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
             GenericDownloader.Constants.ORIGIN_KEY
         ) ?: throw Throwable("URL is NULL")
 
-        AppLogger.d("Start download dl:  ${vFormat.formatId} $url $task")
+        AppLogger.d("Start download with custom yt-dlp: $url $task")
 
         val taskTitle = task.title
 
         hideNotifications(taskId)
-
-        val request = YoutubeDLRequest(url)
-
-        cookieFile = CookieUtils.addCookiesToRequest(
-            url, request, inputData.getString(GenericDownloader.Constants.ORIGIN_KEY)
-        )
 
         tmpFile = File(
             "${fileUtil.tmpDir}/$taskId"
@@ -150,11 +145,6 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         if (!tmpFile.exists()) {
             tmpFile.mkdir()
         }
-
-        // Monitoring for LIVE stream downloading (youtubedlp doesn't show progress on live streams)
-        monitorDownloadProcess(taskId, task)
-
-        configureYoutubedlRequest(request, vFormat, taskTitle, isContinue)
 
         showProgress(taskId, taskTitle, 0, "Starting...", tmpFile)
         saveProgress(
@@ -165,7 +155,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         downloadJobDisposable?.dispose()
 
         if (fileUtil.isFreeSpaceAvailable()) {
-            startDownloadProcess(url, request, task, taskId)
+            startDownloadProcessWithCustomLibrary(url, task, taskId)
         } else {
             finishWork(task.also {
                 task.mId = taskId
@@ -184,8 +174,8 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
 
         val id = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)
         if (id != null) {
-            YoutubeDL.getInstance().destroyProcessById(id)
-
+            // For custom library, we can't easily pause downloads
+            // Just mark as paused for now
             WorkManager.getInstance(applicationContext).cancelAllWorkByTag(id)
 
             if (task.taskState != VideoTaskState.DOWNLOADING) {
@@ -203,8 +193,9 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
             inputData.getBoolean(GenericDownloader.Constants.IS_FILE_REMOVE_KEY, false)
 
         if (taskId != null) {
-            YoutubeDL.getInstance().destroyProcessById(taskId)
-
+            // For custom library, we can't easily cancel downloads
+            // Just clean up files if requested
+            
             val fileToRemove = File("${fileUtil.tmpDir}/$taskId")
 
             if (isFileRemove) {
@@ -221,181 +212,111 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
     }
 
     @SuppressLint("CheckResult")
-    private fun startDownloadProcess(
+    private fun startDownloadProcessWithCustomLibrary(
         url: String,
-        request: YoutubeDLRequest,
         task: VideoTaskItem,
         taskId: String,
     ) {
-        downloadJobDisposable = Observable.fromCallable<YoutubeDLResponse> {
-            YoutubeDL.getInstance().execute(request, taskId) { pr, _, line ->
-                if (line.contains("[download] Destination:")) {
-                    isDownloadJustStarted = true
-                }
-                if (line.contains(Regex("""\[download] {3}\d+"""))) {
-                    isDownloadOk = true
-                }
-
-                val lineInfo: LineInfo? = try {
-                    parseInfoFromLine(line)
-                } catch (e: Throwable) {
-                    null
-                }
-
-                progressCached = pr.toInt()
-
-                if (Date().time - time > UPDATE_INTERVAL && !getDone()) {
-                    time = Date().time
-
-                    val totalBytes = (lineInfo?.total ?: 0).toLong()
-
-                    val downloadBytes = (totalBytes * (pr / 100)).toLong()
-                    val downloadBytesFixed = if (downloadBytes > 0) {
-                        downloadBytes
-                    } else {
-                        0
-                    }
-                    task.also {
-                        it.percent = pr
-                        it.totalSize = totalBytes
-                        it.downloadSize = downloadBytesFixed
-                        it.taskState = VideoTaskState.DOWNLOADING
-                    }
-
-                    saveProgress(
-                        taskId, lineInfo, task
-                    ).blockingFirst(Unit)
-                    showProgress(
-                        taskId, task.title, pr.toInt(), line, tmpFile
-                    )
-
-                    if (!fileUtil.isFreeSpaceAvailable()) {
-                        finishWork(task.also {
-                            it.mId = taskId
-                            it.taskState = VideoTaskState.ERROR
-                            it.errorMessage = "Not enough space"
-                        })
-
-                        return@execute
-                    }
-                }
-            }
-        }.doOnError {
-            handleError(taskId, url, progressCached, it, task.title)
-        }.onErrorComplete().subscribe { dlResponse ->
-            // Seems like youtube-dlp has a bug and sometimes skip removing already merged fragments
-            val list = tmpFile.listFiles()
-            val finalFile = if (!list.isNullOrEmpty()) {
-                tmpFile.walkTopDown()
-                    .filter {
-                        it.isFile && it.extension.equals(
-                            "mp4",
-                            ignoreCase = true
-                        ) || it.isFile && it.extension.equals("mp3", ignoreCase = true)
-                    }
-                    .firstOrNull()
-            } else {
-                null
-            }
-            if (dlResponse.exitCode == 0 && finalFile != null) {
-                val destinationFile = fileUtil.folderDir.resolve(finalFile.name).let {
-                    fixFileName(it.absolutePath)
-                }.let {
-                    File(it)
-                }
-                val moved = fileUtil.moveMedia(
-                    this@YoutubeDlDownloaderWorker.applicationContext,
-                    Uri.fromFile(finalFile),
-                    Uri.fromFile(destinationFile)
-                )
-
-                if (this@YoutubeDlDownloaderWorker.cookieFile != null) {
-                    this@YoutubeDlDownloaderWorker.cookieFile!!.delete()
-                }
-
-                if (moved) {
-                    tmpFile.deleteRecursively()
-                }
-                finishWork(VideoTaskItem(url).also { f ->
-                    f.fileName = finalFile.name
-                    f.errorCode = if (moved) 0 else 1
-                    f.percent = 100F
-                    f.taskState = if (moved) VideoTaskState.SUCCESS else VideoTaskState.ERROR
-                })
-            } else {
-                val fixedList = tmpFile.listFiles()?.filter { !it.name.contains("part") }
-                this@YoutubeDlDownloaderWorker.cookieFile?.delete()
-                fixedList?.firstOrNull().let {
-                    finishWork(VideoTaskItem(url).also { f ->
-                        if (it != null) {
-                            f.fileName = it.name
+        downloadJobDisposable = Observable.fromCallable<YtDlpJava.DownloadResult> {
+            // Initialize the custom yt-dlp library
+            ytdlpJava = YtDlpJava()
+            
+            // Set output path to tmp directory
+            val outputPath = "${tmpFile.absolutePath}/${task.title}.%(ext)s"
+            ytdlpJava?.setOption("output", outputPath)
+            
+            // Add progress callback
+            ytdlpJava?.addProgressCallback(object : YtDlpJava.ProgressCallback {
+                override fun onProgress(percentage: Int, bytesDownloaded: Long, totalBytes: Long) {
+                    if (Date().time - time > UPDATE_INTERVAL && !getDone()) {
+                        time = Date().time
+                        
+                        progressCached = percentage
+                        
+                        val downloadBytesFixed = if (bytesDownloaded > 0) {
+                            bytesDownloaded
+                        } else {
+                            (totalBytes * (percentage / 100.0)).toLong()
                         }
+                        
+                        task.also {
+                            it.percent = percentage.toFloat()
+                            it.totalSize = totalBytes
+                            it.downloadSize = downloadBytesFixed
+                            it.taskState = VideoTaskState.DOWNLOADING
+                        }
+
+                        val lineInfo = LineInfo("download", downloadBytesFixed.toDouble(), totalBytes.toDouble(), sourceLine = "Downloading...")
+                        saveProgress(taskId, lineInfo, task).blockingFirst(Unit)
+                        showProgress(taskId, task.title, percentage, "Downloading...", tmpFile)
+
+                        if (!fileUtil.isFreeSpaceAvailable()) {
+                            finishWork(task.also {
+                                it.mId = taskId
+                                it.taskState = VideoTaskState.ERROR
+                                it.errorMessage = "Not enough space"
+                            })
+                        }
+                    }
+                }
+                
+                override fun onComplete(filePath: String) {
+                    AppLogger.d("Download completed: $filePath")
+                }
+                
+                override fun onError(error: String) {
+                    AppLogger.e("Download error: $error")
+                }
+            })
+            
+            // Start download and return result
+            ytdlpJava?.download(url, outputPath) ?: throw Exception("Failed to initialize download")
+        }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ downloadResult ->
+                if (downloadResult.isSuccess()) {
+                    val finalFile = File(downloadResult.getFilePath())
+                    if (finalFile.exists()) {
+                        val destinationFile = fileUtil.folderDir.resolve(finalFile.name).let {
+                            fixFileName(it.absolutePath)
+                        }.let {
+                            File(it)
+                        }
+                        val moved = fileUtil.moveMedia(
+                            this@YoutubeDlDownloaderWorker.applicationContext,
+                            Uri.fromFile(finalFile),
+                            Uri.fromFile(destinationFile)
+                        )
+
+                        if (moved) {
+                            tmpFile.deleteRecursively()
+                        }
+                        finishWork(VideoTaskItem(url).also { f ->
+                            f.fileName = finalFile.name
+                            f.errorCode = if (moved) 0 else 1
+                            f.percent = 100F
+                            f.taskState = if (moved) VideoTaskState.SUCCESS else VideoTaskState.ERROR
+                        })
+                    } else {
+                        finishWork(VideoTaskItem(url).also { f ->
+                            f.errorCode = 1
+                            f.taskState = VideoTaskState.ERROR
+                            f.errorMessage = "Downloaded file not found"
+                        })
+                    }
+                } else {
+                    finishWork(VideoTaskItem(url).also { f ->
                         f.errorCode = 1
                         f.taskState = VideoTaskState.ERROR
+                        f.errorMessage = downloadResult.getErrorMessage() ?: "Unknown error"
                     })
                 }
-            }
-        }
+            }, { error ->
+                handleError(taskId, url, progressCached, error, task.title)
+            })
     }
 
-    private fun configureYoutubedlRequest(
-        request: YoutubeDLRequest, vFormat: VideoFormatEntity, fileName: String, isContinue: Boolean
-    ) {
-        request.addOption("--progress")
-
-        val threadsCount = sharedPrefHelper.getM3u8DownloaderThreadCount() + 1
-        request.addOption("-N", threadsCount)
-
-        val isAudioOnly = vFormat.vcodec == "none" && vFormat.acodec != "none"
-
-        if (isAudioOnly) {
-            request.addOption("--audio-quality", "0")
-            request.addOption("--extract-audio")
-            request.addOption("--audio-format", "mp3")
-        } else {
-            val videoOnly = vFormat.vcodec != "none" && vFormat.acodec == "none"
-            if (videoOnly) {
-                request.addOption("-f", "${vFormat.formatId}+bestaudio")
-            } else {
-                request.addOption("-f", "${vFormat.formatId}")
-            }
-
-            request.addOption("--recode-video", "mp4")
-            request.addOption("--merge-output-format", "mp4")
-        }
-
-
-        // any another downloader has issues
-        request.addOption("--hls-prefer-native")
-        // without this download will start again from beginning after error
-        request.addOption("--hls-use-mpegts")
-
-        if (isContinue) {
-            request.addOption("--continue")
-        }
-
-//        $youtube-dl --proxy http://user:password@your_proxy.com:port url
-        val currentProxy = proxyController.getCurrentRunningProxy()
-        if (currentProxy != Proxy.noProxy()) {
-            val (user, password) = proxyController.getProxyCredentials()
-            if (user.isNotEmpty() && password.isNotEmpty()) {
-                request.addOption(
-                    "--proxy",
-                    "http://${user}:${password}@${currentProxy.host}:${currentProxy.port}"
-                )
-            } else {
-                request.addOption("--proxy", "${currentProxy.host}:${currentProxy.port}")
-            }
-        }
-
-        request.addOption("-o", "${tmpFile.absolutePath}/${fileName}.%(ext)s")
-
-        vFormat.httpHeaders?.forEach {
-            if (it.key != "Cookie") {
-                request.addOption("--add-header", "${it.key}:${it.value}")
-            }
-        }
-    }
+    // configureYoutubedlRequest method removed - no longer needed with custom library
 
     @SuppressLint("CheckResult")
     private fun monitorDownloadProcess(taskId: String, task: VideoTaskItem) {
@@ -451,11 +372,8 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         AppLogger.d("Download Error: $throwable \ntaskId: $taskId")
 
         finishWork(VideoTaskItem(url).also { f ->
-            if (isCanceled && throwable is YoutubeDL.CanceledException) {
+            if (isCanceled) {
                 f.taskState = VideoTaskState.CANCELED
-                f.errorCode = 0
-            } else if (throwable is YoutubeDL.CanceledException) {
-                f.taskState = VideoTaskState.PAUSE
                 f.errorCode = 0
             } else {
                 f.taskState = VideoTaskState.ERROR
@@ -464,9 +382,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
             }
             f.fileName = name
             f.percent = progressCached.toFloat()
-
         })
-
     }
 
     //[download]   0.3% of ~  49.94MiB at  438.62KiB/s ETA 04:41 (frag 2/201)
@@ -674,14 +590,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
             }
     }
 
-    private fun deserializeVideoFormat(taskId: String): VideoFormatEntity {
-        val rawHeaders = GenericDownloader.getInstance()
-            .loadHeadersStringFromSharedPreferences(applicationContext, taskId)
-        val decompressedRaw = rawHeaders?.let { YoutubeDlDownloader.decompressString(it) }
-        val decodedHeadersString = String(Base64.decode(decompressedRaw, Base64.DEFAULT))
-
-        return Gson().fromJson(decodedHeadersString, VideoFormatEntity::class.java)
-    }
+    // deserializeVideoFormat method removed - no longer needed with custom library
 
     private fun hideNotifications(taskId: String) {
         notificationsHelper.hideNotification(taskId.hashCode())

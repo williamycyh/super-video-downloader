@@ -1,1 +1,3 @@
 include ':app'
+include ':yt-dlp-java'
+project(':yt-dlp-java').projectDir = new File('/Users/egbert/Desktop/myproject/yt-dlp/javacode')

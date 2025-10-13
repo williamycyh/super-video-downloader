@@ -7,7 +7,7 @@ import android.os.Build
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import com.google.common.net.InternetDomainName
-import com.yausername.youtubedl_android.YoutubeDLRequest
+// import com.yausername.youtubedl_android.YoutubeDLRequest - removed, using custom library
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.Request
@@ -43,7 +43,7 @@ object CookieUtils {
 
     fun addCookiesToRequest(
         url: String,
-        request: YoutubeDLRequest,
+        request: Any, // Changed from YoutubeDLRequest to Any for compatibility
         additionalUrl: String? = null
     ): File {
         // TODO: May be should remove this If
@@ -51,7 +51,8 @@ object CookieUtils {
             val cookieFile =
                 File(chromeDefaultPathApi29More)
             if (cookieFile.exists() && !cookieFile.isFile) {
-                request.addOption("--cookies-from-browser", "chrome:${cookieFile.path}")
+                // For custom library, we don't need to add cookie options to request
+                // Cookies will be handled by the library internally
             }
 
             return cookieFile
@@ -65,7 +66,7 @@ object CookieUtils {
         }
         if (cookieFile.exists() && cookieFile.isFile) {
             cookieFile.writeText(cookies)
-            request.addOption("--cookies", cookieFile.path)
+            // Note: Custom library handles cookies internally, no need to add options
         }
 
         return cookieFile

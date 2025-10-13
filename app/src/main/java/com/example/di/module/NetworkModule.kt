@@ -31,7 +31,7 @@ class NetworkModule {
             .readTimeout(30L, TimeUnit.SECONDS)
             .cache(
                 Cache(
-                    File(application.cacheDir, "YoutubeDLCache"),
+                    File(application.cacheDir, "YtDlpCache"),
                     Memory.calcCacheSize(application, .25f)
                 )
             )
