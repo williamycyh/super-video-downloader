@@ -62,4 +62,18 @@ public class YoutubeDLOptions {
     public Map<String, Object> getAll() {
         return new HashMap<>(options);
     }
+    
+    /**
+     * 设置HTTP头部信息
+     */
+    public void setHttpHeaders(String httpHeaders) {
+        options.put("http_headers", httpHeaders);
+    }
+    
+    /**
+     * 获取HTTP头部信息
+     */
+    public String getHttpHeaders() {
+        return getString("http_headers");
+    }
 }

@@ -108,6 +108,24 @@ public class YtDlpJava {
     }
     
     /**
+     * 设置HTTP头部
+     */
+    public void setHttpHeaders(Map<String, String> headers) {
+        if (headers != null && !headers.isEmpty()) {
+            // 将headers存储到options中，供下载器使用
+            StringBuilder headerStr = new StringBuilder();
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                if (headerStr.length() > 0) {
+                    headerStr.append("\n");
+                }
+                headerStr.append(entry.getKey()).append(": ").append(entry.getValue());
+            }
+            options.put("http_headers", headerStr.toString());
+            logger.info("设置HTTP头部: {}", headerStr.toString());
+        }
+    }
+    
+    /**
      * 移除进度回调
      */
     public void removeProgressCallback(ProgressCallback callback) {
@@ -353,12 +371,22 @@ public class YtDlpJava {
         // 使用YoutubeDL核心进行下载
         YoutubeDL youtubeDL = YoutubeDL.getInstance();
         
+        // 设置HTTP头部信息
+        String httpHeaders = options.get("http_headers");
+        if (httpHeaders != null && !httpHeaders.isEmpty()) {
+            youtubeDL.setHttpHeaders(httpHeaders);
+        }
+        
         for (VideoFormat format : formats) {
             try {
-                logger.info("开始下载格式: {} ({})", format.getFormatId(), format.getExt());
+                logger.info("开始下载格式: " + format.getFormatId() + " (" + format.getExt() + ")");
+                logger.info("调用youtubeDL.downloadFormat，格式协议: " + format.getProtocol());
+                logger.info("输出路径: " + outputPath);
                 
-                // 使用YoutubeDL的下载功能
-                boolean success = youtubeDL.download(format.getUrl(), outputPath);
+                // 直接使用YoutubeDL的downloadFormat方法，而不是重新提取信息
+                boolean success = youtubeDL.downloadFormat(format, outputPath, "video");
+                
+                logger.info("downloadFormat调用完成，结果: " + success);
                 
                 if (success) {
                     // 通知进度回调
@@ -369,6 +397,7 @@ public class YtDlpJava {
                 
             } catch (Exception e) {
                 logger.error("下载格式失败: {}", e.getMessage());
+                e.printStackTrace();
                 notifyErrorCallbacks("下载失败: " + e.getMessage());
             }
         }

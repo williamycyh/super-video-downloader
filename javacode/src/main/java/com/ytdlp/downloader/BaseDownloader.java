@@ -29,6 +29,11 @@ public abstract class BaseDownloader implements FileDownloader {
     public void initialize(YoutubeDLOptions params, Logger logger) {
         this.params = params;
         this.logger = logger;
+        
+        // 确保logger不为null
+        if (this.logger == null) {
+            this.logger = new Logger(true, true, true);
+        }
     }
     
     public void setProgressCallback(ProgressCallback progressCallback) {

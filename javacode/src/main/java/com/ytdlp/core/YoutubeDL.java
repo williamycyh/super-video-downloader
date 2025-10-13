@@ -18,7 +18,7 @@ public class YoutubeDL {
     private ExtractorRegistry extractorRegistry;
 
     private YoutubeDL() {
-        this.logger = new Logger(false, false, false);
+        this.logger = new Logger(true, true, true);  // 启用所有日志级别
         this.params = new YoutubeDLOptions();
         this.extractorRegistry = new ExtractorRegistry();
     }
@@ -36,6 +36,17 @@ public class YoutubeDL {
 
     public void setParams(YoutubeDLOptions params) {
         this.params = params;
+    }
+    
+    /**
+     * 设置HTTP头部信息
+     */
+    public void setHttpHeaders(String httpHeaders) {
+        if (httpHeaders != null && !httpHeaders.isEmpty()) {
+            // 将HTTP头部信息存储到params中
+            this.params.setHttpHeaders(httpHeaders);
+            logger.info("设置HTTP头部信息: {}", httpHeaders);
+        }
     }
 
     public Logger getLogger() {
@@ -90,10 +101,69 @@ public class YoutubeDL {
         return formats.get(0);
     }
 
-    private boolean downloadFormat(VideoFormat format, String outputPath, String title) throws Exception {
-        // This would implement actual downloading logic
-        // For now, return true as placeholder
+    public boolean downloadFormat(VideoFormat format, String outputPath, String title) throws Exception {
         logger.info("Downloading format: " + format.getFormatId());
-        return true;
+        logger.info("Format protocol: " + format.getProtocol());
+        logger.info("Format URL: " + format.getUrl());
+        logger.info("Output path: " + outputPath);
+        
+        // 根据格式类型选择下载器
+        boolean isHls = isHlsFormat(format);
+        logger.info("Is HLS format: " + isHls);
+        
+        if (isHls) {
+            logger.info("Using HLS downloader");
+            return downloadWithHlsDownloader(format, outputPath, title);
+        } else {
+            logger.info("Using HTTP downloader");
+            return downloadWithHttpDownloader(format, outputPath, title);
+        }
+    }
+    
+    private boolean isHlsFormat(VideoFormat format) {
+        String protocol = format.getProtocol();
+        String url = format.getUrl();
+        return "hls".equals(protocol) || 
+               (url != null && (url.contains(".m3u8") || url.contains("m3u8")));
+    }
+    
+    private boolean downloadWithHlsDownloader(VideoFormat format, String outputPath, String title) throws Exception {
+        try {
+            logger.info("Using HLS downloader for format: " + format.getFormatId());
+            com.ytdlp.downloader.hls.HlsDownloader hlsDownloader = new com.ytdlp.downloader.hls.HlsDownloader();
+            
+            // 初始化下载器
+            hlsDownloader.initialize(params, logger);
+            
+            // 创建临时VideoInfo用于下载
+            VideoInfo tempInfo = new VideoInfo();
+            tempInfo.setTitle(title);
+            tempInfo.setUrl(format.getUrl());
+            
+            return hlsDownloader.download(tempInfo, format, outputPath);
+        } catch (Exception e) {
+            logger.error("HLS download failed: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    private boolean downloadWithHttpDownloader(VideoFormat format, String outputPath, String title) throws Exception {
+        try {
+            logger.info("Using HTTP downloader for format: " + format.getFormatId());
+            com.ytdlp.downloader.http.HttpDownloader httpDownloader = new com.ytdlp.downloader.http.HttpDownloader();
+            
+            // 初始化下载器
+            httpDownloader.initialize(params, logger);
+            
+            // 创建临时VideoInfo用于下载
+            VideoInfo tempInfo = new VideoInfo();
+            tempInfo.setTitle(title);
+            tempInfo.setUrl(format.getUrl());
+            
+            return httpDownloader.download(tempInfo, format, outputPath);
+        } catch (Exception e) {
+            logger.error("HTTP download failed: " + e.getMessage());
+            throw e;
+        }
     }
 }

@@ -59,7 +59,7 @@ public abstract class InfoExtractor {
     protected String searchRegex(Pattern pattern, String text, String name, String group) {
         java.util.regex.Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
-            if (group != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (group != null) {
                 return matcher.group(group);
             } else {
                 return matcher.group(1);

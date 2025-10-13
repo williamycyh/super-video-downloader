@@ -28,6 +28,7 @@ public class ExtractorRegistry {
             register(new com.ytdlp.extractor.xhamster.AdvancedXHamsterExtractor());
             register(new com.ytdlp.extractor.xvideos.AdvancedXVideosExtractor());
             register(new com.ytdlp.extractor.xnxx.AdvancedXNXXExtractor());
+            register(new com.ytdlp.extractor.m3u8.M3U8Extractor());
             register(new YouTubeExtractor());
         } catch (Exception e) {
             // Log error but continue with available extractors
