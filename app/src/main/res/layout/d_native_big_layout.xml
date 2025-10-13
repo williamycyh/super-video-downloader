@@ -3,29 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:tag="tnmusvidedd"
     android:minWidth="300dp"
-    android:minHeight="250dp"
-    android:tag="tnmusvidedd">
-
-    <FrameLayout
-        android:id="@+id/options_view"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginRight="2dp" />
-
-    <FrameLayout
-        android:id="@+id/d_media_content_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/bottom_btn_layout"
-        android:layout_below="@+id/d_ad_content_linear_layout"
-        android:layout_centerHorizontal="true" />
-
+    android:minHeight="250dp">
 
     <LinearLayout
         android:id="@+id/d_ad_content_linear_layout"
@@ -79,35 +59,54 @@
 
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/options_view"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginRight="2dp" />
+
+
+    <FrameLayout
+        android:id="@+id/d_media_content_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/d_ad_content_linear_layout"
+        android:layout_above="@+id/bottom_btn_layout"
+        android:layout_centerHorizontal="true" />
+
     <LinearLayout
         android:id="@+id/bottom_btn_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/d_cta_button"
-            style="@style/com.applovin.mediation.nativeAds.MaxNativeAdView.CTAButton"
-            android:layout_width="120dp"
-            android:layout_height="48dp"
-            android:layout_margin="@dimen/default_margin"
-
-            android:layout_weight="1"
-            android:singleLine="false"
-            android:textSize="15sp"
-            tools:text="CTA" />
-
         <TextView
+            android:layout_weight="3"
             android:id="@+id/d_body_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_weight="3"
             android:maxLines="3"
             android:textSize="12sp"
             tools:text="BODY_TEXT_VIEW" />
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/d_cta_button"
+            style="@style/com.applovin.mediation.nativeAds.MaxNativeAdView.CTAButton"
+            android:layout_width="120dp"
+            android:layout_height="48dp"
+
+            android:layout_margin="@dimen/default_margin"
+            android:singleLine="false"
+            android:textSize="15sp"
+            tools:text="CTA" />
     </LinearLayout>
 
 </RelativeLayout>
