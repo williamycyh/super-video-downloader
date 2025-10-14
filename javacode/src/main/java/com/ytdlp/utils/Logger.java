@@ -52,7 +52,9 @@ public class Logger {
      */
     public void debug(String format, Object... args) {
         if (verbose && !quiet) {
-            System.out.printf("[debug] " + format + "%n", args);
+            // 将{}占位符转换为%s，以兼容printf
+            String convertedFormat = format.replace("{}", "%s");
+            System.out.printf("[debug] " + convertedFormat + "%n", args);
         }
     }
     

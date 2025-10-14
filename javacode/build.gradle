@@ -48,6 +48,9 @@ dependencies {
     // Minimal dependencies for the custom library
     implementation 'com.google.code.gson:gson:2.8.9'
     
+    // FFmpegKit for video processing
+    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
+    
     testImplementation 'junit:junit:4.13.2'
 }
 

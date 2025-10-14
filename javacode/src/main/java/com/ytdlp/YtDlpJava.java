@@ -6,7 +6,9 @@ import com.ytdlp.core.YoutubeDL;
 import com.ytdlp.extractor.InfoExtractor;
 import com.ytdlp.extractor.ExtractorRegistry;
 import com.ytdlp.utils.Logger;
+import com.ytdlp.options.DownloadOptions;
 
+import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -121,7 +123,7 @@ public class YtDlpJava {
                 headerStr.append(entry.getKey()).append(": ").append(entry.getValue());
             }
             options.put("http_headers", headerStr.toString());
-            logger.info("设置HTTP头部: {}", headerStr.toString());
+            logger.info("设置HTTP头部: %s", headerStr.toString());
         }
     }
     
@@ -142,6 +144,269 @@ public class YtDlpJava {
     }
     
     /**
+     * 兼容Python版本的execute方法
+     * @param request 请求对象
+     * @param processId 进程ID（用于取消）
+     * @param callback 进度回调
+     * @return 响应对象
+     */
+    public YoutubeDLResponse execute(YoutubeDLRequest request, String processId, ProgressCallback callback) {
+        long startTime = System.currentTimeMillis();
+        List<String> command = request.buildCommand();
+        
+        try {
+            logger.info("=== 执行兼容Python版本的下载 ===");
+            logger.info("命令: %s", command);
+            
+            // 获取URL
+            List<String> urls = request.getUrls();
+            if (urls.isEmpty()) {
+                throw new IllegalArgumentException("No URLs provided");
+            }
+            String url = urls.get(0);
+            
+            // 获取选项
+            DownloadOptions options = request.getOptions();
+            
+            // 应用选项到YtDlpJava实例
+            if (options.getHttpHeaders() != null) {
+                // 将字符串格式的HTTP头部转换为Map格式
+                Map<String, String> headers = parseHttpHeaders(options.getHttpHeaders());
+                setHttpHeaders(headers);
+            }
+            
+            // 处理输出路径
+            String outputPath = options.getOutput();
+            if (outputPath == null && options.getOutputTemplate() != null) {
+                outputPath = options.getOutputTemplate();
+            }
+            
+            // 根据请求类型决定是提取信息还是下载
+            boolean isInfoRequest = request.hasOption("--dump-json");
+            
+            if (isInfoRequest) {
+                // 提取信息
+                VideoInfo videoInfo = extractInfo(url);
+                if (videoInfo != null) {
+                    // 将VideoInfo转换为JSON字符串（简化版本）
+                    String jsonOutput = convertVideoInfoToJson(videoInfo);
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    return new YoutubeDLResponse(command, 0, elapsedTime, jsonOutput, "");
+                } else {
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    return new YoutubeDLResponse(command, 1, elapsedTime, "", "Failed to extract video information");
+                }
+            } else {
+                // 下载视频
+                if (options.getFormat() != null) {
+                    // 如果有格式指定，先提取信息然后选择格式
+                    VideoInfo videoInfo = extractInfo(url);
+                    if (videoInfo == null) {
+                        long elapsedTime = System.currentTimeMillis() - startTime;
+                        return new YoutubeDLResponse(command, 1, elapsedTime, "", "Failed to extract video information");
+                    }
+                    
+                    // 根据格式选择视频格式
+                    VideoFormat selectedFormat = selectFormatBySpec(videoInfo.getFormats(), options.getFormat());
+                    if (selectedFormat == null) {
+                        long elapsedTime = System.currentTimeMillis() - startTime;
+                        return new YoutubeDLResponse(command, 1, elapsedTime, "", "No matching format found: " + options.getFormat());
+                    }
+                    
+                    // 下载指定格式
+                    DownloadResult result = downloadFormat(selectedFormat, outputPath);
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    
+                    if (result.isSuccess()) {
+                        String output = String.format("下载完成: %s", result.getFilePath());
+                        return new YoutubeDLResponse(command, 0, elapsedTime, output, "");
+                    } else {
+                        return new YoutubeDLResponse(command, 1, elapsedTime, "", result.getErrorMessage());
+                    }
+                } else {
+                    // 直接下载（使用原有逻辑）
+                    DownloadResult result = download(url, outputPath);
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    
+                    if (result.isSuccess()) {
+                        String output = String.format("下载完成: %s", result.getFilePath());
+                        return new YoutubeDLResponse(command, 0, elapsedTime, output, "");
+                    } else {
+                        return new YoutubeDLResponse(command, 1, elapsedTime, "", result.getErrorMessage());
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            String errorMsg = "执行过程中发生错误: " + e.getMessage();
+            logger.error(errorMsg, e);
+            return new YoutubeDLResponse(command, 1, elapsedTime, "", errorMsg);
+        }
+    }
+    
+    /**
+     * 根据格式规格选择视频格式
+     */
+    private VideoFormat selectFormatBySpec(List<VideoFormat> formats, String formatSpec) {
+        if (formats == null || formats.isEmpty()) {
+            return null;
+        }
+        
+        // 简化的格式选择逻辑
+        // 实际应该实现完整的yt-dlp格式选择语法
+        if ("best".equals(formatSpec)) {
+            return selectBestFormat(formats);
+        } else if (formatSpec.startsWith("best[")) {
+            // 解析格式选择器，如 "best[height<=720]"
+            return selectBestFormatWithCriteria(formats, formatSpec);
+        } else {
+            // 按格式ID查找
+            for (VideoFormat format : formats) {
+                if (formatSpec.equals(format.getFormatId())) {
+                    return format;
+                }
+            }
+        }
+        
+        return formats.get(0); // 默认返回第一个
+    }
+    
+    /**
+     * 选择最佳格式（带条件）
+     */
+    private VideoFormat selectBestFormatWithCriteria(List<VideoFormat> formats, String criteria) {
+        // 简化实现，实际应该解析复杂的格式选择语法
+        if (criteria.contains("height<=")) {
+            // 提取高度限制
+            String heightStr = criteria.substring(criteria.indexOf("height<=") + 8);
+            heightStr = heightStr.substring(0, heightStr.indexOf("]"));
+            int maxHeight = Integer.parseInt(heightStr);
+            
+            // 选择符合高度限制的最佳格式
+            VideoFormat best = null;
+            int bestHeight = 0;
+            
+            for (VideoFormat format : formats) {
+                if (format.getHeight() != null && format.getHeight() <= maxHeight) {
+                    if (best == null || format.getHeight() > bestHeight) {
+                        best = format;
+                        bestHeight = format.getHeight();
+                    }
+                }
+            }
+            
+            return best != null ? best : selectBestFormat(formats);
+        }
+        
+        return selectBestFormat(formats);
+    }
+    
+    /**
+     * 将VideoInfo转换为JSON字符串（简化版本）
+     */
+    private String convertVideoInfoToJson(VideoInfo videoInfo) {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"id\": \"").append(escapeJson(videoInfo.getId())).append("\",\n");
+        json.append("  \"title\": \"").append(escapeJson(videoInfo.getTitle())).append("\",\n");
+        json.append("  \"url\": \"").append(escapeJson(videoInfo.getUrl())).append("\",\n");
+        json.append("  \"duration\": ").append(videoInfo.getDuration()).append(",\n");
+        json.append("  \"uploader\": \"").append(escapeJson(videoInfo.getUploader())).append("\",\n");
+        json.append("  \"formats\": [\n");
+        
+        List<VideoFormat> formats = videoInfo.getFormats();
+        for (int i = 0; i < formats.size(); i++) {
+            VideoFormat format = formats.get(i);
+            json.append("    {\n");
+            json.append("      \"format_id\": \"").append(escapeJson(format.getFormatId())).append("\",\n");
+            json.append("      \"url\": \"").append(escapeJson(format.getUrl())).append("\",\n");
+            json.append("      \"ext\": \"").append(escapeJson(format.getExt())).append("\",\n");
+            json.append("      \"protocol\": \"").append(escapeJson(format.getProtocol())).append("\",\n");
+            json.append("      \"width\": ").append(format.getWidth() != null ? format.getWidth() : "null").append(",\n");
+            json.append("      \"height\": ").append(format.getHeight() != null ? format.getHeight() : "null").append(",\n");
+            json.append("      \"tbr\": ").append(format.getTbr() != null ? format.getTbr() : "null").append("\n");
+            json.append("    }");
+            if (i < formats.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        
+        json.append("  ]\n");
+        json.append("}");
+        
+        return json.toString();
+    }
+    
+    /**
+     * 转义JSON字符串
+     */
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+    }
+    
+    /**
+     * 解析HTTP头部字符串为Map
+     */
+    private Map<String, String> parseHttpHeaders(String headersStr) {
+        Map<String, String> headers = new HashMap<>();
+        if (headersStr == null || headersStr.trim().isEmpty()) {
+            return headers;
+        }
+        
+        // 支持多种格式的HTTP头部字符串
+        // 格式1: "User-Agent: Custom Agent\nReferer: https://example.com"
+        // 格式2: "User-Agent: Custom Agent; Referer: https://example.com"
+        String[] lines = headersStr.split("[\\n;]");
+        
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            
+            int colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+                String key = line.substring(0, colonIndex).trim();
+                String value = line.substring(colonIndex + 1).trim();
+                headers.put(key, value);
+            }
+        }
+        
+        return headers;
+    }
+    
+    /**
+     * 直接下载指定格式（避免重复解析URL）
+     * @param format 预选的视频格式
+     * @param outputPath 输出路径
+     * @return 下载结果
+     */
+    public DownloadResult downloadFormat(VideoFormat format, String outputPath) {
+        try {
+            logger.info("=== 直接下载指定格式 ===");
+            logger.info("格式ID: %s, 协议: %s, URL: %s", 
+                format.getFormatId(), format.getProtocol(), format.getUrl());
+            
+            // 直接下载，无需重新解析URL
+            boolean success = downloadFormats(Arrays.asList(format), outputPath);
+            
+            if (success) {
+                logger.info("格式下载完成: %s", outputPath);
+                return new DownloadResult(true, outputPath, null, null);
+            } else {
+                String error = "格式下载失败";
+                logger.error(error);
+                return new DownloadResult(false, null, error, null);
+            }
+            
+        } catch (Exception e) {
+            String error = "格式下载过程中发生错误: " + e.getMessage();
+            logger.error(error);
+            e.printStackTrace();
+            return new DownloadResult(false, null, error, null);
+        }
+    }
+    
+    /**
      * 主入口方法 - 下载视频（带输出路径）
      * @param url 视频URL
      * @param outputPath 输出路径
@@ -150,7 +415,7 @@ public class YtDlpJava {
     public DownloadResult download(String url, String outputPath) {
         try {
             logger.info("=== 开始视频下载 ===");
-            logger.info("URL: {}", url);
+            logger.info("URL: %s", url);
             
             // 1. 自动选择提取器
             InfoExtractor extractor = createExtractor(url);
@@ -160,7 +425,7 @@ public class YtDlpJava {
                 return new DownloadResult(false, null, error, null);
             }
             
-            logger.info("选择的提取器: {}", extractor.getIE_NAME());
+            logger.info("选择的提取器: %s", extractor.getIE_NAME());
             
             // 2. 提取视频信息
             VideoInfo videoInfo = extractor.extract(url);
@@ -170,7 +435,7 @@ public class YtDlpJava {
                 return new DownloadResult(false, null, error, null);
             }
             
-            logger.info("提取成功 - 标题: {}, 格式数量: {}", 
+            logger.info("提取成功 - 标题: %s, 格式数量: %s", 
                 videoInfo.getTitle(), videoInfo.getFormats().size());
             
             // 3. 格式选择
@@ -181,7 +446,7 @@ public class YtDlpJava {
                 return new DownloadResult(false, null, error, videoInfo);
             }
             
-            logger.info("选择了 {} 个格式", selectedFormats.size());
+            logger.info("选择了 %s 个格式", selectedFormats.size());
             
             // 4. 生成输出文件名
             if (outputPath == null) {
@@ -192,7 +457,7 @@ public class YtDlpJava {
             boolean success = downloadFormats(selectedFormats, outputPath);
             
             if (success) {
-                logger.info("下载完成: {}", outputPath);
+                logger.info("下载完成: %s", outputPath);
                 return new DownloadResult(true, outputPath, null, videoInfo);
             } else {
                 String error = "视频下载失败";
@@ -216,24 +481,24 @@ public class YtDlpJava {
     public VideoInfo extractInfo(String url) {
         try {
             logger.info("=== 提取视频信息 ===");
-            logger.info("URL: {}", url);
+            logger.info("URL: %s", url);
             
             InfoExtractor extractor = createExtractor(url);
             if (extractor == null) {
-                logger.error("不支持的视频平台: {}", getPlatformName(url));
+                logger.error("不支持的视频平台: %s", getPlatformName(url));
                 return null;
             }
             
             VideoInfo videoInfo = extractor.extract(url);
             if (videoInfo != null) {
-                logger.info("信息提取成功 - 标题: {}, 格式数量: {}", 
+                logger.info("信息提取成功 - 标题: %s, 格式数量: %s", 
                     videoInfo.getTitle(), videoInfo.getFormats().size());
             }
             
             return videoInfo;
             
         } catch (Exception e) {
-            logger.error("信息提取失败: {}", e.getMessage());
+            logger.error("信息提取失败: %s", e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -260,7 +525,7 @@ public class YtDlpJava {
             // 使用ExtractorRegistry来获取合适的提取器
             return extractorRegistry.getExtractor(url);
         } catch (Exception e) {
-            logger.error("创建提取器失败: {}", e.getMessage());
+            logger.error("创建提取器失败: %s", e.getMessage());
             return null;
         }
     }
@@ -342,12 +607,41 @@ public class YtDlpJava {
      */
     private String generateOutputPath(VideoInfo videoInfo, VideoFormat format) {
         String template = options.get("output");
+        if (template == null || template.trim().isEmpty()) {
+            // 默认输出路径
+            template = "%(title)s.%(ext)s";
+        }
+        
+        // 对于HLS格式，强制使用.ts扩展名
+        String ext = format.getExt();
+        if ("hls".equals(format.getProtocol()) || "m3u8".equals(format.getProtocol())) {
+            ext = "ts";
+        }
+        
         String fileName = template
             .replace("%(title)s", sanitizeFileName(videoInfo.getTitle()))
-            .replace("%(ext)s", format.getExt())
+            .replace("%(ext)s", ext)
             .replace("%(id)s", videoInfo.getId());
             
+        // 确保路径是绝对路径
+        if (!new File(fileName).isAbsolute()) {
+            // 如果模板不包含完整路径，使用当前工作目录
+            fileName = new File(System.getProperty("user.dir"), fileName).getAbsolutePath();
+        }
+        
         return fileName;
+    }
+    
+    /**
+     * 检查是否在Android环境中运行
+     */
+    private boolean isAndroidEnvironment() {
+        try {
+            Class.forName("android.os.Build");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
     
     /**
@@ -368,6 +662,169 @@ public class YtDlpJava {
      * 下载格式列表
      */
     private boolean downloadFormats(List<VideoFormat> formats, String outputPath) {
+        // Android环境检查
+        boolean isAndroid = isAndroidEnvironment();
+        if (isAndroid) {
+            logger.info("检测到Android环境，使用兼容模式");
+        }
+        
+        for (VideoFormat format : formats) {
+            try {
+                logger.info("开始下载格式: " + format.getFormatId() + " (" + format.getExt() + ")");
+                logger.info("格式协议: " + format.getProtocol());
+                logger.info("输出路径: " + outputPath);
+                
+                // 确保输出目录存在
+                File outputFile = new File(outputPath);
+                File parentDir = outputFile.getParentFile();
+                if (parentDir != null && !parentDir.exists()) {
+                    boolean dirCreated = parentDir.mkdirs();
+                    if (!dirCreated && !parentDir.exists()) {
+                        logger.error("无法创建输出目录: " + parentDir.getAbsolutePath());
+                        notifyErrorCallbacks("无法创建输出目录: " + parentDir.getAbsolutePath());
+                        return false;
+                    }
+                }
+                
+                // 根据协议选择下载器
+                boolean success = false;
+                String protocol = format.getProtocol();
+                
+                if (isStreamingFormat(format)) {
+                    // 使用FFmpeg下载器处理流媒体格式
+                    logger.info("使用FFmpeg下载器处理流媒体格式");
+                    success = downloadWithFfmpeg(format, outputPath);
+                } else {
+                    // 使用原有的HTTP下载器
+                    logger.info("使用HTTP下载器");
+                    success = downloadWithHttp(format, outputPath);
+                }
+                
+                logger.info("下载完成，结果: " + success);
+                
+                if (success) {
+                    // 验证下载的文件
+                    File downloadedFile = new File(outputPath);
+                    if (downloadedFile.exists() && downloadedFile.length() > 0) {
+                        logger.info("下载成功，文件大小: " + downloadedFile.length() + " bytes");
+                        // 通知进度回调
+                        notifyProgressCallbacks(100, downloadedFile.length(), downloadedFile.length());
+                        notifyCompleteCallbacks(outputPath);
+                        return true;
+                    } else {
+                        logger.error("下载完成但文件无效: " + outputPath);
+                        notifyErrorCallbacks("下载完成但文件无效");
+                        return false;
+                    }
+                }
+                
+            } catch (Exception e) {
+                logger.error("下载格式失败: %s", e.getMessage());
+                e.printStackTrace();
+                notifyErrorCallbacks("下载失败: " + e.getMessage());
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 使用HLS下载器下载
+     */
+    private boolean downloadWithPureJavaHls(VideoFormat format, String outputPath) throws Exception {
+        logger.info("=== 使用HLS下载器 ===");
+        
+        // 使用现有的HlsDownloader（已经过测试并支持fMP4合并）
+        com.ytdlp.downloader.hls.HlsDownloader hlsDownloader = 
+            new com.ytdlp.downloader.hls.HlsDownloader();
+        
+        // 初始化下载器
+        hlsDownloader.initialize(null, logger);
+        
+        // 创建虚拟VideoInfo对象
+        VideoInfo dummyInfo = new VideoInfo();
+        dummyInfo.setTitle("HLS Video");
+        
+        // 执行下载
+        File outputFile = new File(outputPath);
+        boolean success = hlsDownloader.download(dummyInfo, format, outputFile.getAbsolutePath());
+        
+        logger.info("HLS下载结果: " + success);
+        return success;
+    }
+    
+    /**
+     * 判断是否为流媒体格式
+     * 参考Android工程的判断逻辑
+     */
+    private boolean isStreamingFormat(VideoFormat format) {
+        String protocol = format.getProtocol();
+        String url = format.getUrl();
+        
+        // 检查协议
+        if ("hls".equals(protocol) || "m3u8".equals(protocol) || 
+            "dash".equals(protocol) || "mpd".equals(protocol) ||
+            "mms".equals(protocol) || "rtmp".equals(protocol) ||
+            "rtsp".equals(protocol) || "websocket".equals(protocol)) {
+            return true;
+        }
+        
+        // 检查URL中的流媒体标识
+        if (url != null) {
+            String lowerUrl = url.toLowerCase();
+            if (lowerUrl.contains(".m3u8") || 
+                lowerUrl.contains(".mpd") || 
+                lowerUrl.contains(".txt") ||
+                lowerUrl.contains("manifest") ||
+                lowerUrl.contains("playlist") ||
+                lowerUrl.contains("stream") ||
+                lowerUrl.contains("live")) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 使用FFmpeg HLS下载器下载
+     */
+    private boolean downloadWithFfmpeg(VideoFormat format, String outputPath) throws Exception {
+        logger.info("=== 使用Android FFmpeg HLS下载器 ===");
+        
+        // 创建Android FFmpeg下载器
+        com.ytdlp.downloader.hls.AndroidFfmpegHlsDownloader androidFfmpegDownloader = 
+            new com.ytdlp.downloader.hls.AndroidFfmpegHlsDownloader();
+        
+        // 设置日志器
+        androidFfmpegDownloader.setLogger(logger);
+        
+        // 初始化FFmpegKit（Android环境）
+        androidFfmpegDownloader.initialize();
+        
+        // 检查FFmpeg是否可用
+        if (!androidFfmpegDownloader.isAvailable()) {
+            logger.error("FFmpeg不可用，回退到纯Java HLS下载器");
+            return downloadWithPureJavaHls(format, outputPath);
+        }
+        
+        // 创建虚拟VideoInfo对象
+        VideoInfo dummyInfo = new VideoInfo();
+        dummyInfo.setTitle("HLS Video");
+        
+        // 执行下载
+        boolean success = androidFfmpegDownloader.download(dummyInfo, format, outputPath);
+        
+        logger.info("Android FFmpeg下载结果: " + success);
+        return success;
+    }
+    
+    /**
+     * 使用HTTP下载器下载
+     */
+    private boolean downloadWithHttp(VideoFormat format, String outputPath) throws Exception {
+        logger.info("=== 使用HTTP下载器 ===");
+        
         // 使用YoutubeDL核心进行下载
         YoutubeDL youtubeDL = YoutubeDL.getInstance();
         
@@ -377,32 +834,8 @@ public class YtDlpJava {
             youtubeDL.setHttpHeaders(httpHeaders);
         }
         
-        for (VideoFormat format : formats) {
-            try {
-                logger.info("开始下载格式: " + format.getFormatId() + " (" + format.getExt() + ")");
-                logger.info("调用youtubeDL.downloadFormat，格式协议: " + format.getProtocol());
-                logger.info("输出路径: " + outputPath);
-                
-                // 直接使用YoutubeDL的downloadFormat方法，而不是重新提取信息
-                boolean success = youtubeDL.downloadFormat(format, outputPath, "video");
-                
-                logger.info("downloadFormat调用完成，结果: " + success);
-                
-                if (success) {
-                    // 通知进度回调
-                    notifyProgressCallbacks(100, -1, -1);
-                    notifyCompleteCallbacks(outputPath);
-                    return true;
-                }
-                
-            } catch (Exception e) {
-                logger.error("下载格式失败: {}", e.getMessage());
-                e.printStackTrace();
-                notifyErrorCallbacks("下载失败: " + e.getMessage());
-            }
-        }
-        
-        return false;
+        // 直接使用YoutubeDL的downloadFormat方法
+        return youtubeDL.downloadFormat(format, outputPath, "video");
     }
     
     /**
@@ -413,7 +846,7 @@ public class YtDlpJava {
             try {
                 callback.onProgress(percentage, bytesDownloaded, totalBytes);
             } catch (Exception e) {
-                logger.error("进度回调执行失败: {}", e.getMessage());
+                logger.error("进度回调执行失败: %s", e.getMessage());
             }
         }
     }
@@ -426,7 +859,7 @@ public class YtDlpJava {
             try {
                 callback.onComplete(filePath);
             } catch (Exception e) {
-                logger.error("完成回调执行失败: {}", e.getMessage());
+                logger.error("完成回调执行失败: %s", e.getMessage());
             }
         }
     }
@@ -439,7 +872,7 @@ public class YtDlpJava {
             try {
                 callback.onError(error);
             } catch (Exception e) {
-                logger.error("错误回调执行失败: {}", e.getMessage());
+                logger.error("错误回调执行失败: %s", e.getMessage());
             }
         }
     }

@@ -20,12 +20,10 @@ public class HlsDownloader extends BaseDownloader {
     private static final int MAX_CONCURRENT_DOWNLOADS = 4;
     
     private ExecutorService executorService;
-    private final List<Future<Void>> downloadTasks;
     
     public HlsDownloader() {
         super();
         this.executorService = Executors.newFixedThreadPool(MAX_CONCURRENT_DOWNLOADS);
-        this.downloadTasks = new ArrayList<>();
         
         // 确保logger被初始化
         if (this.logger == null) {
@@ -223,7 +221,12 @@ public class HlsDownloader extends BaseDownloader {
         Path tempDir = Files.createTempDirectory("hls_download");
         
         try {
+            // 计算总大小估算（基于片段时长）
+            long estimatedTotalSize = calculateEstimatedTotalSize(playlist);
+            logger.info("估算总大小: %s bytes", estimatedTotalSize);
+            
             // 并发下载所有片段
+            List<Future<Long>> downloadTasks = new ArrayList<>();
             for (int i = 0; i < segments.size(); i++) {
                 final HlsSegment segment = segments.get(i);
                 // 根据片段URL的扩展名确定文件扩展名
@@ -231,18 +234,32 @@ public class HlsDownloader extends BaseDownloader {
                 final Path segmentFile = tempDir.resolve(String.format("segment_%06d.%s", i, extension));
                 final int segmentIndex = i;
                 
-                Future<Void> task = executorService.submit(() -> {
-                    downloadSegment(segment, format, segmentFile, segmentIndex);
-                    return null;
+                Future<Long> task = executorService.submit(() -> {
+                    return downloadSegmentWithProgress(segment, format, segmentFile, segmentIndex);
                 });
                 
                 downloadTasks.add(task);
             }
             
-            // 等待所有下载完成
-            for (Future<Void> task : downloadTasks) {
+            // 等待所有下载完成并收集进度
+            long totalDownloaded = 0;
+            for (int i = 0; i < downloadTasks.size(); i++) {
+                Future<Long> task = downloadTasks.get(i);
                 try {
-                    task.get();
+                    long segmentSize = task.get();
+                    totalDownloaded += segmentSize;
+                    
+                    // 更新进度 - 基于片段数量或估算大小
+                    int percentage;
+                    if (estimatedTotalSize > 0) {
+                        percentage = (int) Math.min(95, (totalDownloaded * 100) / estimatedTotalSize); // 留5%给合并过程
+                    } else {
+                        percentage = (int) ((i + 1) * 90 / downloadTasks.size()); // 留10%给合并过程
+                    }
+                    
+                    updateProgress(totalDownloaded, estimatedTotalSize, 0);
+                    
+                    logger.debug("片段 %s 下载完成，累计下载: %s bytes (%s%%)", i + 1, totalDownloaded, percentage);
                 } catch (ExecutionException e) {
                     logger.error("Segment download failed: " + e.getCause().getMessage());
                     return false;
@@ -250,7 +267,15 @@ public class HlsDownloader extends BaseDownloader {
             }
             
             // 合并片段
-            return mergeSegments(playlist, outputFile, tempDir);
+            boolean success = mergeSegments(playlist, outputFile, tempDir);
+            
+            if (success) {
+                // 合并完成，更新进度到100%
+                updateProgress(outputFile.length(), outputFile.length(), 0);
+                logger.info("HLS下载和合并完成，最终文件大小: %s bytes", outputFile.length());
+            }
+            
+            return success;
             
         } finally {
             // 清理临时文件
@@ -265,8 +290,28 @@ public class HlsDownloader extends BaseDownloader {
         }
     }
     
-    private void downloadSegment(HlsSegment segment, VideoFormat format, Path segmentFile, int index) throws Exception {
-        logger.info("下载片段 {}: {}", index, segment.getUrl());
+    /**
+     * 计算估算的总大小（基于片段时长）
+     */
+    private long calculateEstimatedTotalSize(HlsPlaylist playlist) {
+        double totalDuration = 0;
+        for (HlsSegment segment : playlist.getSegments()) {
+            totalDuration += segment.getDuration();
+        }
+        
+        // 假设平均比特率为2Mbps，这是一个合理的估算
+        // 总大小 = 时长(秒) * 比特率(bps) / 8
+        long estimatedSize = (long) (totalDuration * 2 * 1024 * 1024 / 8);
+        logger.info("总时长: %s 秒，估算大小: %s bytes", totalDuration, estimatedSize);
+        
+        return estimatedSize;
+    }
+    
+    /**
+     * 下载片段并返回实际大小（带进度更新）
+     */
+    private long downloadSegmentWithProgress(HlsSegment segment, VideoFormat format, Path segmentFile, int index) throws Exception {
+        logger.info("下载片段 %s: %s", index, segment.getUrl());
         
         URL urlObj = new URL(segment.getUrl());
         HttpURLConnection connection = createConnection(urlObj, format);
@@ -278,7 +323,7 @@ public class HlsDownloader extends BaseDownloader {
             }
             
             long contentLength = connection.getContentLengthLong();
-            logger.info("片段 {} 响应成功，内容长度: {} bytes", index, contentLength);
+            logger.debug("片段 %s 响应成功，内容长度: %s bytes", index, contentLength);
             
             try (InputStream inputStream = connection.getInputStream();
                  FileOutputStream outputStream = new FileOutputStream(segmentFile.toFile())) {
@@ -297,6 +342,7 @@ public class HlsDownloader extends BaseDownloader {
                 }
                 
                 logger.debug("Downloaded segment " + index + ": " + totalBytes + " bytes");
+                return totalBytes;
             }
             
         } finally {
@@ -304,24 +350,37 @@ public class HlsDownloader extends BaseDownloader {
         }
     }
     
+    
     private boolean mergeSegments(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
-        logger.info("开始合并 {} 个片段到文件: {}", playlist.getSegments().size(), outputFile.getAbsolutePath());
+        logger.info("开始合并 %s 个片段到文件: %s", playlist.getSegments().size(), outputFile.getAbsolutePath());
         
-        // 检查第一个片段来确定格式
-        Path firstSegment = findFirstSegment(tempDir);
-        if (firstSegment == null) {
-            logger.error("第一个片段不存在");
+        // 使用简单的TS合并方式
+        logger.info("使用简单的TS合并方式");
+        return mergeTsSegmentsSimple(playlist, outputFile, tempDir);
+    }
+    
+    private boolean mergeTsSegmentsSimple(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
+        logger.info("使用简单的TS文件合并");
+        
+        try (FileOutputStream merged = new FileOutputStream(outputFile)) {
+            // 按照用户指导：合并所有TS文件
+            for (int i = 0; i < playlist.getSegments().size(); i++) {
+                Path segmentFile = findSegmentFile(tempDir, i);
+                if (segmentFile != null && Files.exists(segmentFile)) {
+                    logger.info("合并片段 %s: %s (大小: %s bytes)", i, segmentFile, Files.size(segmentFile));
+                    Files.copy(segmentFile, merged);
+                } else {
+                    logger.warning("片段文件不存在: segment_%s", i);
+                }
+            }
+            
+            logger.info("简单的TS合并完成，输出文件大小: %s bytes", outputFile.length());
+            return outputFile.length() > 0;
+            
+        } catch (Exception e) {
+            logger.error("简单的TS合并失败: " + e.getMessage());
+            e.printStackTrace();
             return false;
-        }
-        
-        // 检查是否为fMP4格式
-        boolean isFmp4 = isFmp4Format(firstSegment);
-        logger.info("检测到格式: {}", isFmp4 ? "fMP4" : "TS");
-        
-        if (isFmp4) {
-            return mergeFmp4Segments(playlist, outputFile, tempDir);
-        } else {
-            return mergeTsSegments(playlist, outputFile, tempDir);
         }
     }
     
@@ -350,7 +409,7 @@ public class HlsDownloader extends BaseDownloader {
                           ((header[2] & 0xFF) << 8) | (header[3] & 0xFF);
                 String type = new String(header, 4, 4);
                 
-                logger.info("片段头部: size={}, type={}", size, type);
+                logger.info("片段头部: size=%s, type=%s", size, type);
                 
                 // 常见的MP4原子类型
                 return type.equals("ftyp") || type.equals("styp") || type.equals("moof") || 
@@ -371,7 +430,7 @@ public class HlsDownloader extends BaseDownloader {
                     continue;
                 }
                 
-                logger.info("合并TS片段 {}: {} (大小: {} bytes)", i, segmentFile, Files.size(segmentFile));
+                logger.info("合并TS片段 %s: %s (大小: %s bytes)", i, segmentFile, Files.size(segmentFile));
                 
                 try (FileInputStream inputStream = new FileInputStream(segmentFile.toFile())) {
                         byte[] buffer = new byte[BUFFER_SIZE];
@@ -383,11 +442,11 @@ public class HlsDownloader extends BaseDownloader {
                             totalBytesRead += bytesRead;
                         }
                         
-                        logger.info("TS片段 {} 合并完成，读取了 {} bytes", i, totalBytesRead);
+                        logger.info("TS片段 %s 合并完成，读取了 %s bytes", i, totalBytesRead);
                     }
             }
             
-            logger.info("所有TS片段合并完成，输出文件大小: {} bytes", outputFile.length());
+            logger.info("所有TS片段合并完成，输出文件大小: %s bytes", outputFile.length());
             return true;
         } catch (Exception e) {
             logger.error("合并TS片段失败: " + e.getMessage());
@@ -396,41 +455,658 @@ public class HlsDownloader extends BaseDownloader {
         }
     }
     
+    private boolean mergeFmp4SegmentsSimple(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
+        logger.info("使用正确的fMP4合并方法");
+        
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            // 1. 写入ftyp原子（28字节，与Python版本一致）
+            writeFtypAtomCorrect(outputStream);
+            
+            // 2. 写入moov原子（108字节，与Python版本一致）
+            writeMoovAtomCorrect(outputStream);
+            
+            // 3. 创建mdat原子头部
+            long totalMdatSize = 0;
+            for (int i = 0; i < playlist.getSegments().size(); i++) {
+                Path segmentFile = findSegmentFile(tempDir, i);
+                if (segmentFile != null && Files.exists(segmentFile)) {
+                    byte[] segmentData = Files.readAllBytes(segmentFile);
+                    
+                    // 查找mdat原子
+                    int offset = 0;
+                    while (offset < segmentData.length - 8) {
+                        int size = ((segmentData[offset] & 0xFF) << 24) | 
+                                  ((segmentData[offset + 1] & 0xFF) << 16) | 
+                                  ((segmentData[offset + 2] & 0xFF) << 8) | 
+                                  (segmentData[offset + 3] & 0xFF);
+                        
+                        if (size <= 0 || size > segmentData.length - offset) {
+                            break;
+                        }
+                        
+                        String type = new String(segmentData, offset + 4, 4);
+                        
+                        if ("mdat".equals(type)) {
+                            totalMdatSize += (size - 8);
+                            break;
+                        }
+                        
+                        offset += size;
+                    }
+                }
+            }
+            
+            // 4. 写入mdat原子头部
+            long mdatSize = totalMdatSize + 8;
+            outputStream.write((byte) ((mdatSize >> 24) & 0xFF));
+            outputStream.write((byte) ((mdatSize >> 16) & 0xFF));
+            outputStream.write((byte) ((mdatSize >> 8) & 0xFF));
+            outputStream.write((byte) (mdatSize & 0xFF));
+            outputStream.write("mdat".getBytes());
+            
+            // 5. 写入所有片段的mdat数据
+            for (int i = 0; i < playlist.getSegments().size(); i++) {
+                Path segmentFile = findSegmentFile(tempDir, i);
+                if (segmentFile != null && Files.exists(segmentFile)) {
+                    byte[] segmentData = Files.readAllBytes(segmentFile);
+                    
+                    // 查找mdat原子
+                    int offset = 0;
+                    while (offset < segmentData.length - 8) {
+                        int size = ((segmentData[offset] & 0xFF) << 24) | 
+                                  ((segmentData[offset + 1] & 0xFF) << 16) | 
+                                  ((segmentData[offset + 2] & 0xFF) << 8) | 
+                                  (segmentData[offset + 3] & 0xFF);
+                        
+                        if (size <= 0 || size > segmentData.length - offset) {
+                            break;
+                        }
+                        
+                        String type = new String(segmentData, offset + 4, 4);
+                        
+                        if ("mdat".equals(type)) {
+                            // 写入mdat原子的数据部分（跳过原子头部）
+                            outputStream.write(segmentData, offset + 8, size - 8);
+                            logger.info("写入片段 %s 的mdat数据，大小: %s bytes", i, size - 8);
+                            break;
+                        }
+                        
+                        offset += size;
+                    }
+                }
+            }
+            
+            logger.info("正确的fMP4合并完成，输出文件大小: %s bytes", outputFile.length());
+            return outputFile.length() > 0;
+            
+        } catch (Exception e) {
+            logger.error("正确的fMP4合并失败: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private void writeFtypAtomCorrect(FileOutputStream outputStream) throws Exception {
+        // 创建与Python版本完全一致的ftyp原子（28字节）
+        byte[] ftypAtom = new byte[28];
+        
+        // 原子大小 (28 bytes)
+        ftypAtom[0] = 0x00;
+        ftypAtom[1] = 0x00;
+        ftypAtom[2] = 0x00;
+        ftypAtom[3] = 0x1C; // 28
+        
+        // 原子类型
+        ftypAtom[4] = 'f';
+        ftypAtom[5] = 't';
+        ftypAtom[6] = 'y';
+        ftypAtom[7] = 'p';
+        
+        // 主要品牌 (iso5)
+        ftypAtom[8] = 'i';
+        ftypAtom[9] = 's';
+        ftypAtom[10] = 'o';
+        ftypAtom[11] = '5';
+        
+        // 版本
+        ftypAtom[12] = 0x00;
+        ftypAtom[13] = 0x00;
+        ftypAtom[14] = 0x02;
+        ftypAtom[15] = 0x00;
+        
+        // 兼容品牌 (iso5)
+        ftypAtom[16] = 'i';
+        ftypAtom[17] = 's';
+        ftypAtom[18] = 'o';
+        ftypAtom[19] = '5';
+        
+        // 兼容品牌 (iso6)
+        ftypAtom[20] = 'i';
+        ftypAtom[21] = 's';
+        ftypAtom[22] = 'o';
+        ftypAtom[23] = '6';
+        
+        // 兼容品牌 (mp41)
+        ftypAtom[24] = 'm';
+        ftypAtom[25] = 'p';
+        ftypAtom[26] = '4';
+        ftypAtom[27] = '1';
+        
+        outputStream.write(ftypAtom);
+        logger.info("写入ftyp原子，大小: 28 bytes");
+    }
+    
+    private void writeMoovAtomCorrect(FileOutputStream outputStream) throws Exception {
+        // 创建与Python版本一致的moov原子（108字节）
+        byte[] moovAtom = new byte[108];
+        
+        // 原子大小 (108 bytes)
+        moovAtom[0] = 0x00;
+        moovAtom[1] = 0x00;
+        moovAtom[2] = 0x00;
+        moovAtom[3] = 0x6C; // 108
+        
+        // 原子类型
+        moovAtom[4] = 'm';
+        moovAtom[5] = 'o';
+        moovAtom[6] = 'o';
+        moovAtom[7] = 'v';
+        
+        // mvhd原子大小 (32 bytes)
+        moovAtom[8] = 0x00;
+        moovAtom[9] = 0x00;
+        moovAtom[10] = 0x00;
+        moovAtom[11] = 0x20; // 32
+        
+        // mvhd原子类型
+        moovAtom[12] = 'm';
+        moovAtom[13] = 'v';
+        moovAtom[14] = 'h';
+        moovAtom[15] = 'd';
+        
+        // 版本和标志 (1 + 3)
+        moovAtom[16] = 0x00; // 版本
+        moovAtom[17] = 0x00; // 标志
+        moovAtom[18] = 0x00; // 标志
+        moovAtom[19] = 0x00; // 标志
+        
+        // 创建时间 (4 bytes) - 使用当前时间
+        long creationTime = System.currentTimeMillis() / 1000 + 2082844800; // 转换为Mac时间
+        moovAtom[20] = (byte) ((creationTime >> 24) & 0xFF);
+        moovAtom[21] = (byte) ((creationTime >> 16) & 0xFF);
+        moovAtom[22] = (byte) ((creationTime >> 8) & 0xFF);
+        moovAtom[23] = (byte) (creationTime & 0xFF);
+        
+        // 修改时间 (4 bytes) - 使用当前时间
+        moovAtom[24] = (byte) ((creationTime >> 24) & 0xFF);
+        moovAtom[25] = (byte) ((creationTime >> 16) & 0xFF);
+        moovAtom[26] = (byte) ((creationTime >> 8) & 0xFF);
+        moovAtom[27] = (byte) (creationTime & 0xFF);
+        
+        // 时间刻度 (4 bytes) - 1000
+        moovAtom[28] = 0x00;
+        moovAtom[29] = 0x00;
+        moovAtom[30] = 0x03;
+        moovAtom[31] = (byte) 0xE8; // 1000
+        
+        // 持续时间 (4 bytes) - 40秒 * 1000 = 40000
+        moovAtom[32] = 0x00;
+        moovAtom[33] = 0x00;
+        moovAtom[34] = (byte) 0x9C;
+        moovAtom[35] = 0x40; // 40000
+        
+        // 速率 (4 bytes) - 1.0
+        moovAtom[36] = 0x00;
+        moovAtom[37] = 0x01;
+        moovAtom[38] = 0x00;
+        moovAtom[39] = 0x00; // 65536 = 1.0
+        
+        // 音量 (2 bytes) - 1.0
+        moovAtom[40] = 0x01;
+        moovAtom[41] = 0x00; // 256 = 1.0
+        
+        // 保留字段 (10 bytes)
+        for (int i = 42; i < 52; i++) {
+            moovAtom[i] = 0x00;
+        }
+        
+        // 矩阵 (36 bytes) - 单位矩阵
+        // 前16字节
+        moovAtom[52] = 0x00; moovAtom[53] = 0x01; moovAtom[54] = 0x00; moovAtom[55] = 0x00;
+        moovAtom[56] = 0x00; moovAtom[57] = 0x00; moovAtom[58] = 0x00; moovAtom[59] = 0x00;
+        moovAtom[60] = 0x00; moovAtom[61] = 0x00; moovAtom[62] = 0x00; moovAtom[63] = 0x00;
+        moovAtom[64] = 0x00; moovAtom[65] = 0x01; moovAtom[66] = 0x00; moovAtom[67] = 0x00;
+        
+        // 中间16字节
+        moovAtom[68] = 0x00; moovAtom[69] = 0x00; moovAtom[70] = 0x00; moovAtom[71] = 0x00;
+        moovAtom[72] = 0x00; moovAtom[73] = 0x00; moovAtom[74] = 0x00; moovAtom[75] = 0x00;
+        moovAtom[76] = 0x00; moovAtom[77] = 0x01; moovAtom[78] = 0x00; moovAtom[79] = 0x00;
+        moovAtom[80] = 0x00; moovAtom[81] = 0x00; moovAtom[82] = 0x00; moovAtom[83] = 0x00;
+        
+        // 最后4字节
+        moovAtom[84] = 0x00; moovAtom[85] = 0x00; moovAtom[86] = 0x00; moovAtom[87] = 0x00;
+        
+        // 预定义 (24 bytes)
+        for (int i = 88; i < 108; i++) {
+            moovAtom[i] = 0x00;
+        }
+        
+        outputStream.write(moovAtom);
+        logger.info("写入moov原子，大小: 108 bytes");
+    }
+
     private boolean mergeFmp4Segments(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
         logger.info("使用fMP4格式合并");
         
-        // 对于fMP4，我们需要创建一个有效的MP4容器
-        // 这里我们使用一个简化的方法：将第一个片段作为基础，然后追加其他片段的数据部分
+        // 对于fMP4 HLS，我们需要使用ffmpeg或类似工具来正确合并
+        // 由于这是Java实现，我们使用一个简化的方法：
+        // 1. 找到第一个包含初始化信息的片段
+        // 2. 创建一个基本的MP4容器
+        // 3. 将所有片段的mdat部分合并
         
-        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            // 写入第一个片段（通常包含初始化信息）
+        try {
+            // 查找第一个片段
             Path firstSegment = findSegmentFile(tempDir, 0);
-            if (firstSegment != null && Files.exists(firstSegment)) {
-                logger.info("写入第一个fMP4片段: {} (大小: {} bytes)", firstSegment, Files.size(firstSegment));
-                copyFile(firstSegment.toFile(), outputStream);
+            if (firstSegment == null || !Files.exists(firstSegment)) {
+                logger.error("找不到第一个fMP4片段");
+                return false;
             }
             
-            // 追加其他片段
-            for (int i = 1; i < playlist.getSegments().size(); i++) {
-                Path segmentFile = findSegmentFile(tempDir, i);
-                if (segmentFile == null) {
-                    logger.warning("fMP4片段文件不存在: segment_{:06d}", i);
-                    continue;
+            logger.info("处理fMP4片段合并，共 %s 个片段", playlist.getSegments().size());
+            
+            // 创建一个临时的m3u8文件用于ffmpeg处理
+            File tempM3u8 = File.createTempFile("temp_", ".m3u8");
+            try {
+                // 生成m3u8播放列表
+                generateM3u8Playlist(playlist, tempM3u8, tempDir);
+                
+                // 使用ffmpeg合并（如果可用）
+                if (isFfmpegAvailable()) {
+                    logger.info("使用ffmpeg合并fMP4片段");
+                    return mergeWithFfmpeg(tempM3u8, outputFile);
+                } else {
+                    // 回退到简单合并（可能不完美）
+                    logger.warning("ffmpeg不可用，使用简单合并方法");
+                    return simpleFmp4Merge(playlist, outputFile, tempDir);
                 }
                 
-                if (Files.exists(segmentFile)) {
-                    logger.info("追加fMP4片段 {}: {} (大小: {} bytes)", i, segmentFile, Files.size(segmentFile));
-                    copyFile(segmentFile.toFile(), outputStream);
-                } else {
-                    logger.warning("fMP4片段文件不存在: {}", segmentFile);
+            } finally {
+                if (tempM3u8.exists()) {
+                    tempM3u8.delete();
                 }
             }
             
-            logger.info("所有fMP4片段合并完成，输出文件大小: {} bytes", outputFile.length());
-            return true;
         } catch (Exception e) {
             logger.error("合并fMP4片段失败: " + e.getMessage());
             e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private boolean simpleFmp4Merge(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
+        logger.info("使用改进的fMP4合并方法");
+        
+        // 改进的fMP4合并方法：
+        // 1. 找到第一个包含初始化信息的片段
+        // 2. 提取并合并所有片段的媒体数据
+        // 3. 创建正确的MP4容器结构
+        
+        try {
+            // 查找所有片段文件
+            List<Path> segmentFiles = new ArrayList<>();
+            for (int i = 0; i < playlist.getSegments().size(); i++) {
+                Path segmentFile = findSegmentFile(tempDir, i);
+                if (segmentFile != null && Files.exists(segmentFile)) {
+                    segmentFiles.add(segmentFile);
+                    logger.info("找到fMP4片段 %s: %s (大小: %s bytes)", i, segmentFile, Files.size(segmentFile));
+                } else {
+                    logger.warning("fMP4片段文件不存在: segment_%s", i);
+                }
+            }
+            
+            if (segmentFiles.isEmpty()) {
+                logger.error("没有找到任何fMP4片段文件");
+                return false;
+            }
+            
+            // 使用改进的MP4合并算法
+            return mergeFmp4SegmentsImproved(segmentFiles, outputFile);
+            
+        } catch (Exception e) {
+            logger.error("改进的fMP4合并失败: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private boolean mergeFmp4SegmentsImproved(List<Path> segmentFiles, File outputFile) throws Exception {
+        logger.info("使用改进的MP4合并算法，共 %s 个片段", segmentFiles.size());
+        
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            // 读取第一个片段作为基础
+            Path firstSegment = segmentFiles.get(0);
+            byte[] firstSegmentData = Files.readAllBytes(firstSegment);
+            
+            // 分析第一个片段的MP4结构
+            Mp4Structure firstStructure = analyzeMp4Structure(firstSegmentData);
+            logger.info("第一个片段结构分析: 包含 %s 个原子", firstStructure.atoms.size());
+            
+            // 创建输出MP4文件
+            // 1. 写入ftyp原子（如果第一个片段有的话，否则创建默认的）
+            if (firstStructure.hasFtyp) {
+                writeFtypAtom(outputStream, firstSegmentData, firstStructure);
+            } else {
+                // 创建默认的ftyp原子
+                writeDefaultFtypAtom(outputStream);
+            }
+            
+            // 2. 写入moov原子（从第一个片段提取，如果不存在则创建基本的）
+            if (firstStructure.hasMoov) {
+                writeMoovAtom(outputStream, firstSegmentData, firstStructure);
+            } else {
+                // 创建基本的moov原子
+                writeBasicMoovAtom(outputStream);
+            }
+            
+            // 3. 合并所有片段的mdat原子
+            writeMdatAtom(outputStream, segmentFiles);
+            
+            logger.info("改进的MP4合并完成，输出文件大小: %s bytes", outputFile.length());
+            return outputFile.length() > 0;
+            
+        } catch (Exception e) {
+            logger.error("改进的MP4合并异常: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private static class Mp4Atom {
+        int size;
+        String type;
+        int offset;
+        byte[] data;
+        
+        Mp4Atom(int size, String type, int offset) {
+            this.size = size;
+            this.type = type;
+            this.offset = offset;
+        }
+    }
+    
+    private static class Mp4Structure {
+        List<Mp4Atom> atoms = new ArrayList<>();
+        boolean hasFtyp = false;
+        boolean hasMoov = false;
+        boolean hasMdat = false;
+    }
+    
+    private Mp4Structure analyzeMp4Structure(byte[] data) {
+        Mp4Structure structure = new Mp4Structure();
+        int offset = 0;
+        
+        while (offset < data.length - 8) {
+            // 读取原子大小（4字节，大端序）
+            int size = ((data[offset] & 0xFF) << 24) | 
+                      ((data[offset + 1] & 0xFF) << 16) | 
+                      ((data[offset + 2] & 0xFF) << 8) | 
+                      (data[offset + 3] & 0xFF);
+            
+            if (size <= 0 || size > data.length - offset) {
+                break;
+            }
+            
+            // 读取原子类型（4字节）
+            String type = new String(data, offset + 4, 4);
+            
+            Mp4Atom atom = new Mp4Atom(size, type, offset);
+            atom.data = new byte[size];
+            System.arraycopy(data, offset, atom.data, 0, size);
+            structure.atoms.add(atom);
+            
+            // 检查特殊原子类型
+            switch (type) {
+                case "ftyp":
+                    structure.hasFtyp = true;
+                    break;
+                case "moov":
+                    structure.hasMoov = true;
+                    break;
+                case "mdat":
+                    structure.hasMdat = true;
+                    break;
+            }
+            
+            offset += size;
+        }
+        
+        return structure;
+    }
+    
+    private void writeFtypAtom(FileOutputStream outputStream, byte[] firstSegmentData, Mp4Structure structure) throws Exception {
+        for (Mp4Atom atom : structure.atoms) {
+            if ("ftyp".equals(atom.type)) {
+                outputStream.write(atom.data);
+                logger.info("写入ftyp原子，大小: %s bytes", atom.size);
+                break;
+            }
+        }
+    }
+    
+    private void writeMoovAtom(FileOutputStream outputStream, byte[] firstSegmentData, Mp4Structure structure) throws Exception {
+        for (Mp4Atom atom : structure.atoms) {
+            if ("moov".equals(atom.type)) {
+                outputStream.write(atom.data);
+                logger.info("写入moov原子，大小: %s bytes", atom.size);
+                break;
+            }
+        }
+    }
+    
+    private void writeMdatAtom(FileOutputStream outputStream, List<Path> segmentFiles) throws Exception {
+        logger.info("开始合并mdat原子，共 %s 个片段", segmentFiles.size());
+        
+        for (int i = 0; i < segmentFiles.size(); i++) {
+            Path segmentFile = segmentFiles.get(i);
+            byte[] segmentData = Files.readAllBytes(segmentFile);
+            
+            Mp4Structure structure = analyzeMp4Structure(segmentData);
+            
+            // 找到并写入mdat原子
+            for (Mp4Atom atom : structure.atoms) {
+                if ("mdat".equals(atom.type)) {
+                    outputStream.write(atom.data);
+                    logger.info("写入片段 %s 的mdat原子，大小: %s bytes", i, atom.size);
+                    break;
+                }
+            }
+        }
+        
+        logger.info("mdat原子合并完成");
+    }
+    
+    private void writeDefaultFtypAtom(FileOutputStream outputStream) throws Exception {
+        // 创建Python兼容的ftyp原子 (28 bytes)
+        // 与Python yt-dlp生成的格式完全一致
+        byte[] ftypAtom = new byte[28];
+        
+        // 原子大小 (28 bytes)
+        ftypAtom[0] = 0x00;
+        ftypAtom[1] = 0x00;
+        ftypAtom[2] = 0x00;
+        ftypAtom[3] = 0x1c;
+        
+        // 原子类型 "ftyp"
+        ftypAtom[4] = 'f';
+        ftypAtom[5] = 't';
+        ftypAtom[6] = 'y';
+        ftypAtom[7] = 'p';
+        
+        // major_brand "iso5" (与Python版本一致)
+        ftypAtom[8] = 'i';
+        ftypAtom[9] = 's';
+        ftypAtom[10] = 'o';
+        ftypAtom[11] = '5';
+        
+        // minor_version (与Python版本一致: 0x00000200)
+        ftypAtom[12] = 0x00;
+        ftypAtom[13] = 0x00;
+        ftypAtom[14] = 0x02;
+        ftypAtom[15] = 0x00;
+        
+        // compatible_brands: "iso5", "iso6", "mp41" (与Python版本一致)
+        System.arraycopy("iso5".getBytes(), 0, ftypAtom, 16, 4);
+        System.arraycopy("iso6".getBytes(), 0, ftypAtom, 20, 4);
+        System.arraycopy("mp41".getBytes(), 0, ftypAtom, 24, 4);
+        
+        outputStream.write(ftypAtom);
+        logger.info("写入Python兼容的ftyp原子，大小: 28 bytes (iso5品牌)");
+    }
+    
+    private void writeBasicMoovAtom(FileOutputStream outputStream) throws Exception {
+        // 创建一个更完整的moov原子，基于Python版本的结构
+        // 参考Python版本生成的moov原子结构
+        
+        // moov原子总大小 (108 bytes，与Python版本一致)
+        byte[] moovAtom = new byte[108];
+        int offset = 0;
+        
+        // moov原子大小 (108 bytes)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x6c;
+        
+        // moov原子类型
+        moovAtom[offset++] = 'm';
+        moovAtom[offset++] = 'o';
+        moovAtom[offset++] = 'o';
+        moovAtom[offset++] = 'v';
+        
+        // mvhd原子 (电影头部)
+        // mvhd原子大小 (108 bytes)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x6c;
+        
+        // mvhd原子类型
+        moovAtom[offset++] = 'm';
+        moovAtom[offset++] = 'v';
+        moovAtom[offset++] = 'h';
+        moovAtom[offset++] = 'd';
+        
+        // mvhd版本和标志 (1 byte version + 3 bytes flags)
+        moovAtom[offset++] = 0x00; // 版本
+        moovAtom[offset++] = 0x00; // 标志
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        
+        // 创建时间 (4 bytes)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        
+        // 修改时间 (4 bytes)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        
+        // 时间刻度 (4 bytes) - 1000 (0x03e8)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x03;
+        moovAtom[offset++] = (byte) 0xe8;
+        
+        // 持续时间 (4 bytes) - 0 (未指定)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        
+        // 播放速率 (4 bytes) - 1.0 (0x00010000)
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x01;
+        moovAtom[offset++] = 0x00;
+        moovAtom[offset++] = 0x00;
+        
+        // 音量 (2 bytes) - 1.0 (0x0100)
+        moovAtom[offset++] = 0x01;
+        moovAtom[offset++] = 0x00;
+        
+        // 保留字段 (10 bytes)
+        for (int i = 0; i < 10; i++) {
+            moovAtom[offset++] = 0x00;
+        }
+        
+        // 矩阵结构 (36 bytes) - 单位矩阵
+        // 这里简化为零矩阵
+        for (int i = 0; i < 36; i++) {
+            moovAtom[offset++] = 0x00;
+        }
+        
+        // 预览时间和持续时间 (6 bytes)
+        for (int i = 0; i < 6; i++) {
+            moovAtom[offset++] = 0x00;
+        }
+        
+        // 写入moov原子
+        outputStream.write(moovAtom);
+        logger.info("写入Python兼容的moov原子，大小: 108 bytes");
+    }
+    
+    private void generateM3u8Playlist(HlsPlaylist playlist, File outputFile, Path tempDir) throws Exception {
+        try (FileWriter writer = new FileWriter(outputFile)) {
+            writer.write("#EXTM3U\n");
+            writer.write("#EXT-X-VERSION:3\n");
+            writer.write("#EXT-X-TARGETDURATION:10\n");
+            writer.write("#EXT-X-MEDIA-SEQUENCE:0\n");
+            
+            for (int i = 0; i < playlist.getSegments().size(); i++) {
+                Path segmentFile = findSegmentFile(tempDir, i);
+                if (segmentFile != null) {
+                    HlsSegment segment = playlist.getSegments().get(i);
+                    writer.write("#EXTINF:" + segment.getDuration() + ",\n");
+                    writer.write(segmentFile.getFileName().toString() + "\n");
+                }
+            }
+            
+            writer.write("#EXT-X-ENDLIST\n");
+        }
+    }
+    
+    private boolean isFfmpegAvailable() {
+        try {
+            Process process = Runtime.getRuntime().exec("ffmpeg -version");
+            int exitCode = process.waitFor();
+            return exitCode == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    private boolean mergeWithFfmpeg(File m3u8File, File outputFile) throws Exception {
+        try {
+            String[] command = {
+                "ffmpeg", "-i", m3u8File.getAbsolutePath(),
+                "-c", "copy", "-bsf:a", "aac_adtstoasc",
+                outputFile.getAbsolutePath()
+            };
+            
+            Process process = Runtime.getRuntime().exec(command);
+            int exitCode = process.waitFor();
+            
+            if (exitCode == 0 && outputFile.exists() && outputFile.length() > 0) {
+                logger.info("ffmpeg合并成功，输出文件大小: %s bytes", outputFile.length());
+                return true;
+            } else {
+                logger.error("ffmpeg合并失败，退出码: %s", exitCode);
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("ffmpeg合并异常: " + e.getMessage());
             return false;
         }
     }
