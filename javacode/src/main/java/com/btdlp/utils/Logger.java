@@ -4,11 +4,11 @@ import android.util.Log;
 
 /**
  * Android Logger class - equivalent to the logging functionality in Python yt-dlp
- * Uses Android's official Log class with YOUTUBE_DL_DEBUG_TAG
+ * Uses Android's official Log class with BUBE_DEBUG_TAG
  */
 public class Logger {
     
-    private static final String TAG = "YOUTUBE_DL_DEBUG_TAG";
+    private static final String TAG = "BUBE_DEBUG_TAG";
     private static boolean quiet = false;
     
     /**

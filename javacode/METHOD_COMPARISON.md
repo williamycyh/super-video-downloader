@@ -4,7 +4,7 @@
 
 ### `execute()` 方法
 ```java
-public YoutubeDLResponse execute(YoutubeDLRequest request, String processId, ProgressCallback callback)
+public BubeDLResponse execute(BubeDLRequest request, String processId, ProgressCallback callback)
 ```
 
 ### `download()` 方法
@@ -17,10 +17,10 @@ public DownloadResult download(String url, String outputPath)
 ### 1. **设计目的**
 
 #### `execute()` 方法
-- **目的**: 兼容Python版本的`youtubedl-android`库
+- **目的**: 兼容Python版本的`dl-android`库
 - **设计**: 模仿Python yt-dlp的完整工作流程
-- **输入**: `YoutubeDLRequest`对象（包含完整的命令参数）
-- **输出**: `YoutubeDLResponse`对象（包含完整的执行结果）
+- **输入**: `BubeDLRequest`对象（包含完整的命令参数）
+- **输出**: `BubeDLResponse`对象（包含完整的执行结果）
 
 #### `download()` 方法
 - **目的**: 简化的Java原生下载接口
@@ -33,7 +33,7 @@ public DownloadResult download(String url, String outputPath)
 #### `execute()` 参数
 ```java
 // 复杂的参数结构
-YoutubeDLRequest request    // 包含所有选项和URL
+BubeDLRequest request    // 包含所有选项和URL
 String processId           // 进程ID
 ProgressCallback callback  // 进度回调
 ```
@@ -68,7 +68,7 @@ if (options.getFormat() != null) {
 }
 
 // 5. 返回详细的响应对象
-return new YoutubeDLResponse(command, exitCode, elapsedTime, output, error);
+return new BubeDLResponse(command, exitCode, elapsedTime, output, error);
 ```
 
 #### `download()` 功能
@@ -98,7 +98,7 @@ return new DownloadResult(success, outputPath, error, videoInfo);
 
 #### `execute()` 返回值
 ```java
-public class YoutubeDLResponse {
+public class BubeDLResponse {
     private List<String> command;     // 执行的命令
     private int exitCode;             // 退出码
     private long elapsedTime;         // 执行时间
@@ -122,13 +122,13 @@ public class DownloadResult {
 #### `execute()` 使用场景
 ```java
 // 复杂场景：需要精确控制所有参数
-YoutubeDLRequest request = new YoutubeDLRequest();
+BubeDLRequest request = new BubeDLRequest();
 request.setUrls(Arrays.asList(url));
 request.setOption("--format", "best[height<=720]");
 request.setOption("--output", "/path/to/output.%(ext)s");
 request.setOption("--http-headers", "User-Agent: MyApp/1.0");
 
-YoutubeDLResponse response = ytdlpJava.execute(request, "process1", callback);
+BubeDLResponse response = ytdlpJava.execute(request, "process1", callback);
 
 if (response.getExitCode() == 0) {
     System.out.println("成功: " + response.getOutput());
@@ -168,7 +168,7 @@ if (isInfoRequest) {
     // 仅提取信息
     VideoInfo videoInfo = extractInfo(url);
     String jsonOutput = convertVideoInfoToJson(videoInfo);
-    return new YoutubeDLResponse(command, 0, elapsedTime, jsonOutput, "");
+    return new BubeDLResponse(command, 0, elapsedTime, jsonOutput, "");
 } else {
     // 下载视频
     if (options.getFormat() != null) {
@@ -235,7 +235,7 @@ boolean success = downloadFormats(selectedFormats, outputPath);
 
 ```java
 // execute() 内部会调用 download()
-public YoutubeDLResponse execute(YoutubeDLRequest request, ...) {
+public BubeDLResponse execute(BubeDLRequest request, ...) {
     // ...
     if (options.getFormat() != null) {
         // 使用 downloadFormat()

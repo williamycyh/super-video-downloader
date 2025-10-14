@@ -938,7 +938,7 @@ public class BtdJava {
     private boolean downloadWithHttp(VideoFormat format, String outputPath) throws Exception {
         logger.info("=== 使用HTTP下载器 ===");
         
-        // 使用YoutubeDL核心进行下载
+        // 使用BubeDL核心进行下载
         BubeDL bubeDL = BubeDL.getInstance();
         
         // 设置HTTP头部信息
@@ -947,7 +947,7 @@ public class BtdJava {
             bubeDL.setHttpHeaders(httpHeaders);
         }
         
-        // 直接使用YoutubeDL的downloadFormat方法
+        // 直接使用BubeDL的downloadFormat方法
         return bubeDL.downloadFormat(format, outputPath, "video");
     }
     
@@ -997,7 +997,7 @@ public class BtdJava {
         return Arrays.asList(
             "Facebook", "Instagram", "TikTok", "Twitter", 
             "Dailymotion", "Vimeo", "Pornhub", "XHamster",
-            "XVideos", "XNXX", "YouTube"
+            "XVideos", "XNXX"
         );
     }
     
@@ -1010,7 +1010,6 @@ public class BtdJava {
                url.contains("x.com") || url.contains("dailymotion.com") ||
                url.contains("vimeo.com") || url.contains("pornhub.com") ||
                url.contains("xhamster.com") || url.contains("xvideos.com") ||
-               url.contains("xnxx.com") || url.contains("youtube.com") ||
-               url.contains("youtu.be");
+               url.contains("xnxx.com");
     }
 }
