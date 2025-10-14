@@ -12,7 +12,7 @@ import com.example.tubedown.main.home.MainActivity
 import com.example.util.downloaders.NotificationReceiver
 import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
-import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloaderWorker
+import com.example.util.downloaders.tubedl_downloader.TubeDlDownloaderWorker
 import java.io.File
 import javax.inject.Singleton
 
@@ -122,8 +122,8 @@ class NotificationsHelper(private val context: Context) {
             context, MainActivity::class.java
         )
 
-        intent.putExtra(YoutubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY, isFinished)
-        intent.putExtra(YoutubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_ERROR_KEY, isError)
+        intent.putExtra(TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY, isFinished)
+        intent.putExtra(TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_ERROR_KEY, isError)
 
 
         val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -155,8 +155,8 @@ class NotificationsHelper(private val context: Context) {
         val intent = Intent(
             context, MainActivity::class.java
         )
-        intent.putExtra(YoutubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY, true)
-            .putExtra(YoutubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY, filenameFixed)
+        intent.putExtra(TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY, true)
+            .putExtra(TubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY, filenameFixed)
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.getActivity(

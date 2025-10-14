@@ -10,7 +10,7 @@ import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
 import com.example.util.downloaders.generic_downloader.workers.Progress
-import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
+import com.example.util.downloaders.tubedl_downloader.TubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
 import java.io.File
 import java.net.URL
 import java.util.Date

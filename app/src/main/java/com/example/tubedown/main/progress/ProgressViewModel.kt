@@ -12,7 +12,7 @@ import com.example.util.ContextUtils
 import com.example.util.FileUtil
 import com.example.util.downloaders.custom_downloader.CustomRegularDownloader
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
-import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloader
+import com.example.util.downloaders.tubedl_downloader.TubeDlDownloader
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -48,7 +48,7 @@ class ProgressViewModel @Inject constructor(
 
         if (inf?.videoInfo?.isRegularDownload == false) {
             inf.let {
-                YoutubeDlDownloader.stopAndSaveDownload(
+                TubeDlDownloader.stopAndSaveDownload(
                     ContextUtils.getApplicationContext(), it
                 )
             }
@@ -73,7 +73,7 @@ class ProgressViewModel @Inject constructor(
                     )
                 } else {
                     info.let {
-                        YoutubeDlDownloader.cancelDownload(
+                        TubeDlDownloader.cancelDownload(
                             ContextUtils.getApplicationContext(), it, removeFile
                         )
                     }
@@ -93,7 +93,7 @@ class ProgressViewModel @Inject constructor(
             val updated = inf?.copy(downloadStatus = VideoTaskState.PAUSE)
             if (updated != null) {
                 saveProgressInfo(updated) { info ->
-                    YoutubeDlDownloader.pauseDownload(ContextUtils.getApplicationContext(), info)
+                    TubeDlDownloader.pauseDownload(ContextUtils.getApplicationContext(), info)
                 }
             }
         }
@@ -109,7 +109,7 @@ class ProgressViewModel @Inject constructor(
                 val updated = inf.copy(downloadStatus = VideoTaskState.PREPARE)
 
                 saveProgressInfo(updated) { info ->
-                    YoutubeDlDownloader.resumeDownload(
+                    TubeDlDownloader.resumeDownload(
                         ContextUtils.getApplicationContext(),
                         info
                     )
@@ -138,7 +138,7 @@ class ProgressViewModel @Inject constructor(
                 if (info.videoInfo.isRegularDownload) {
                     CustomRegularDownloader.startDownload(context, info.videoInfo)
                 } else {
-                    YoutubeDlDownloader.startDownload(context, info.videoInfo)
+                    TubeDlDownloader.startDownload(context, info.videoInfo)
                 }
             }
         }

@@ -10,17 +10,17 @@ import com.example.data.local.room.entity.VideoInfo
 import com.example.util.AppLogger
 import com.example.util.ContextUtils
 import com.example.util.downloaders.generic_downloader.GenericDownloader
-import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloader
-import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
+import com.example.util.downloaders.tubedl_downloader.TubeDlDownloader
+import com.example.util.downloaders.tubedl_downloader.TubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 object CustomRegularDownloader : GenericDownloader() {
 
     fun stopAndSaveDownload(context: Context, progressInfo: ProgressInfo) {
-        val downloadWork = YoutubeDlDownloader.getWorkRequest(progressInfo.videoInfo.id)
+        val downloadWork = TubeDlDownloader.getWorkRequest(progressInfo.videoInfo.id)
         val downloaderData =
-            YoutubeDlDownloader.getDownloadDataFromVideoInfo(progressInfo.videoInfo)
+            TubeDlDownloader.getDownloadDataFromVideoInfo(progressInfo.videoInfo)
         downloaderData.putString(Constants.ACTION_KEY, STOP_SAVE_ACTION)
         downloadWork.setInputData(downloaderData.build())
 

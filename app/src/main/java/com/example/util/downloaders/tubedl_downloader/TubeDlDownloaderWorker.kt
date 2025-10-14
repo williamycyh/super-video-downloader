@@ -1,27 +1,19 @@
-package com.example.util.downloaders.youtubedl_downloader
+package com.example.util.downloaders.tubedl_downloader
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
-import android.util.Base64
 import androidx.core.net.toUri
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.example.data.local.model.Proxy
-import com.example.data.local.room.entity.VideoFormatEntity
 import com.example.util.AppLogger
-import com.example.util.CookieUtils
 import com.example.util.FileUtil
 import com.example.util.downloaders.generic_downloader.GenericDownloader
 import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
-import com.google.gson.Gson
 import com.ytdlp.YtDlpJava
 import com.ytdlp.YoutubeDLRequest
 import com.ytdlp.YoutubeDLResponse
-import com.ytdlp.core.VideoInfo
-import com.ytdlp.core.VideoFormat
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -31,7 +23,7 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
-class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters) :
+class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters) :
     GenericDownloadWorkerWrapper(appContext, workerParams) {
     companion object {
         var isCanceled = false
@@ -616,7 +608,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         val taskId = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)
 
         if (taskId != null) {
-            YoutubeDlDownloader.deleteHeadersStringFromSharedPreferences(applicationContext, taskId)
+            TubeDlDownloader.deleteHeadersStringFromSharedPreferences(applicationContext, taskId)
         }
 
         notificationsHelper.hideNotification(taskId.hashCode())
