@@ -81,10 +81,9 @@ public class YtDlpJava {
      * 设置默认选项
      */
     private void setDefaultOptions() {
+        // 只保留必要的默认选项，避免与Android应用传递的参数冲突
         options.put("quiet", "false");
         options.put("verbose", "true");
-        options.put("format", "best");
-        options.put("output", "%(title)s.%(ext)s");
         options.put("no_warnings", "false");
     }
     
@@ -175,11 +174,53 @@ public class YtDlpJava {
                 setHttpHeaders(headers);
             }
             
+            // 处理其他自定义选项
+            if (options.getCustomOptions() != null && !options.getCustomOptions().isEmpty()) {
+                Map<String, String> customOptions = options.getCustomOptions();
+                logger.info("处理剩余自定义选项: %s", customOptions);
+                
+                // 处理剩余的自定义选项
+                for (Map.Entry<String, String> entry : customOptions.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    
+                    // 跳过已经通过标准字段处理的选项
+                    if ("-o".equals(key) || "-f".equals(key)) {
+                        continue;
+                    }
+                    
+                    // 处理其他选项
+                    if (key.startsWith("--")) {
+                        // 长选项格式
+                        String optionName = key.substring(2);
+                        if (value != null && !value.isEmpty()) {
+                            setOption(optionName, value);
+                            logger.info("设置选项 %s = %s", optionName, value);
+                        } else {
+                            setOption(optionName, "true");
+                            logger.info("设置布尔选项 %s = true", optionName);
+                        }
+                    } else if (key.startsWith("-")) {
+                        // 短选项格式
+                        String optionName = key.substring(1);
+                        if (value != null && !value.isEmpty()) {
+                            setOption(optionName, value);
+                            logger.info("设置选项 %s = %s", optionName, value);
+                        } else {
+                            setOption(optionName, "true");
+                            logger.info("设置布尔选项 %s = true", optionName);
+                        }
+                    }
+                }
+            }
+            
             // 处理输出路径
             String outputPath = options.getOutput();
             if (outputPath == null && options.getOutputTemplate() != null) {
                 outputPath = options.getOutputTemplate();
             }
+            
+            logger.info("最终输出路径: %s", outputPath);
             
             // 根据请求类型决定是提取信息还是下载
             boolean isInfoRequest = request.hasOption("--dump-json");
@@ -449,8 +490,12 @@ public class YtDlpJava {
             logger.info("选择了 %s 个格式", selectedFormats.size());
             
             // 4. 生成输出文件名
+            logger.info("原始输出路径: %s", outputPath);
             if (outputPath == null) {
                 outputPath = generateOutputPath(videoInfo, selectedFormats.get(0));
+                logger.info("生成的输出路径: %s", outputPath);
+            } else {
+                logger.info("使用提供的输出路径: %s", outputPath);
             }
             
             // 5. 下载视频
@@ -608,14 +653,18 @@ public class YtDlpJava {
     private String generateOutputPath(VideoInfo videoInfo, VideoFormat format) {
         String template = options.get("output");
         if (template == null || template.trim().isEmpty()) {
-            // 默认输出路径
-            template = "%(title)s.%(ext)s";
+            // 如果没有指定输出模板，生成一个简单的文件名
+            String ext = format.getExt();
+            if ("hls".equals(format.getProtocol()) || "m3u8".equals(format.getProtocol())) {
+                ext = "mp4";  // FFmpeg会转换为MP4格式
+            }
+            template = sanitizeFileName(videoInfo.getTitle()) + "." + ext;
         }
         
-        // 对于HLS格式，强制使用.ts扩展名
+        // 对于HLS格式，使用MP4扩展名（FFmpeg会转换为MP4）
         String ext = format.getExt();
         if ("hls".equals(format.getProtocol()) || "m3u8".equals(format.getProtocol())) {
-            ext = "ts";
+            ext = "mp4";  // FFmpeg会转换为MP4格式
         }
         
         String fileName = template
@@ -625,8 +674,18 @@ public class YtDlpJava {
             
         // 确保路径是绝对路径
         if (!new File(fileName).isAbsolute()) {
-            // 如果模板不包含完整路径，使用当前工作目录
-            fileName = new File(System.getProperty("user.dir"), fileName).getAbsolutePath();
+            // 在Android环境中，使用应用的临时目录
+            if (isAndroidEnvironment()) {
+                // 使用Android应用的缓存目录
+                String cacheDir = System.getProperty("java.io.tmpdir");
+                if (cacheDir == null || cacheDir.isEmpty()) {
+                    cacheDir = "/data/local/tmp";
+                }
+                fileName = new File(cacheDir, fileName).getAbsolutePath();
+            } else {
+                // 如果模板不包含完整路径，使用当前工作目录
+                fileName = new File(System.getProperty("user.dir"), fileName).getAbsolutePath();
+            }
         }
         
         return fileName;
@@ -668,6 +727,8 @@ public class YtDlpJava {
             logger.info("检测到Android环境，使用兼容模式");
         }
         
+        logger.info("downloadFormats开始 - 格式数量: %d, 输出路径: %s", formats.size(), outputPath);
+        
         for (VideoFormat format : formats) {
             try {
                 logger.info("开始下载格式: " + format.getFormatId() + " (" + format.getExt() + ")");
@@ -693,7 +754,9 @@ public class YtDlpJava {
                 if (isStreamingFormat(format)) {
                     // 使用FFmpeg下载器处理流媒体格式
                     logger.info("使用FFmpeg下载器处理流媒体格式");
+                    logger.info("FFmpeg下载前 - 格式ID: %s, URL: %s", format.getFormatId(), format.getUrl());
                     success = downloadWithFfmpeg(format, outputPath);
+                    logger.info("FFmpeg下载后 - 结果: %s", success);
                 } else {
                     // 使用原有的HTTP下载器
                     logger.info("使用HTTP下载器");
@@ -791,6 +854,8 @@ public class YtDlpJava {
      */
     private boolean downloadWithFfmpeg(VideoFormat format, String outputPath) throws Exception {
         logger.info("=== 使用Android FFmpeg HLS下载器 ===");
+        logger.info("downloadWithFfmpeg调用 - 格式ID: %s, URL: %s, 输出路径: %s", 
+            format.getFormatId(), format.getUrl(), outputPath);
         
         // 创建Android FFmpeg下载器
         com.ytdlp.downloader.hls.AndroidFfmpegHlsDownloader androidFfmpegDownloader = 
@@ -812,8 +877,15 @@ public class YtDlpJava {
         VideoInfo dummyInfo = new VideoInfo();
         dummyInfo.setTitle("HLS Video");
         
+        // 确保输出路径正确传递
+        logger.info("传递给FFmpeg的输出路径: %s", outputPath);
+        logger.info("输出路径长度: %d", outputPath.length());
+        logger.info("输出路径是否为绝对路径: %s", new File(outputPath).isAbsolute());
+        
         // 执行下载
+        logger.info("开始调用AndroidFfmpegHlsDownloader.download");
         boolean success = androidFfmpegDownloader.download(dummyInfo, format, outputPath);
+        logger.info("AndroidFfmpegHlsDownloader.download完成，结果: %s", success);
         
         logger.info("Android FFmpeg下载结果: " + success);
         return success;

@@ -17,6 +17,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+// FFmpegKit imports
+import com.arthenica.ffmpegkit.FFmpegKit;
+import com.arthenica.ffmpegkit.ReturnCode;
+import com.arthenica.ffmpegkit.Session;
+import com.arthenica.ffmpegkit.Statistics;
+import com.arthenica.ffmpegkit.StatisticsCallback;
+import com.arthenica.ffmpegkit.FFmpegSessionCompleteCallback;
+
 /**
  * Android版本的FFmpeg HLS下载器
  * 使用FFmpegKit进行Android兼容的视频处理
@@ -80,10 +88,13 @@ public class AndroidFfmpegHlsDownloader {
             }
             
             logger.info("=== 使用Android FFmpeg下载HLS流 ===");
+            logger.info("AndroidFfmpegHlsDownloader.download调用 - 线程: %s", Thread.currentThread().getName());
             logger.info("视频标题: %s", videoInfo.getTitle());
             logger.info("格式ID: %s", format.getFormatId());
             logger.info("HLS URL: %s", format.getUrl());
             logger.info("输出路径: %s", outputPath);
+            logger.info("输出路径长度: %d", outputPath.length());
+            logger.info("输出路径是否为绝对路径: %s", new File(outputPath).isAbsolute());
             
             String hlsUrl = format.getUrl();
             
@@ -116,21 +127,33 @@ public class AndroidFfmpegHlsDownloader {
             // 使用FFmpegKit执行命令
             CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
                 try {
-                    // 这里需要使用FFmpegKit的API
-                    // 由于我们在非Android环境中测试，这里使用模拟实现
-                    logger.info("模拟FFmpegKit执行...");
+                    logger.info("使用FFmpegKit执行命令...");
                     
-                    // 在实际Android环境中，这里应该使用：
-                    // Session session = FFmpegKit.executeAsync(String.join(" ", command));
-                    // ReturnCode returnCode = session.getReturnCode();
-                    // return ReturnCode.isSuccess(returnCode);
+                    // 创建同步执行的Session
+                    Session session = FFmpegKit.execute(String.join(" ", command));
                     
-                    // 模拟成功
-                    Thread.sleep(2000); // 模拟处理时间
-                    return true;
+                    // 等待执行完成
+                    // 由于是异步执行，需要等待session完成
+                    while (session.getState() == com.arthenica.ffmpegkit.SessionState.RUNNING) {
+                        Thread.sleep(100); // 等待100ms
+                    }
+                    
+                    ReturnCode returnCode = session.getReturnCode();
+                    boolean success = ReturnCode.isSuccess(returnCode);
+                    
+                    if (success) {
+                        logger.info("FFmpegKit执行成功");
+                    } else {
+                        logger.error("FFmpegKit执行失败，返回码: %s", returnCode);
+                        logger.error("FFmpegKit错误输出: %s", session.getFailStackTrace());
+                        logger.error("FFmpegKit输出: %s", session.getOutput());
+                    }
+                    
+                    return success;
                     
                 } catch (Exception e) {
                     logger.error("FFmpegKit执行异常: %s", e.getMessage());
+                    e.printStackTrace();
                     return false;
                 }
             });
@@ -138,11 +161,15 @@ public class AndroidFfmpegHlsDownloader {
             boolean success = future.get();
             
             if (success) {
-                // 创建模拟输出文件
+                // 验证输出文件
                 File outputFile = new File(outputPath);
-                outputFile.createNewFile();
-                logger.info("FFmpegKit下载完成: %s", outputPath);
-                return true;
+                if (outputFile.exists() && outputFile.length() > 0) {
+                    logger.info("FFmpegKit下载完成: %s (大小: %d bytes)", outputPath, outputFile.length());
+                    return true;
+                } else {
+                    logger.error("FFmpegKit下载完成但文件不存在或为空: %s", outputPath);
+                    return false;
+                }
             }
             
             return false;
@@ -150,8 +177,8 @@ public class AndroidFfmpegHlsDownloader {
         } catch (InterruptedException | ExecutionException e) {
             logger.error("FFmpegKit执行被中断: %s", e.getMessage());
             return false;
-        } catch (IOException e) {
-            logger.error("FFmpegKit文件操作失败: %s", e.getMessage());
+        } catch (Exception e) {
+            logger.error("FFmpegKit执行异常: %s", e.getMessage());
             return false;
         }
     }
@@ -280,8 +307,11 @@ public class AndroidFfmpegHlsDownloader {
         command.add("h264_mp4toannexb");  // H.264比特流过滤器
         
         // 输出文件
+        logger.info("buildFfmpegCommand - 添加输出路径: %s", outputPath);
+        logger.info("buildFfmpegCommand - 输出路径长度: %d", outputPath.length());
         command.add(outputPath);
         
+        logger.info("buildFfmpegCommand - 完整命令: %s", String.join(" ", command));
         return command;
     }
     

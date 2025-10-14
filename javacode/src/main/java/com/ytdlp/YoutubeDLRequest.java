@@ -32,9 +32,11 @@ public class YoutubeDLRequest {
     public YoutubeDLRequest addOption(String option, String argument) {
         switch (option) {
             case "--format":
+            case "-f":
                 options.setFormat(argument);
                 break;
             case "--output":
+            case "-o":
                 options.setOutput(argument);
                 break;
             case "--output-template":
@@ -69,6 +71,10 @@ public class YoutubeDLRequest {
                 break;
             case "--timeout":
                 options.setTimeout(Integer.parseInt(argument));
+                break;
+            case "-N":
+                // 线程数选项，添加到自定义选项
+                options.addOption(option, argument);
                 break;
             case "--no-cache-dir":
                 options.setNoCacheDir(true);
@@ -137,8 +143,10 @@ public class YoutubeDLRequest {
     public String getOption(String option) {
         switch (option) {
             case "--format":
+            case "-f":
                 return options.getFormat();
             case "--output":
+            case "-o":
                 return options.getOutput();
             case "--output-template":
                 return options.getOutputTemplate();
@@ -200,11 +208,11 @@ public class YoutubeDLRequest {
         
         // 添加选项
         if (options.getFormat() != null) {
-            command.add("--format");
+            command.add("-f");
             command.add(options.getFormat());
         }
         if (options.getOutput() != null) {
-            command.add("--output");
+            command.add("-o");
             command.add(options.getOutput());
         }
         if (options.getOutputTemplate() != null) {
