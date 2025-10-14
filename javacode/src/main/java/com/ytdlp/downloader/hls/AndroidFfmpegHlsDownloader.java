@@ -33,9 +33,14 @@ public class AndroidFfmpegHlsDownloader {
     
     private Logger logger;
     private boolean isInitialized = false;
+    private ProgressCallback progressCallback;
     
     public void setLogger(Logger logger) {
         this.logger = logger;
+    }
+    
+    public void setProgressCallback(ProgressCallback progressCallback) {
+        this.progressCallback = progressCallback;
     }
     
     /**
@@ -125,50 +130,90 @@ public class AndroidFfmpegHlsDownloader {
             logger.info("FFmpegKit命令: %s", String.join(" ", command));
             
             // 使用FFmpegKit执行命令
-            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    logger.info("使用FFmpegKit执行命令...");
-                    
-                    // 创建同步执行的Session
-                    Session session = FFmpegKit.execute(String.join(" ", command));
-                    
-                    // 等待执行完成
-                    // 由于是异步执行，需要等待session完成
-                    while (session.getState() == com.arthenica.ffmpegkit.SessionState.RUNNING) {
-                        Thread.sleep(100); // 等待100ms
-                    }
-                    
-                    ReturnCode returnCode = session.getReturnCode();
-                    boolean success = ReturnCode.isSuccess(returnCode);
-                    
-                    if (success) {
-                        logger.info("FFmpegKit执行成功");
-                    } else {
-                        logger.error("FFmpegKit执行失败，返回码: %s", returnCode);
-                        logger.error("FFmpegKit错误输出: %s", session.getFailStackTrace());
-                        logger.error("FFmpegKit输出: %s", session.getOutput());
-                    }
-                    
-                    return success;
-                    
-                } catch (Exception e) {
-                    logger.error("FFmpegKit执行异常: %s", e.getMessage());
-                    e.printStackTrace();
-                    return false;
-                }
-            });
+            // ✅ 用 CompletableFuture 来等待异步执行结束
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+            // 记录执行开始时间（用于计算百分比）
+            long startTime = System.currentTimeMillis();
             
-            boolean success = future.get();
+            // 调用下载开始回调
+            if (progressCallback != null) {
+                progressCallback.onDownloadStart(10000); // 估算10MB
+            }
+
+            FFmpegKit.executeAsync(
+                    String.join(" ", command),
+                    session -> {
+                        // ✅ 任务结束时回调
+                        ReturnCode returnCode = session.getReturnCode();
+                        boolean success = ReturnCode.isSuccess(returnCode);
+
+                        if (success) {
+                            logger.info("✅ FFmpegKit 执行成功");
+                        } else {
+                            logger.error("❌ FFmpegKit 执行失败，返回码: %s", returnCode);
+                            logger.error("错误输出: %s", session.getFailStackTrace());
+                            logger.error("输出: %s", session.getOutput());
+                        }
+
+                        // 通知 future 结束
+                        future.complete(success);
+                    },
+                    log -> {
+                        // 🧾 日志输出（可选）
+                        logger.debug("[FFmpegLog] %s", log.getMessage());
+                    },
+                    statistics -> {
+                        // 📈 进度信息（单位：毫秒）
+                        double timeMs = statistics.getTime();
+                        if (progressCallback != null && timeMs > 0) {
+                            // 适配 ProgressCallback 接口
+                            // 估算下载进度：基于时间或文件大小
+                            double seconds = timeMs / 1000.0;
+                            double bitrate = statistics.getBitrate(); // bps
+                            long speed = (long) (bitrate / 8); // 转换为 bytes/sec
+                            long size = statistics.getSize(); // bytes
+                            
+                            // 简单估算：假设总时长60秒，或者基于当前下载速度估算
+                            long estimatedTotalBytes = size * 2; // 简单估算
+                            if (estimatedTotalBytes == 0) {
+                                estimatedTotalBytes = 10000; // 默认10MB
+                            }
+                            
+                            progressCallback.onProgress(size, estimatedTotalBytes, speed);
+                        }
+                    }
+            );
+
+            // ✅ 阻塞等待执行完成（同步）
+            boolean success = future.get(); // 会阻塞直到 complete()
             
             if (success) {
                 // 验证输出文件
                 File outputFile = new File(outputPath);
                 if (outputFile.exists() && outputFile.length() > 0) {
                     logger.info("FFmpegKit下载完成: %s (大小: %d bytes)", outputPath, outputFile.length());
+                    
+                    // 调用完成回调
+                    if (progressCallback != null) {
+                        progressCallback.onDownloadComplete(outputFile.length(), outputFile.length());
+                    }
+                    
                     return true;
                 } else {
                     logger.error("FFmpegKit下载完成但文件不存在或为空: %s", outputPath);
+                    
+                    // 调用错误回调
+                    if (progressCallback != null) {
+                        progressCallback.onDownloadError("文件不存在或为空", null);
+                    }
+                    
                     return false;
+                }
+            } else {
+                // 调用错误回调
+                if (progressCallback != null) {
+                    progressCallback.onDownloadError("FFmpeg执行失败", null);
                 }
             }
             

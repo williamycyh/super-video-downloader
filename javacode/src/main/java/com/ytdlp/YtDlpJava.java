@@ -864,6 +864,47 @@ public class YtDlpJava {
         // 设置日志器
         androidFfmpegDownloader.setLogger(logger);
         
+        // 设置进度回调
+        androidFfmpegDownloader.setProgressCallback(new com.ytdlp.downloader.ProgressCallback() {
+            @Override
+            public void onDownloadStart(long totalBytes) {
+                logger.info("FFmpeg下载开始，总字节数: %d", totalBytes);
+                // 调用YtDlpJava的进度回调
+                notifyProgressCallbacks(0, 0, totalBytes);
+            }
+            
+            @Override
+            public void onProgress(long bytesDownloaded, long totalBytes, long speed) {
+                int percentage = totalBytes > 0 ? (int) ((bytesDownloaded * 100) / totalBytes) : 0;
+                logger.info("FFmpeg下载进度: %d%% (%d/%d bytes, %d bytes/s)", 
+                    percentage, bytesDownloaded, totalBytes, speed);
+                // 调用YtDlpJava的进度回调
+                notifyProgressCallbacks(percentage, bytesDownloaded, totalBytes);
+            }
+            
+            @Override
+            public void onDownloadComplete(long bytesDownloaded, long totalBytes) {
+                logger.info("FFmpeg下载完成: %d bytes", bytesDownloaded);
+                // 调用YtDlpJava的完成回调
+                notifyCompleteCallbacks(outputPath);
+            }
+            
+            @Override
+            public void onDownloadError(String errorMessage, Exception exception) {
+                logger.error("FFmpeg下载错误: %s", errorMessage);
+                if (exception != null) {
+                    logger.error("异常详情: %s", exception.getMessage());
+                }
+                // 调用YtDlpJava的错误回调
+                notifyErrorCallbacks(errorMessage);
+            }
+            
+            @Override
+            public void onDownloadCancelled(long bytesDownloaded) {
+                logger.info("FFmpeg下载取消，已下载字节数: %d", bytesDownloaded);
+            }
+        });
+        
         // 初始化FFmpegKit（Android环境）
         androidFfmpegDownloader.initialize();
         
