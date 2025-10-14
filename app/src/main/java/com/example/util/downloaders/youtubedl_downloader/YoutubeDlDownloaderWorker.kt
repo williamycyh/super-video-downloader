@@ -18,6 +18,8 @@ import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
 import com.google.gson.Gson
 import com.ytdlp.YtDlpJava
+import com.ytdlp.YoutubeDLRequest
+import com.ytdlp.YoutubeDLResponse
 import com.ytdlp.core.VideoInfo
 import com.ytdlp.core.VideoFormat
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -65,7 +67,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         when (action) {
             GenericDownloader.DownloaderActions.DOWNLOAD -> {
                 isCanceled = false
-                startDownload(task)
+                startDownload(task, headers)
             }
 
             GenericDownloader.DownloaderActions.CANCEL -> {
@@ -121,7 +123,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
 
     @SuppressLint("CheckResult")
     private fun startDownload(
-        task: VideoTaskItem, isContinue: Boolean = false
+        task: VideoTaskItem, headers: Map<String, String> = emptyMap(), isContinue: Boolean = false
     ) {
         val taskId = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)!!
 
@@ -155,7 +157,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         downloadJobDisposable?.dispose()
 
         if (fileUtil.isFreeSpaceAvailable()) {
-            startDownloadProcessWithCustomLibrary(url, task, taskId)
+            startDownloadProcessWithCustomLibrary(url, task, taskId, headers)
         } else {
             finishWork(task.also {
                 task.mId = taskId
@@ -166,7 +168,7 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
     }
 
     private fun resumeDownload(task: VideoTaskItem) {
-        startDownload(task, true)
+        startDownload(task, emptyMap(), true)
     }
 
     private fun pauseDownload(task: VideoTaskItem) {
@@ -216,14 +218,25 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         url: String,
         task: VideoTaskItem,
         taskId: String,
+        headers: Map<String, String> = emptyMap()
     ) {
-        downloadJobDisposable = Observable.fromCallable<YtDlpJava.DownloadResult> {
+        downloadJobDisposable = Observable.fromCallable<YoutubeDLResponse> {
             // Initialize the custom yt-dlp library
             ytdlpJava = YtDlpJava()
             
-            // Set output path to tmp directory
-            val outputPath = "${tmpFile.absolutePath}/${task.title}.%(ext)s"
-            ytdlpJava?.setOption("output", outputPath)
+            // Clean the title to remove any existing extensions
+            val cleanTitle = task.title.replace(Regex("\\.(m3u8|mp4|ts|webm)$"), "")
+            val outputPath = "${tmpFile.absolutePath}/${cleanTitle}.mp4"
+            
+            AppLogger.d("Android下载 - 使用Python兼容方式")
+            AppLogger.d("Android下载 - URL: $url")
+            AppLogger.d("Android下载 - 输出路径: $outputPath")
+            
+            // 🆕 使用Python兼容的YoutubeDLRequest方式
+            val request = YoutubeDLRequest(url)
+            
+            // 🆕 参考configureYoutubedlRequest方法设置完整参数
+            configureYoutubedlRequest(request, task, headers, outputPath)
             
             // Add progress callback
             ytdlpJava?.addProgressCallback(object : YtDlpJava.ProgressCallback {
@@ -269,46 +282,106 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
                 }
             })
             
-            // Start download and return result
-            ytdlpJava?.download(url, outputPath) ?: throw Exception("Failed to initialize download")
+            // 🆕 使用Python兼容的execute方法
+            AppLogger.d("Android下载 - 执行Python兼容下载")
+            ytdlpJava?.execute(request, taskId, null) ?: throw Exception("Failed to initialize download")
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ downloadResult ->
-                if (downloadResult.isSuccess()) {
-                    val finalFile = File(downloadResult.getFilePath())
-                    if (finalFile.exists()) {
+            .subscribe({ response ->
+                AppLogger.d("Android下载结果 - 退出码: ${response.getExitCode()}")
+                AppLogger.d("Android下载结果 - 成功: ${response.isSuccess()}")
+                AppLogger.d("Android下载结果 - 执行时间: ${response.getElapsedTime()}ms")
+                AppLogger.d("Android下载结果 - 输出: ${response.getOut()}")
+                
+                if (response.isSuccess()) {
+                    // 🔧 修复：使用与原始版本相同的文件查找逻辑
+                    val outputText = response.getOut()
+                    AppLogger.d("Android下载响应输出: $outputText")
+                    
+                    // 在tmpFile目录中查找下载的文件（与原始版本保持一致）
+                    val list = tmpFile.listFiles()
+                    val finalFile = if (!list.isNullOrEmpty()) {
+                        tmpFile.walkTopDown()
+                            .filter {
+                                it.isFile && (it.extension.equals("mp4", ignoreCase = true) || 
+                                            it.extension.equals("mp3", ignoreCase = true))
+                            }
+                            .firstOrNull()
+                    } else {
+                        null
+                    }
+                    
+                    AppLogger.d("Android下载完成 - 找到文件: ${finalFile?.absolutePath}")
+                    AppLogger.d("Android下载完成 - 文件大小: ${finalFile?.length()} bytes")
+                    
+                    if (finalFile != null && finalFile.exists() && finalFile.length() > 0) {
                         val destinationFile = fileUtil.folderDir.resolve(finalFile.name).let {
                             fixFileName(it.absolutePath)
                         }.let {
                             File(it)
                         }
-                        val moved = fileUtil.moveMedia(
-                            this@YoutubeDlDownloaderWorker.applicationContext,
-                            Uri.fromFile(finalFile),
-                            Uri.fromFile(destinationFile)
-                        )
-
-                        if (moved) {
-                            tmpFile.deleteRecursively()
+                        
+                        AppLogger.d("Android文件移动 - 源文件: ${finalFile.absolutePath}")
+                        AppLogger.d("Android文件移动 - 目标文件: ${destinationFile.absolutePath}")
+                        
+                        // 🔧 修复：使用标准Java文件复制，避免Android特定的moveMedia
+                        try {
+                            finalFile.copyTo(destinationFile, overwrite = true)
+                            
+                            // 验证复制后的文件
+                            if (destinationFile.exists() && destinationFile.length() > 0) {
+                                AppLogger.d("Android文件复制成功 - 目标文件大小: ${destinationFile.length()} bytes")
+                                tmpFile.deleteRecursively()
+                                finishWork(VideoTaskItem(url).also { f ->
+                                    f.fileName = destinationFile.name
+                                    f.errorCode = 0
+                                    f.percent = 100F
+                                    f.taskState = VideoTaskState.SUCCESS
+                                })
+                            } else {
+                                AppLogger.e("Android文件复制失败 - 目标文件无效")
+                                finishWork(VideoTaskItem(url).also { f ->
+                                    f.errorCode = 1
+                                    f.taskState = VideoTaskState.ERROR
+                                    f.errorMessage = "文件复制失败"
+                                })
+                            }
+                        } catch (e: Exception) {
+                            AppLogger.e("Android文件复制异常: ${e.message}")
+                            finishWork(VideoTaskItem(url).also { f ->
+                                f.errorCode = 1
+                                f.taskState = VideoTaskState.ERROR
+                                f.errorMessage = "文件复制异常: ${e.message}"
+                            })
                         }
-                        finishWork(VideoTaskItem(url).also { f ->
-                            f.fileName = finalFile.name
-                            f.errorCode = if (moved) 0 else 1
-                            f.percent = 100F
-                            f.taskState = if (moved) VideoTaskState.SUCCESS else VideoTaskState.ERROR
-                        })
                     } else {
-                        finishWork(VideoTaskItem(url).also { f ->
-                            f.errorCode = 1
-                            f.taskState = VideoTaskState.ERROR
-                            f.errorMessage = "Downloaded file not found"
-                        })
+                        // 🔧 修复：与原始版本保持一致的错误处理逻辑
+                        val fixedList = tmpFile.listFiles()?.filter { !it.name.contains("part") }
+                        AppLogger.e("Android下载失败 - 未找到有效文件，tmpFile文件列表: ${fixedList?.map { it.name }}")
+                        
+                        fixedList?.firstOrNull()?.let { fallbackFile ->
+                            AppLogger.d("Android使用fallback文件: ${fallbackFile.absolutePath}")
+                            finishWork(VideoTaskItem(url).also { f ->
+                                f.fileName = fallbackFile.name
+                                f.errorCode = 0
+                                f.percent = 100F
+                                f.taskState = VideoTaskState.SUCCESS
+                            })
+                        } ?: run {
+                            AppLogger.e("Android下载完全失败 - 无任何文件")
+                            finishWork(VideoTaskItem(url).also { f ->
+                                f.errorCode = 1
+                                f.taskState = VideoTaskState.ERROR
+                                f.errorMessage = "下载失败，未找到任何文件"
+                            })
+                        }
                     }
                 } else {
+                    AppLogger.e("Android下载失败 - 错误输出: ${response.getErr()}")
                     finishWork(VideoTaskItem(url).also { f ->
                         f.errorCode = 1
                         f.taskState = VideoTaskState.ERROR
-                        f.errorMessage = downloadResult.getErrorMessage() ?: "Unknown error"
+                        f.errorMessage = response.getErr().ifEmpty { "下载失败" }
                     })
                 }
             }, { error ->
@@ -316,7 +389,53 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
             })
     }
 
-    // configureYoutubedlRequest method removed - no longer needed with custom library
+    /**
+     * 配置YoutubeDLRequest参数（参考原版本实现）
+     */
+    private fun configureYoutubedlRequest(
+        request: YoutubeDLRequest, 
+        task: VideoTaskItem, 
+        headers: Map<String, String>,
+        outputPath: String
+    ) {
+        AppLogger.d("配置下载参数...")
+        
+        // 基本选项
+        request.addOption("--progress")
+        
+        // 线程数配置（模拟原版本的M3U8下载器线程数）
+        val threadsCount = 4  // 默认4个线程
+        request.addOption("-N", threadsCount)
+        
+        // 格式选择 - 使用最佳格式
+        request.addOption("-f", "best")
+        
+        // 视频转码选项
+        request.addOption("--recode-video", "mp4")
+        request.addOption("--merge-output-format", "mp4")
+        
+        // HLS选项
+        request.addOption("--hls-prefer-native")
+        request.addOption("--hls-use-mpegts")
+        
+        // 输出路径
+        request.addOption("-o", outputPath)
+        
+        // 重试和超时
+        request.addOption("--retries", "3")
+        request.addOption("--timeout", "30")
+        request.addOption("--ignore-errors")
+        
+        // HTTP头部处理
+        headers.forEach { (key, value) ->
+            if (key != "Cookie") {  // Cookie通过其他方式处理
+                request.addOption("--add-header", "$key:$value")
+                AppLogger.d("添加HTTP头部: $key: $value")
+            }
+        }
+        
+        AppLogger.d("下载参数配置完成")
+    }
 
     @SuppressLint("CheckResult")
     private fun monitorDownloadProcess(taskId: String, task: VideoTaskItem) {
@@ -596,4 +715,5 @@ class YoutubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParamet
         notificationsHelper.hideNotification(taskId.hashCode())
         notificationsHelper.hideNotification(taskId.hashCode() + 1)
     }
+    
 }

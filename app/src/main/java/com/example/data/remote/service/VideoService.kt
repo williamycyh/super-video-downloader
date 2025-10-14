@@ -58,6 +58,8 @@ open class VideoServiceLocal(
             AppLogger.d("VideoService: Starting video info extraction for URL: ${url.url}")
             val ytdlpJava = YtDlpJava()
             
+            AppLogger.d("VideoService: YtDlpJava instance created successfully")
+            
             // Extract video info using custom library
             val ytdlpVideoInfo = ytdlpJava.extractInfo(url.url.toString())
             
@@ -67,6 +69,12 @@ open class VideoServiceLocal(
             }
             
             AppLogger.d("VideoService: Successfully extracted video info: ${ytdlpVideoInfo.getTitle()}")
+            AppLogger.d("VideoService: Found ${ytdlpVideoInfo.getFormats().size} formats")
+            
+            // 打印前几个格式的信息用于调试
+            ytdlpVideoInfo.getFormats().take(3).forEachIndexed { index, format ->
+                AppLogger.d("VideoService: Format $index - ID: ${format.getFormatId()}, Ext: ${format.getExt()}, Protocol: ${format.getProtocol()}")
+            }
             
             // Convert custom library formats to our format
             val formats = ytdlpVideoInfo.getFormats().map { videoEntityFromYtDlpFormat(it) }
@@ -98,6 +106,8 @@ open class VideoServiceLocal(
                     isRegularDownload = false
                 })
         } catch (e: Throwable) {
+            AppLogger.e("VideoService: Exception during extraction: ${e.message}")
+            AppLogger.e("VideoService: Exception stack trace: ${e.stackTraceToString()}")
             throw e
         }
     }

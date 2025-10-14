@@ -233,6 +233,9 @@ dependencies {
 
     // Custom yt-dlp Java library
     implementation project(':yt-dlp-java')
+    
+    // FFmpegKit for video processing
+    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
 
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
