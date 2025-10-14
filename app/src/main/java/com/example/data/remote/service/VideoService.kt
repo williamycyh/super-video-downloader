@@ -1,15 +1,12 @@
 package com.example.data.remote.service
 
-import com.example.data.local.model.Proxy
 import com.example.data.local.model.VideoInfoWrapper
 import com.example.data.local.room.entity.VideFormatEntityList
 import com.example.data.local.room.entity.VideoFormatEntity
 import com.example.data.local.room.entity.VideoInfo
 import com.example.util.AppLogger
-import com.example.util.CookieUtils
 import com.example.util.proxy_utils.CustomProxyController
 import com.btdlp.BtdJava
-import com.btdlp.core.VideoInfo as BtdVideoInfo
 import com.btdlp.core.VideoFormat as BtdVideoFormat
 import okhttp3.Request
 import java.util.Locale
@@ -41,7 +38,7 @@ open class VideoServiceLocal(
         var result: VideoInfoWrapper? = null
 
         try {
-            result = handleYoutubeDlUrl(url, isM3u8OrMpd, isAudioCheck)
+            result = handleVideoDlUrl(url, isM3u8OrMpd, isAudioCheck)
         } catch (e: Throwable) {
             AppLogger.d("BubeDL Error: $e")
         }
@@ -49,7 +46,7 @@ open class VideoServiceLocal(
         return result
     }
 
-    private fun handleYoutubeDlUrl(
+    private fun handleVideoDlUrl(
         url: Request,
         isM3u8OrMpd: Boolean = false,
         isAudioCheck: Boolean

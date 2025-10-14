@@ -4,5 +4,4 @@
 -dontwarn org.immutables.value.Value$Style$ImplementationVisibility
 -dontwarn org.immutables.value.Value$Style
 
--keep class com.yausername.youtubedl_android.** { *; }
 -keep class org.immutables.** { *; }

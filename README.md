@@ -1,4 +1,4 @@
-# Android Video and Audio Downloader app with browser, player and custom downloaders
+# Android Video and Audio Downloader app with browser, player and custom Bube downloaders
 
 [![F-Droid](https://img.shields.io/f-droid/v/com.myAllVideoBrowser?color=b4eb12&label=F-Droid&logo=fdroid&logoColor=1f78d2)](https://f-droid.org/packages/com.myAllVideoBrowser)
 
@@ -7,9 +7,11 @@
 ## Features
 
 - Download videos from Youtube, Facebook, Twitter, Instagram, Dailymotion, Vimeo and more
-  than [other 1000 sites](http://rg3.github.io/youtube-dl/supportedsites.html), also inrecept all
-  streams data in browser like m3u8 or mpd links and download them, also intrecepts mp4 streaming
+  than [other 1000 sites](http://rg3.github.io/youtube-dl/supportedsites.html), also intercept all
+  streams data in browser like m3u8 or mpd links and download them, also intercepts mp4 streaming
   video data
+- **Custom Bube Download Engine**: Built-in custom video downloader based on yt-dlp with Java implementation
+- **FFmpeg Integration**: Advanced HLS/TS stream processing with real-time progress tracking
 - Browse videos and audio with the built-in browser
 - Download videos and audio with the built-in download manager
 - Play videos and audio offline with the built-in player
@@ -20,6 +22,22 @@
 - Live MP3 streams support
 - Cokies support
 - HTTP proxy support
+
+## Technical Details
+
+### Custom Download Engine
+This project features a custom-built video download engine called **Bube**, which is a Java implementation based on the popular Python yt-dlp library. The engine includes:
+
+- **Package**: `com.btdlp` (renamed from com.ytdlp)
+- **Main Classes**: `BtdJava`, `BubeDL`, `BubeDLRequest`, `BubeDLResponse`
+- **FFmpeg Integration**: Real-time HLS/TS stream processing with progress callbacks
+- **Multi-platform Support**: 11+ video platforms with dedicated extractors
+
+### Architecture
+- **Language**: Kotlin
+- **Architecture**: MVVM
+- **Custom Download Engine**: Bube (Java-based yt-dlp implementation)
+- **Stream Processing**: FFmpegKit integration for advanced formats
 
 Thanks
 to [@cuongpm](https://github.com/cuongpm), [@yausername](https://github.com/yausername) and [@JunkFood02](https://github.com/JunkFood02)

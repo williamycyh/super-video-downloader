@@ -227,8 +227,8 @@ class BubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
             // 🆕 使用Python兼容的BubeDLRequest方式
             val request = BubeDLRequest(url)
             
-            // 🆕 参考configureYoutubedlRequest方法设置完整参数
-            configureYoutubedlRequest(request, task, headers, outputPath)
+            // 🆕 参考configureBubedlRequest方法设置完整参数
+            configureBubedlRequest(request, task, headers, outputPath)
             
             // Add progress callback
             btdJava?.addProgressCallback(object : BtdJava.ProgressCallback {
@@ -384,7 +384,7 @@ class BubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
     /**
      * 配置BubeDLRequest参数（参考原版本实现）
      */
-    private fun configureYoutubedlRequest(
+    private fun configureBubedlRequest(
         request: BubeDLRequest, 
         task: VideoTaskItem, 
         headers: Map<String, String>,

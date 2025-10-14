@@ -345,22 +345,6 @@ public class Utils {
         return true;
     }
 
-    //ok
-    //https://www.youtube.com/watch?v=2mY7AFTtYwQ
-    //https://www.youtube.com/watch?v=2FaNmRsM-NY
-    //https://www.youtube.com/watch?v=6spv5T6X1lg
-    //https://www.youtube.com/watch?v=PNXDCaxFsfY
-    //https://www.youtube.com/watch?v=_0LrJebSdA0
-    //https://www.youtube.com/watch?v=gkAHSL003PA
-    //https://www.youtube.com/watch?v=xmkg34Havks
-    //https://www.youtube.com/watch?v=wGfnUwBK5Ow
-
-
-    //not ok
-    //https://www.youtube.com/watch?v=2n6YaiWrsPI
-    //https://www.youtube.com/watch?v=7ynrOq3vBq4
-    //https://www.youtube.com/watch?v=-KqxoCdbzrc10  //-KqxoCdbzrc 可以
-
     public static boolean canShowFullAd(Context activity) {
         try {
             if (!isShowByDev(activity)) {

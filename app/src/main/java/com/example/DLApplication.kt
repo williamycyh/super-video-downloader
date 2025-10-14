@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 open class DLApplication : DaggerApplication() {
     companion object {
-        const val DEBUG_TAG: String = "YOUTUBE_DL_DEBUG_TAG"
+        const val DEBUG_TAG: String = "BUBE_DEBUG_TAG"
     }
 
     private lateinit var androidInjector: AndroidInjector<out DaggerApplication>

@@ -58,7 +58,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
     private fun handleCancel(context: Context, task: ProgressInfo) {
         AppLogger.d("HANDLE CANCEL $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
-            DOWNLOADER_YOUTUBE_DL -> {
+            DOWNLOADER_BUBE_DL -> {
                 BubeDlDownloader.cancelDownload(context, task, true)
                 progressRepository.deleteProgressInfo(task)
             }
@@ -77,7 +77,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
     private fun handleResume(context: Context, task: ProgressInfo) {
         AppLogger.d("HANDLE RESUME $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
-            DOWNLOADER_YOUTUBE_DL -> {
+            DOWNLOADER_BUBE_DL -> {
                 BubeDlDownloader.resumeDownload(context, task)
             }
 
@@ -94,7 +94,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
     private fun handlePause(context: Context, task: ProgressInfo) {
         AppLogger.d("HANDLE PAUSE $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
-            DOWNLOADER_YOUTUBE_DL -> {
+            DOWNLOADER_BUBE_DL -> {
                 BubeDlDownloader.pauseDownload(context, task)
             }
 
@@ -112,12 +112,12 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
         return if (videoInfo.isRegularDownload) {
             DOWNLOADER_REGULAR
         } else {
-            DOWNLOADER_YOUTUBE_DL
+            DOWNLOADER_BUBE_DL
         }
     }
 
     companion object {
-        const val DOWNLOADER_YOUTUBE_DL = "DOWNLOADER_YOUTUBE_DL"
+        const val DOWNLOADER_BUBE_DL = "DOWNLOADER_BUBE_DL"
         const val DOWNLOADER_REGULAR = "DOWNLOADER_REGULAR"
         const val TASK_ID = "TASK_ID"
         const val ACTION_PAUSE = "ACTION_PAUSE"

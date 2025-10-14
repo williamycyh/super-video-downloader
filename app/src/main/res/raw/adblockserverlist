@@ -14233,9 +14233,6 @@ ff02::3 ip6-allhosts
 # [youramigo.com]
 0.0.0.0 analytics.youramigo.com
 
-# [youtube.com]
-0.0.0.0 ads.youtube.com
-
 # [yyapi.net]
 0.0.0.0 global.yyapi.net
 0.0.0.0 t.global.yyapi.net
@@ -30777,7 +30774,6 @@ ff02::3 ip6-allhosts
 0.0.0.0 androbin.net
 0.0.0.0 android-cleaner.net
 0.0.0.0 androidsecurityplus.com
-0.0.0.0 androidyoutubetomp3.com
 0.0.0.0 androuet.info
 0.0.0.0 andrzejnow139.teokonieczna.pl
 0.0.0.0 andsheisoff.com
@@ -46852,7 +46848,6 @@ ff02::3 ip6-allhosts
 0.0.0.0 high-invstment.shop
 0.0.0.0 highcopywatches.top
 0.0.0.0 highcountryparent.com
-0.0.0.0 higherloweryoutube.com
 0.0.0.0 higherselfdevelopment.com
 0.0.0.0 highestn.sbs
 0.0.0.0 highestsolutions.com

@@ -6608,7 +6608,6 @@
 0.0.0.0 ehg-wss.hitbox.com
 0.0.0.0 ehg-xxolympicwintergames.hitbox.com
 0.0.0.0 ehg-yellowpages.hitbox.com
-0.0.0.0 ehg-youtube.hitbox.com
 0.0.0.0 ehg.hitbox.com
 0.0.0.0 ejs.hitbox.com
 0.0.0.0 enterprise.hitbox.com
@@ -12473,9 +12472,6 @@
 0.0.0.0 www.yoursuperplatforma.site
 0.0.0.0 www.youtaser.site
 0.0.0.0 www.youthful-easley.171-22-30-123.plesk.page
-0.0.0.0 www.youtube-com.pol.beauty
-0.0.0.0 www.youtube.p1.beauty
-0.0.0.0 www.youtube.p1.gives
 0.0.0.0 www.youurffindepppl.site
 0.0.0.0 www.youwld.site
 0.0.0.0 www.yovjc.hostingkampanya.com
@@ -13766,9 +13762,6 @@
 0.0.0.0 yoursuperplatforma.site
 0.0.0.0 youtaser.site
 0.0.0.0 youthful-easley.171-22-30-123.plesk.page
-0.0.0.0 youtube-com.pol.beauty
-0.0.0.0 youtube.p1.beauty
-0.0.0.0 youtube.p1.gives
 0.0.0.0 youurffindepppl.site
 0.0.0.0 youwld.site
 0.0.0.0 yovjc.hostingkampanya.com
@@ -23328,13 +23321,8 @@
 0.0.0.0 www3.doubleclick.com
 0.0.0.0 www.doubleclick.com
 0.0.0.0 www.bt.emsecure.net
-# 0.0.0.0  www.youtube-nocookie.com #[affects various videos]
-# [Google / DoubleClick][AS15169][66.249.64.0 - 66.249.95.255]
 0.0.0.0 ad.rs.doubleclick.net
-# [Google / DoubleClick][AS15169][72.14.192.0 - 72.14.255.255]
 0.0.0.0 affiliate.2mdn.net
-# 0.0.0.0  s0.2mdn.net #[affects video stream]
-# 0.0.0.0  static.2mdn.net #[affects Youtube]
 0.0.0.0 clickserve.us2.dartsearch.net
 0.0.0.0 ad-apac.doubleclick.net
 0.0.0.0 ad.mo.doubleclick.net
@@ -23342,7 +23330,6 @@
 0.0.0.0 gan.doubleclick.net
 0.0.0.0 googleads2.g.doubleclick.net
 0.0.0.0 n4061ad.hk.doubleclick.net
-# [Google / DoubleClick][AS15169][74.125.0.0 - 74.125.255.255]
 0.0.0.0 c.admob.com
 0.0.0.0 code.adtlgc.com
 0.0.0.0 ip-geo.appspot.com
@@ -29104,7 +29091,6 @@
 0.0.0.0 s-39.predictvideo.com
 0.0.0.0 s.bl-1.com
 0.0.0.0 s.update.fbsbx.com
-0.0.0.0 s.youtube.com # Blocking this will interfere with video watching history and may interfere with Google Podcasts
 0.0.0.0 s1-tracking.adalyser.com
 0.0.0.0 s1.shinystat.it
 0.0.0.0 s2.statcounter.com
@@ -31187,7 +31173,6 @@
 0.0.0.0 www.winlottofrequently.com
 0.0.0.0 www.youfiletor.com
 0.0.0.0 www1-van-city-signon.com
-0.0.0.0 wyoutube.fr
 0.0.0.0 xcdkb.comfortykive.xyz
 0.0.0.0 xen-media.com
 0.0.0.0 xn--oogle-wmc.com
@@ -31604,7 +31589,6 @@
 0.0.0.0 wmgmulti.112.2o7.net
 0.0.0.0 workopolis.122.2o7.net
 0.0.0.0 xhealthmobiletools.112.2o7.net
-0.0.0.0 youtube.112.2o7.net
 0.0.0.0 yrkeve.112.2o7.net
 #</2o7-sites>
 
@@ -42817,7 +42801,6 @@
 0.0.0.0 www.high-invstment.shop
 0.0.0.0 www.highcopywatches.top
 0.0.0.0 www.highcountryparent.com
-0.0.0.0 www.higherloweryoutube.com
 0.0.0.0 www.higherselfdevelopment.com
 0.0.0.0 www.highestn.sbs
 0.0.0.0 www.highestsolutions.com

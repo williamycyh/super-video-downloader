@@ -16,9 +16,9 @@
         name="files"
         path="." />
     <files-path
-        name="YoutubeDL"
+        name="SaveX"
         path="./files" />
     <files-path
-        name="YoutubeDL"
+        name="SaveX"
         path="." />
 </paths>

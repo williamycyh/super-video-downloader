@@ -176,7 +176,7 @@ class ProgressViewModel @Inject constructor(
     }
 
     private fun progressObservable(): Observable<List<ProgressInfo>> {
-        val youtubeDlDownloads = Observable.interval(1000, TimeUnit.MILLISECONDS).flatMap {
+        val videoDlDownloads = Observable.interval(1000, TimeUnit.MILLISECONDS).flatMap {
             progressRepository.getProgressInfos().take(1).flatMap {
                 val filtered = it.filter { info -> info.downloadStatus != VideoTaskState.SUCCESS }
                 Observable.just(filtered).toFlowable(BackpressureStrategy.LATEST).take(1)
@@ -185,6 +185,6 @@ class ProgressViewModel @Inject constructor(
             }
         }
 
-        return youtubeDlDownloads
+        return videoDlDownloads
     }
 }

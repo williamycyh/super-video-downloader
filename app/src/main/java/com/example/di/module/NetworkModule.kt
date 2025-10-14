@@ -21,7 +21,7 @@ import javax.inject.Singleton
 class NetworkModule {
 
     companion object {
-        private const val DATA_URL = "https://some-url.com/youtube-dl/"
+        private const val DATA_URL = "https://nowebsite.cc/"
     }
 
     private fun buildOkHttpClient(application: Application): OkHttpClient =
