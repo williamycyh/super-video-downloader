@@ -7,7 +7,7 @@ import com.example.data.local.room.entity.VideoInfo
 import com.example.data.repository.ProgressRepository
 import com.example.util.AppLogger
 import com.example.util.downloaders.custom_downloader.CustomRegularDownloader
-import com.example.util.downloaders.tubedl_downloader.TubeDlDownloader
+import com.example.util.downloaders.Bubedl_downloader.BubeDlDownloader
 import dagger.android.DaggerBroadcastReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +59,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
         AppLogger.d("HANDLE CANCEL $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
             DOWNLOADER_YOUTUBE_DL -> {
-                TubeDlDownloader.cancelDownload(context, task, true)
+                BubeDlDownloader.cancelDownload(context, task, true)
                 progressRepository.deleteProgressInfo(task)
             }
 
@@ -78,7 +78,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
         AppLogger.d("HANDLE RESUME $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
             DOWNLOADER_YOUTUBE_DL -> {
-                TubeDlDownloader.resumeDownload(context, task)
+                BubeDlDownloader.resumeDownload(context, task)
             }
 
             DOWNLOADER_REGULAR -> {
@@ -95,7 +95,7 @@ class NotificationReceiver : DaggerBroadcastReceiver() {
         AppLogger.d("HANDLE PAUSE $task")
         when (val downloaderType = getTaskType(task.videoInfo)) {
             DOWNLOADER_YOUTUBE_DL -> {
-                TubeDlDownloader.pauseDownload(context, task)
+                BubeDlDownloader.pauseDownload(context, task)
             }
 
             DOWNLOADER_REGULAR -> {

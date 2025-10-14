@@ -1,4 +1,4 @@
-package com.example.util.downloaders.tubedl_downloader
+package com.example.util.downloaders.Bubedl_downloader
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,9 +11,9 @@ import com.example.util.downloaders.generic_downloader.GenericDownloader
 import com.example.util.downloaders.generic_downloader.models.VideoTaskItem
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
 import com.example.util.downloaders.generic_downloader.workers.GenericDownloadWorkerWrapper
-import com.ytdlp.YtDlpJava
-import com.ytdlp.YoutubeDLRequest
-import com.ytdlp.YoutubeDLResponse
+import com.btdlp.BtdJava
+import com.btdlp.BubeDLRequest
+import com.btdlp.BubeDLResponse
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -23,7 +23,7 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
-class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters) :
+class BubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters) :
     GenericDownloadWorkerWrapper(appContext, workerParams) {
     companion object {
         var isCanceled = false
@@ -44,7 +44,7 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
     private var downloadJobDisposable: Disposable? = null
     private var cookieFile: File? = null
     private var lastTmpDirSize = 0L
-    private var ytdlpJava: YtDlpJava? = null
+    private var btdJava: BtdJava? = null
 
     @Volatile
     var time = 0L
@@ -212,9 +212,9 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
         taskId: String,
         headers: Map<String, String> = emptyMap()
     ) {
-        downloadJobDisposable = Observable.fromCallable<YoutubeDLResponse> {
+        downloadJobDisposable = Observable.fromCallable<BubeDLResponse> {
             // Initialize the custom yt-dlp library
-            ytdlpJava = YtDlpJava()
+            btdJava = BtdJava()
             
             // Clean the title to remove any existing extensions
             val cleanTitle = task.title.replace(Regex("\\.(m3u8|mp4|ts|webm)$"), "")
@@ -224,14 +224,14 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
             AppLogger.d("Android下载 - URL: $url")
             AppLogger.d("Android下载 - 输出路径: $outputPath")
             
-            // 🆕 使用Python兼容的YoutubeDLRequest方式
-            val request = YoutubeDLRequest(url)
+            // 🆕 使用Python兼容的BubeDLRequest方式
+            val request = BubeDLRequest(url)
             
             // 🆕 参考configureYoutubedlRequest方法设置完整参数
             configureYoutubedlRequest(request, task, headers, outputPath)
             
             // Add progress callback
-            ytdlpJava?.addProgressCallback(object : YtDlpJava.ProgressCallback {
+            btdJava?.addProgressCallback(object : BtdJava.ProgressCallback {
                 override fun onProgress(percentage: Int, bytesDownloaded: Long, totalBytes: Long) {
                     if (Date().time - time > UPDATE_INTERVAL && !getDone()) {
                         time = Date().time
@@ -276,7 +276,7 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
             
             // 🆕 使用Python兼容的execute方法
             AppLogger.d("Android下载 - 执行Python兼容下载")
-            ytdlpJava?.execute(request, taskId, null) ?: throw Exception("Failed to initialize download")
+            btdJava?.execute(request, taskId, null) ?: throw Exception("Failed to initialize download")
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ response ->
@@ -382,10 +382,10 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
     }
 
     /**
-     * 配置YoutubeDLRequest参数（参考原版本实现）
+     * 配置BubeDLRequest参数（参考原版本实现）
      */
     private fun configureYoutubedlRequest(
-        request: YoutubeDLRequest, 
+        request: BubeDLRequest, 
         task: VideoTaskItem, 
         headers: Map<String, String>,
         outputPath: String
@@ -608,7 +608,7 @@ class TubeDlDownloaderWorker(appContext: Context, workerParams: WorkerParameters
         val taskId = inputData.getString(GenericDownloader.Constants.TASK_ID_KEY)
 
         if (taskId != null) {
-            TubeDlDownloader.deleteHeadersStringFromSharedPreferences(applicationContext, taskId)
+            BubeDlDownloader.deleteHeadersStringFromSharedPreferences(applicationContext, taskId)
         }
 
         notificationsHelper.hideNotification(taskId.hashCode())

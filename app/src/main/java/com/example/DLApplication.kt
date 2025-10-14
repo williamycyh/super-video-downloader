@@ -11,7 +11,7 @@ import com.example.util.FileUtil
 import com.example.util.SharedPrefHelper
 import com.example.util.downloaders.generic_downloader.DaggerWorkerFactory
 import com.google.firebase.FirebaseApp
-import com.ytdlp.YtDlpJava
+import com.btdlp.BtdJava
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
@@ -71,7 +71,7 @@ open class DLApplication : DaggerApplication() {
                 file.mkdirs()
             }
 
-            initializeYtDlpJava()
+            initializeBtdJava()
         }
 
         // initialize firebase
@@ -88,12 +88,12 @@ open class DLApplication : DaggerApplication() {
         FileUtil.INITIIALIZED = true
     }
 
-    private fun initializeYtDlpJava() {
+    private fun initializeBtdJava() {
         try {
-            // Initialize custom yt-dlp Java library
-            AppLogger.d("Custom yt-dlp Java library initialized successfully")
+            // Initialize custom Bube download Java library
+            AppLogger.d("Custom Bube download Java library initialized successfully")
         } catch (e: Exception) {
-            AppLogger.e("failed to initialize yt-dlp Java library $e")
+            AppLogger.e("failed to initialize Bube download Java library $e")
         }
     }
 }

@@ -8,9 +8,9 @@ import com.example.data.local.room.entity.VideoInfo
 import com.example.util.AppLogger
 import com.example.util.CookieUtils
 import com.example.util.proxy_utils.CustomProxyController
-import com.ytdlp.YtDlpJava
-import com.ytdlp.core.VideoInfo as YtDlpVideoInfo
-import com.ytdlp.core.VideoFormat as YtDlpVideoFormat
+import com.btdlp.BtdJava
+import com.btdlp.core.VideoInfo as BtdVideoInfo
+import com.btdlp.core.VideoFormat as BtdVideoFormat
 import okhttp3.Request
 import java.util.Locale
 
@@ -43,7 +43,7 @@ open class VideoServiceLocal(
         try {
             result = handleYoutubeDlUrl(url, isM3u8OrMpd, isAudioCheck)
         } catch (e: Throwable) {
-            AppLogger.d("YoutubeDL Error: $e")
+            AppLogger.d("BubeDL Error: $e")
         }
 
         return result
@@ -56,28 +56,28 @@ open class VideoServiceLocal(
     ): VideoInfoWrapper {
         try {
             AppLogger.d("VideoService: Starting video info extraction for URL: ${url.url}")
-            val ytdlpJava = YtDlpJava()
+            val btdJava = BtdJava()
             
-            AppLogger.d("VideoService: YtDlpJava instance created successfully")
+            AppLogger.d("VideoService: BtdJava instance created successfully")
             
             // Extract video info using custom library
-            val ytdlpVideoInfo = ytdlpJava.extractInfo(url.url.toString())
+            val btdVideoInfo = btdJava.extractInfo(url.url.toString())
             
-            if (ytdlpVideoInfo == null) {
+            if (btdVideoInfo == null) {
                 AppLogger.e("VideoService: Failed to extract video info for URL: ${url.url}")
                 throw Exception("Failed to extract video info")
             }
             
-            AppLogger.d("VideoService: Successfully extracted video info: ${ytdlpVideoInfo.getTitle()}")
-            AppLogger.d("VideoService: Found ${ytdlpVideoInfo.getFormats().size} formats")
+            AppLogger.d("VideoService: Successfully extracted video info: ${btdVideoInfo.getTitle()}")
+            AppLogger.d("VideoService: Found ${btdVideoInfo.getFormats().size} formats")
             
             // 打印前几个格式的信息用于调试
-            ytdlpVideoInfo.getFormats().take(3).forEachIndexed { index, format ->
+            btdVideoInfo.getFormats().take(3).forEachIndexed { index, format ->
                 AppLogger.d("VideoService: Format $index - ID: ${format.getFormatId()}, Ext: ${format.getExt()}, Protocol: ${format.getProtocol()}")
             }
             
             // Convert custom library formats to our format
-            val formats = ytdlpVideoInfo.getFormats().map { videoEntityFromYtDlpFormat(it) }
+            val formats = btdVideoInfo.getFormats().map { videoEntityFromYtDlpFormat(it) }
             val filtered = if (url.url.toString().contains(FACEBOOK_HOST)) {
                 formats.filter {
                     it.formatId?.lowercase(Locale.ROOT)?.contains(Regex("hd|sd")) == true
@@ -96,11 +96,11 @@ open class VideoServiceLocal(
 
             return VideoInfoWrapper(
                 VideoInfo(
-                    title = ytdlpVideoInfo.getTitle() ?: "no title", formats = listFormats
+                    title = btdVideoInfo.getTitle() ?: "no title", formats = listFormats
                 ).apply {
                     ext = MP4_EXT
-                    thumbnail = ytdlpVideoInfo.getThumbnail() ?: ""
-                    duration = ytdlpVideoInfo.getDuration()?.toLong() ?: 0L
+                    thumbnail = btdVideoInfo.getThumbnail() ?: ""
+                    duration = btdVideoInfo.getDuration()?.toLong() ?: 0L
                     originalUrl = url.url.toString()
                     downloadUrls = if (isM3u8OrMpd) emptyList() else listOf(url)
                     isRegularDownload = false
@@ -114,7 +114,7 @@ open class VideoServiceLocal(
 
     // attachProxyToRequest method removed - no longer needed with custom library
 
-    private fun videoEntityFromYtDlpFormat(ytdlpFormat: YtDlpVideoFormat): VideoFormatEntity {
+    private fun videoEntityFromYtDlpFormat(ytdlpFormat: BtdVideoFormat): VideoFormatEntity {
         return VideoFormatEntity(
             asr = ytdlpFormat.getAsr() ?: 0,
             tbr = ytdlpFormat.getTbr() ?: 0,
@@ -133,7 +133,7 @@ open class VideoServiceLocal(
         )
     }
 
-    private fun videoEntityFromFormat(videoFormat: YtDlpVideoFormat): VideoFormatEntity {
+    private fun videoEntityFromFormat(videoFormat: BtdVideoFormat): VideoFormatEntity {
         return VideoFormatEntity(
             asr = videoFormat.getAsr() ?: 0,
             tbr = videoFormat.getTbr() ?: 0,

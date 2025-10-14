@@ -27,7 +27,7 @@ import com.example.tubedown.main.proxies.ProxiesViewModel
 import com.example.tubedown.main.settings.SettingsViewModel
 import com.example.util.AdsInitializerHelper
 import com.example.util.SharedPrefHelper
-import com.example.util.downloaders.tubedl_downloader.TubeDlDownloaderWorker
+import com.example.util.downloaders.Bubedl_downloader.BubeDlDownloaderWorker
 import com.example.util.fragment.FragmentFactory
 import com.example.util.scheduler.BaseSchedulers
 import javax.inject.Inject
@@ -133,12 +133,12 @@ class MainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent?.getBooleanExtra(
-                TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY,
+                BubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY,
                 false
             ) == true
         ) {
             if (intent.getBooleanExtra(
-                    TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_ERROR_KEY,
+                    BubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_ERROR_KEY,
                     false
                 )
             ) {
@@ -147,9 +147,9 @@ class MainActivity : BaseActivity() {
                 dataBinding.viewPager.currentItem = 2
             }
 
-            if (intent.hasExtra(TubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY)) {
+            if (intent.hasExtra(BubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY)) {
                 val downloadFileName =
-                    intent.getStringExtra(TubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY)
+                    intent.getStringExtra(BubeDlDownloaderWorker.DOWNLOAD_FILENAME_KEY)
                         .toString()
 
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -157,7 +157,7 @@ class MainActivity : BaseActivity() {
                 }, 1000)
             }
         } else {
-            if (intent?.hasExtra(TubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY) == true) {
+            if (intent?.hasExtra(BubeDlDownloaderWorker.IS_FINISHED_DOWNLOAD_ACTION_KEY) == true) {
                 dataBinding.viewPager.currentItem = 1
             } else {
                 dataBinding.viewPager.currentItem = 0

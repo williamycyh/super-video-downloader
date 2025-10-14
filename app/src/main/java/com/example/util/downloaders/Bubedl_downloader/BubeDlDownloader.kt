@@ -1,4 +1,4 @@
-package com.example.util.downloaders.tubedl_downloader
+package com.example.util.downloaders.Bubedl_downloader
 
 import android.content.Context
 import android.util.Base64
@@ -10,12 +10,12 @@ import com.example.data.local.room.entity.VideoInfo
 import com.example.util.AppLogger
 import com.example.util.ContextUtils
 import com.example.util.downloaders.generic_downloader.GenericDownloader
-import com.example.util.downloaders.tubedl_downloader.TubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
+import com.example.util.downloaders.Bubedl_downloader.BubeDlDownloaderWorker.Companion.STOP_SAVE_ACTION
 import com.google.gson.Gson
 import java.util.concurrent.TimeUnit
 
 
-object TubeDlDownloader : GenericDownloader() {
+object BubeDlDownloader : GenericDownloader() {
 
     fun stopAndSaveDownload(context: Context, progressInfo: ProgressInfo) {
         val downloadWork = getWorkRequest(progressInfo.videoInfo.id)
@@ -64,7 +64,7 @@ object TubeDlDownloader : GenericDownloader() {
     }
 
     override fun getWorkRequest(id: String): OneTimeWorkRequest.Builder {
-        return OneTimeWorkRequest.Builder(TubeDlDownloaderWorker::class.java).addTag(id)
+        return OneTimeWorkRequest.Builder(BubeDlDownloaderWorker::class.java).addTag(id)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
     }
 }

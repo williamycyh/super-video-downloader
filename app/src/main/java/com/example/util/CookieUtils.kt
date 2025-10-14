@@ -7,7 +7,7 @@ import android.os.Build
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import com.google.common.net.InternetDomainName
-// import com.yausername.youtubedl_android.YoutubeDLRequest - removed, using custom library
+// import com.yausername.youtubedl_android.BubeDLRequest - removed, using custom Bube library
 import okhttp3.Headers
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.Request
@@ -43,7 +43,7 @@ object CookieUtils {
 
     fun addCookiesToRequest(
         url: String,
-        request: Any, // Changed from YoutubeDLRequest to Any for compatibility
+        request: Any, // Changed from BubeDLRequest to Any for compatibility
         additionalUrl: String? = null
     ): File {
         // TODO: May be should remove this If
