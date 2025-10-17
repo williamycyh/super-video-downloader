@@ -68,14 +68,16 @@
     <string name="help_troubleshooting">• If the video cannot be detected, please try refreshing the page or replaying the video\n• Check if the network connection is stable\n• Some videos may require logging into an account to download\n• If the problem persists, please contact technical support</string>
     
     <!-- Help Page UI Strings -->
-    <string name="help_welcome_title">欢迎使用 SaveX App</string>
-    <string name="help_quick_start_guide">快速上手指南</string>
-    <string name="help_video_detection_title">视频检测</string>
-    <string name="help_video_download_title">视频下载</string>
-    <string name="help_tips_title">使用技巧</string>
-    <string name="help_troubleshooting_title">问题解决</string>
+    <string name="help_welcome_title">Welcome to SaveX App</string>
+    <string name="help_quick_start_guide">Quick Start Guide</string>
+    <string name="help_video_detection_title">Video Detection</string>
+    <string name="help_video_download_title">Video Download</string>
+    <string name="help_tips_title">Usage Tips</string>
+    <string name="help_troubleshooting_title">Troubleshooting</string>
     <string name="help_step_1">1</string>
     <string name="help_step_2">2</string>
+    
+    <!-- Blocked Websites -->
     
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="new_tab">New Tab</string>
@@ -134,7 +136,14 @@
     
     <!-- Splash Screen -->
     <string name="disclaimer_text">This app allows video downloads only. Please ensure you respect copyright laws.</string>
-    <string name="privacy_agreement_text">点击开始代表同意隐私协议</string>
+
     <string name="start_button_text">Start</string>
     <string name="privacy_policy_url">https://sites.google.com/view/tnvddown/home</string>
+
+    <string name="privacy_agreement_text">By clicking "Start", you agree to the Privacy Policy.</string>
+    <string name="disclaimer">Disclaimer</string>
+    <string name="disclaimer_content">Please obtain permission from the content owner before reposting their content.\n\nAny unauthorized actions (re-uploading or downloading of content) or infringement of intellectual property rights are the sole responsibility of the user.</string>
+    <string name="blocked_website_title">Notice</string>
+    <string name="blocked_website_message">Videos from this website cannot be downloaded due to legal restrictions.</string>
+    <string name="blocked_website_ok">OK</string>
 </resources>

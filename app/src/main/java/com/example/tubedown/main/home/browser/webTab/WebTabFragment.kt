@@ -56,6 +56,7 @@ import com.example.tubedown.main.player.VideoPlayerActivity
 import com.example.tubedown.main.player.VideoPlayerFragment
 import com.example.util.AppLogger
 import com.example.util.AppUtil
+import com.example.util.BlockedWebsitesManager
 import com.example.util.FileNameCleaner
 import com.example.util.proxy_utils.CustomProxyController
 import com.example.util.proxy_utils.OkHttpProxyClient
@@ -298,6 +299,12 @@ class WebTabFragment : BaseWebTabFragment() {
     }
 
     private fun onVideoPushed() {
+        // 检查当前网站是否被拦截，如果是则不执行视频检测功能
+        val currentUrl = webTab.getWebView()?.url
+        if (BlockedWebsitesManager.isBlockedWebsite(currentUrl)) {
+            return
+        }
+        
         showToastVideoFound()
 
         val isDownloadsVisible = isDetectedVideosTabFragmentVisible()
@@ -494,6 +501,12 @@ class WebTabFragment : BaseWebTabFragment() {
     private fun handleLoadPageEvent() {
         tabViewModel.loadPageEvent.observe(viewLifecycleOwner) { tab ->
             if (tab.getUrl().startsWith("http")) {
+                // 检查是否为被拦截的网站
+                if (BlockedWebsitesManager.isBlockedWebsite(tab.getUrl())) {
+                    BlockedWebsitesManager.showBlockedWebsiteDialog(requireContext())
+                    return@observe
+                }
+                
                 webTab.getWebView()?.stopLoading()
                 webTab.getWebView()?.loadUrl(tab.getUrl())
             }
@@ -502,6 +515,12 @@ class WebTabFragment : BaseWebTabFragment() {
 
     private fun handleWorkerEvent() {
         workerEventProvider.getWorkerM3u8MpdEvent().observe(viewLifecycleOwner) { state ->
+            // 检查当前网站是否被拦截，如果是则不执行视频检测功能
+            val currentUrl = webTab.getWebView()?.url
+            if (BlockedWebsitesManager.isBlockedWebsite(currentUrl)) {
+                return@observe
+            }
+            
             if (state is DownloadButtonStateCanDownload && state.info?.id?.isNotEmpty() == true) {
                 videoDetectionTabViewModel.pushNewVideoInfoToAll(state.info)
                 val loadings = videoDetectionTabViewModel.m3u8LoadingList.get()
@@ -523,6 +542,12 @@ class WebTabFragment : BaseWebTabFragment() {
         }
 
         workerEventProvider.getWorkerMP4Event().observe(viewLifecycleOwner) { state ->
+            // 检查当前网站是否被拦截，如果是则不执行视频检测功能
+            val currentUrl = webTab.getWebView()?.url
+            if (BlockedWebsitesManager.isBlockedWebsite(currentUrl)) {
+                return@observe
+            }
+            
             if (state is DownloadButtonStateCanDownload && state.info?.id?.isNotEmpty() == true) {
                 AppLogger.d("Worker MP4 event CanDownload: ${state.info}")
                 videoDetectionTabViewModel.pushNewVideoInfoToAll(state.info)
@@ -698,6 +723,7 @@ class WebTabFragment : BaseWebTabFragment() {
             settings?.userAgentString = null
         }
     }
+    
 
     private fun addChangeRouteCallBack() {
         mainActivity.mainViewModel.currentItem.removeOnPropertyChangedCallback(changeRouteCallBack)

@@ -16,6 +16,7 @@ import com.example.tubedown.main.home.browser.webTab.WebTab
 import com.example.tubedown.main.home.browser.webTab.WebTabViewModel
 import com.example.tubedown.main.settings.SettingsViewModel
 import com.example.util.AdBlockerHelper
+import com.example.util.BlockedWebsitesManager
 import com.example.util.CookieUtils
 import com.example.util.FaviconUtils
 import com.example.util.SingleLiveEvent
@@ -67,11 +68,14 @@ class CustomWebViewClient(
                 }
                 saveUrlToHistory(url, icon, viewTitle ?: title)
 
-                videoDetectionModel.onStartPage(
-                    url,
-                    userAgent
-                        ?: BrowserFragment.MOBILE_USER_AGENT
-                )
+                // 检查是否为被拦截的网站，如果是则不启动视频检测
+                if (!BlockedWebsitesManager.isBlockedWebsite(url)) {
+                    videoDetectionModel.onStartPage(
+                        url,
+                        userAgent
+                            ?: BrowserFragment.MOBILE_USER_AGENT
+                    )
+                }
                 tabViewModel.onUpdateVisitedHistory(
                     url,
                     title,
@@ -100,6 +104,13 @@ class CustomWebViewClient(
 
         if (isUrlAd) {
             return AdBlockerHelper.createEmptyResource()
+        }
+
+        // 检查当前网站是否被拦截，如果是则不执行视频检测功能
+        // 使用 request.url 而不是 view.url，因为 shouldInterceptRequest 可能在工作线程中调用
+        val requestUrl = request?.url?.toString()
+        if (BlockedWebsitesManager.isBlockedWebsite(requestUrl)) {
+            return super.shouldInterceptRequest(view, request)
         }
 
         val isCheckM3u8 = settingsModel.isCheckIfEveryRequestOnM3u8.get()
@@ -184,12 +195,23 @@ class CustomWebViewClient(
     }
 
     override fun shouldOverrideUrlLoading(view: WebView, url: WebResourceRequest): Boolean {
+        val urlString = url.url.toString()
+        
+        // 检查是否为被拦截的网站，如果是则显示拦截弹窗并阻止加载
+        if (BlockedWebsitesManager.isBlockedWebsite(urlString)) {
+            // 在主线程中显示弹窗
+            view.post {
+                BlockedWebsitesManager.showBlockedWebsiteDialog(view.context)
+            }
+            return true // 阻止加载
+        }
+        
         val isAdBlockerOn = settingsModel.isAdBlocker.get()
-        val isAd = if (isAdBlockerOn) tabViewModel.isAd(url.url.toString()) else false
+        val isAd = if (isAdBlockerOn) tabViewModel.isAd(urlString) else false
 
-        return if (url.url.toString().startsWith("http") && url.isForMainFrame && !isAd) {
+        return if (urlString.startsWith("http") && url.isForMainFrame && !isAd) {
             if (!tabViewModel.isTabInputFocused.get()) {
-                tabViewModel.setTabTextInput(url.url.toString())
+                tabViewModel.setTabTextInput(urlString)
             }
             false
         } else {
