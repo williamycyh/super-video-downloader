@@ -56,6 +56,27 @@
     <string name="ok">OK</string>
     <string name="get_started_guide">Hi ;–)  For video detecting go to video in browser, click play and waite until detected(can take 5–50 seconds) \n 1. You can change ads detecting threshold in settings \n 2. Some video downloaded corrupted in multi thread mode, use One thread for downloading in such situations \n\n For Video Downloading: \n \n 1. Press button,in dialog select resolution, if available, and press colored button \n \n 2, 3. Press Play on video player on page with video, after that video should be detected. \n \n If not try to press reload videos on video page or try reload page and repeat. \n If not email me.\n \n \n After downloading video available in app. \n</string>
     <string name="instruction">Hi ;–) \n For video detecting go to video in browser, click play and waite until video detected(can take 5–50 seconds) \n 1. You can change ads detecting threshold in settings \n 2. Video Detection not working for some web sites in mobile mode, try use desktop version of web site if video not detecting in mobile mode \n If not try to press reload videos on video page or try reload page and repeat. \n If not email me.\n \n\n For Video Downloading: \n \n 1. Press Download button,in appeared screen select resolution, if available \n \n 2. Press press download button. \n  \n \n After downloading video available in app. \n</string>
+    
+    <!-- Help Page New Strings -->
+    <string name="help_video_detection">• Open the webpage containing the video in the browser\n• Tap to play the video and wait for detection (may take 5-50 seconds)\n• You can adjust the video detection threshold in Settings\n• Video detection may fail on some websites in mobile mode, try the desktop version</string>
+
+    <string name="help_video_download">• Tap the download button and select the video resolution (if available)\n• Tap to confirm the download\n• Once the download is complete, the video will be saved in the application\n• You can adjust the number of download threads and the storage location in Settings</string>
+
+    <string name="help_tips">• Using Desktop Mode may improve the success rate of video detection\n• Multi-threaded downloads may cause file corruption in some cases; single thread is recommended\n• Regularly clearing browser cache and cookies can improve performance\n•</string>
+
+    <string name="help_troubleshooting">• If the video cannot be detected, please try refreshing the page or replaying the video\n• Check if the network connection is stable\n• Some videos may require logging into an account to download\n• If the problem persists, please contact technical support</string>
+    
+    <!-- Help Page UI Strings -->
+    <string name="help_welcome_title">欢迎使用 SaveX App</string>
+    <string name="help_quick_start_guide">快速上手指南</string>
+    <string name="help_video_detection_title">视频检测</string>
+    <string name="help_video_download_title">视频下载</string>
+    <string name="help_tips_title">使用技巧</string>
+    <string name="help_troubleshooting_title">问题解决</string>
+    <string name="help_step_1">1</string>
+    <string name="help_step_2">2</string>
+    
+    <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="new_tab">New Tab</string>
     <string name="cookies_cleared">Cookies cleared</string>
     <string name="download_started">   Video Download Started Successfully!!!   </string>

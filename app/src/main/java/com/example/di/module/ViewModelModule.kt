@@ -6,6 +6,9 @@ import com.example.di.ViewModelKey
 import com.example.tubedown.main.history.HistoryViewModel
 import com.example.tubedown.main.home.browser.BrowserViewModel
 import com.example.tubedown.main.home.MainViewModel
+import com.example.tubedown.main.home.browser.detectedVideos.GlobalVideoDetectionModel
+import com.example.tubedown.main.home.browser.detectedVideos.VideoDetectionTabViewModel
+import com.example.tubedown.main.help.HelpViewModel
 import com.example.tubedown.main.home.browser.homeTab.BrowserHomeViewModel
 import com.example.tubedown.main.home.browser.detectedVideos.GlobalVideoDetectionModel
 import com.example.tubedown.main.home.browser.webTab.WebTabViewModel
@@ -68,6 +71,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(HistoryViewModel::class)
     abstract fun bindHistoryViewModel(viewModel: HistoryViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(HelpViewModel::class)
+    abstract fun bindHelpViewModel(viewModel: HelpViewModel): ViewModel
 
     @Binds
     @IntoMap
