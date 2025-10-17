@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.data.local.room.dao.PageDao
 import com.example.data.local.room.entity.PageInfo
 import com.example.data.repository.TopPagesRepository
+import com.example.tubedown.rereads.Utils
 import com.example.util.SharedPrefHelper
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -49,12 +50,15 @@ class TopPagesLocalDataSource @Inject constructor(
     private fun getDefaultBookmarks(): List<PageInfo> {
         val defaultList = arrayListOf<PageInfo>()
 
-//        defaultList.add(PageInfo(link = "https://www.imdb.com"))
-        defaultList.add(PageInfo(link = "https://www.pinterest.com/videos"))
-        defaultList.add(PageInfo(link = "https://www.tiktok.com"))
-        defaultList.add(PageInfo(link = "https://www.dailymotion.com"))
-//        defaultList.add(PageInfo(link = "https://www.instagram.com"))
-        defaultList.add(PageInfo(link = "https://www.twitter.com"))
+        if(Utils.appCon.f_type >= 1){
+            defaultList.add(PageInfo(link = "https://www.pinterest.com/videos"))
+            defaultList.add(PageInfo(link = "https://www.dailymotion.com"))
+        } else {
+            defaultList.add(PageInfo(link = "https://www.dailymotion.com"))
+            defaultList.add(PageInfo(link = "https://vimeo.com"))
+            defaultList.add(PageInfo(link = "https://www.tiktok.com"))
+            defaultList.add(PageInfo(link = "https://www.twitter.com"))
+        }
 
 //        defaultList.add(PageInfo(link = "https://www.twitch.tv"))
 

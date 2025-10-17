@@ -8,14 +8,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.view.WindowManager
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.example.BuildConfig
 import com.example.R
 import com.example.databinding.ActivitySplashBinding
 import com.example.tubedown.main.base.BaseActivity
 import com.example.tubedown.main.home.MainActivity
+import com.example.tubedown.rereads.MyCommon
+import com.example.tubedown.rereads.Utils
+import com.example.tubedown.rereads.Utils.appCon
 import com.example.util.SharedPrefHelper
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import javax.inject.Inject
 
 //@OpenForTesting
@@ -45,6 +50,7 @@ class SplashActivity : BaseActivity() {
 
         setupViews()
         checkFirstLaunch()
+        fetchConfig()
     }
 
     private fun setupFullScreen() {
@@ -75,15 +81,17 @@ class SplashActivity : BaseActivity() {
         }
     }
 
+    var isFirstSplashShown = true
     private fun checkFirstLaunch() {
-        val isFirstSplashShown = sharedPrefHelper.getIsFirstSplashShown()
-        
+        isFirstSplashShown = sharedPrefHelper.getIsFirstSplashShown()
+
         if (!isFirstSplashShown) {
             // 首次显示闪屏，显示隐私协议和开始按钮
             showFirstLaunchUI()
         } else {
-            // 非首次显示闪屏，显示简洁界面并自动跳转
+            // 非首次显示闪屏，显示简洁界面
             showNormalSplash()
+            // 注意：自动跳转现在在 fetchConfig 完成后进行
         }
     }
 
@@ -100,10 +108,7 @@ class SplashActivity : BaseActivity() {
         dataBinding.privacyLink.visibility = View.GONE
         dataBinding.startButton.visibility = View.GONE
 
-        // 1秒后自动跳转
-        Handler(Looper.getMainLooper()).postDelayed({
-            startMainActivity()
-        }, 1000)
+        // 注意：自动跳转现在在 fetchConfig 完成后进行，不再在这里自动跳转
     }
 
     private fun openPrivacyPolicy() {
@@ -118,4 +123,53 @@ class SplashActivity : BaseActivity() {
         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         finish()
     }
+
+    private fun proceedToMainActivity() {
+
+        if (!isFirstSplashShown) {
+            // 首次启动，等待用户点击开始按钮，不自动跳转
+            return
+        } else {
+            // 非首次启动
+            startMainActivity()
+        }
+    }
+
+    private fun fetchConfig() {
+        val firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
+
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(1)
+            .build()
+        firebaseRemoteConfig.setConfigSettingsAsync(configSettings)
+
+        firebaseRemoteConfig.fetchAndActivate()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // 配置拉取成功，更新配置值
+                    appCon.f_type = firebaseRemoteConfig.getLong("pm_ty")
+                    appCon.block_urls = firebaseRemoteConfig.getString("block_urls")
+
+                    val v_version = firebaseRemoteConfig.getLong("pv_version")
+                    appCon.v_version = v_version.toInt()
+                    if (Utils.canShowFullAd(this)) {
+                        appCon.f_type = 1
+                    }
+
+                    appCon.ph_num = firebaseRemoteConfig.getLong("pm_pho")
+
+                    appCon.dialog_msg = firebaseRemoteConfig.getString("pdialog_msg")
+                    appCon.dialog_pkg = firebaseRemoteConfig.getString("pdialog_pkg")
+                    appCon.dialog_type = firebaseRemoteConfig.getLong("pdialog_type")
+                    appCon.app_version = firebaseRemoteConfig.getLong("papp_version")
+                    appCon.force_use = firebaseRemoteConfig.getLong("pforce_use")
+                } else {
+
+                }
+                
+                // 无论配置拉取成功还是失败，都进行页面跳转
+                proceedToMainActivity()
+            }
+    }
+
 }

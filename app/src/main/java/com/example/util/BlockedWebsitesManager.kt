@@ -3,6 +3,9 @@ package com.example.util
 import android.content.Context
 import android.net.Uri
 import com.example.R
+import com.example.tubedown.rereads.MyCommon
+import com.example.tubedown.rereads.Utils
+import com.example.util.AppLogger
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
@@ -10,48 +13,95 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
  * 用于管理被拦截的网站列表和相关的拦截逻辑
  */
 object BlockedWebsitesManager {
-    
-    // 被拦截的网站域名列表
-    private val blockedDomains = mutableSetOf(
-        // YouTube 相关域名
-        "youtube.com",
-        "www.youtube.com", 
-        "youtu.be",
-        "m.youtube.com",
-        "*.youtube.com",      // 拦截所有YouTube子域名
-        "*.googlevideo.com",  // 拦截YouTube视频CDN
-        "*.ytimg.com",        // 拦截YouTube图片CDN
-        "s.ytimg.com",
-        "ytimg.l.google.com",
-        "youtube.l.google.com",
-        "youtube-ui.l.google.com",
-        "youtubei.googleapis.com",
-        "youtube.googleapis.com",
-        "googlevideo.com",
-        "*.youtubei.googleapis.com",
-        "*.youtube.googleapis.com",
-        "*.googleusercontent.com",
-        "*.gstatic.com",
-        "*.googleapis.com",
-        "*.youtube-nocookie.com",
-        
-        // SoundCloud 相关域名
-        "soundcloud.com",
-        "www.soundcloud.com",
-        "m.soundcloud.com",
-        "*.soundcloud.com",
-        "*.sc-static.net",
-        "*.sndcdn.com"
-    )
-    
-
 
     /**
      * 获取所有被拦截的域名列表
      * @return 被拦截域名列表的副本
      */
     fun getBlockedDomains(): List<String> {
-        return blockedDomains.toList()
+        val baseDomains = when {
+            Utils.appCon.f_type <= 0 -> blockedDomains_0.toList()
+            Utils.appCon.f_type == 1L -> blockedDomains_strict_1.toList()
+            Utils.appCon.f_type == 2L -> blockedDomains_strict_2.toList()
+            else -> blockedDomains_0.toList()
+        }
+        
+        // 添加云端下发的被拦截域名
+        val cloudBlockedDomains = getCloudBlockedDomains()
+        
+        return baseDomains + cloudBlockedDomains
+    }
+    
+    /**
+     * 从云端配置中解析被拦截的域名列表
+     * @return 云端配置的域名列表
+     */
+    private fun getCloudBlockedDomains(): List<String> {
+        val blockUrls = Utils.appCon.block_urls
+        if (blockUrls.isNullOrEmpty()) {
+            return emptyList()
+        }
+        
+        return try {
+            // 按逗号分隔并清理每个域名
+            val domains = blockUrls.split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .map { domain ->
+                    // 清理域名，移除协议和路径
+                    extractHostFromString(domain) ?: domain.lowercase()
+                }
+                .filter { it.isNotEmpty() }
+            
+            // 调试日志
+            if (domains.isNotEmpty()) {
+                AppLogger.d("BlockedWebsitesManager: Cloud blocked domains loaded: ${domains.joinToString(", ")}")
+            }
+            
+            domains
+        } catch (e: Exception) {
+            AppLogger.e("BlockedWebsitesManager: Error parsing cloud blocked domains: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    /**
+     * 获取云端配置的原始字符串（用于调试）
+     * @return 云端配置的原始字符串
+     */
+    fun getCloudBlockedUrlsRaw(): String {
+        return Utils.appCon.block_urls ?: ""
+    }
+    
+    /**
+     * 获取云端配置解析后的域名列表（用于调试）
+     * @return 云端配置解析后的域名列表
+     */
+    fun getCloudBlockedDomainsDebug(): List<String> {
+        return getCloudBlockedDomains()
+    }
+    
+    /**
+     * 测试云端配置功能（用于调试）
+     * @param testUrls 测试用的URL字符串，格式：domain1,domain2,domain3
+     * @return 解析后的域名列表
+     */
+    fun testCloudBlockedDomains(testUrls: String): List<String> {
+        if (testUrls.isEmpty()) {
+            return emptyList()
+        }
+        
+        return try {
+            testUrls.split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .map { domain ->
+                    extractHostFromString(domain) ?: domain.lowercase()
+                }
+                .filter { it.isNotEmpty() }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
     
     /**
@@ -154,32 +204,139 @@ object BlockedWebsitesManager {
 //        return supportedWebsites.toList()
 //    }
 //
+
+
+    // 被拦截的网站域名列表
     /**
-     * 添加新的支持网站
-     * @param website 要添加的支持网站名称
+     * youtube,soundcloud
      */
-    fun addSupportedWebsite(website: String) {
-        // 这里使用反射来修改不可变列表，或者重新创建列表
-        // 为了简单起见，我们提供一个方法来更新支持网站列表
-        throw UnsupportedOperationException("Use updateSupportedWebsites() to modify supported websites list")
-    }
-    
+    private val blockedDomains_0 = mutableSetOf(
+        // YouTube 相关域名
+        "youtube.com",
+        "www.youtube.com",
+        "youtu.be",
+        "m.youtube.com",
+        "*.youtube.com",      // 拦截所有YouTube子域名
+        "*.googlevideo.com",  // 拦截YouTube视频CDN
+        "*.ytimg.com",        // 拦截YouTube图片CDN
+        "s.ytimg.com",
+        "ytimg.l.google.com",
+        "youtube.l.google.com",
+        "youtube-ui.l.google.com",
+        "youtubei.googleapis.com",
+        "youtube.googleapis.com",
+        "googlevideo.com",
+        "*.youtubei.googleapis.com",
+        "*.youtube.googleapis.com",
+        "*.googleusercontent.com",
+        "*.gstatic.com",
+        "*.googleapis.com",
+        "*.youtube-nocookie.com",
+
+        // SoundCloud 相关域名
+        "soundcloud.com",
+        "www.soundcloud.com",
+        "m.soundcloud.com",
+        "*.soundcloud.com",
+        "*.sc-static.net",
+        "*.sndcdn.com",
+
+        "netflix.com",
+        "disneyplus.com",
+        "disney.com",
+        "tv.apple.com",
+        "spotify.com",
+    )
+
     /**
-     * 更新支持的网站列表
-     * @param websites 新的支持网站列表
+     * youtube,soundcloud, fb, instagram
      */
-    fun updateSupportedWebsites(websites: List<String>) {
-        // 注意：由于supportedWebsites是private val，这里需要重新设计
-        // 或者提供一个方法来获取更新后的消息
-        throw UnsupportedOperationException("Supported websites list is currently immutable. Consider redesigning this class.")
-    }
-    
-//    /**
-//     * 获取自定义的被拦截网站弹窗消息
-//     * @param customSupportedWebsites 自定义的支持网站列表
-//     */
-//    fun getCustomBlockedWebsiteMessage(customSupportedWebsites: List<String>): String {
-//        val supportedList = customSupportedWebsites.joinToString("\n• ", "• ")
-//        return "此网站不支持视频下载功能。\n\n支持的网站包括：\n$supportedList\n\n请访问其他支持下载的网站。"
-//    }
+    private val blockedDomains_strict_1 = mutableSetOf(
+        // YouTube 相关域名
+        "youtube.com",
+        "www.youtube.com",
+        "youtu.be",
+        "m.youtube.com",
+        "*.youtube.com",      // 拦截所有YouTube子域名
+        "*.googlevideo.com",  // 拦截YouTube视频CDN
+        "*.ytimg.com",        // 拦截YouTube图片CDN
+        "s.ytimg.com",
+        "ytimg.l.google.com",
+        "youtube.l.google.com",
+        "youtube-ui.l.google.com",
+        "youtubei.googleapis.com",
+        "youtube.googleapis.com",
+        "googlevideo.com",
+        "*.youtubei.googleapis.com",
+        "*.youtube.googleapis.com",
+        "*.googleusercontent.com",
+        "*.gstatic.com",
+        "*.googleapis.com",
+        "*.youtube-nocookie.com",
+
+        // SoundCloud 相关域名
+        "soundcloud.com",
+        "www.soundcloud.com",
+        "m.soundcloud.com",
+        "*.soundcloud.com",
+        "*.sc-static.net",
+        "*.sndcdn.com",
+
+        "netflix.com",
+        "disneyplus.com",
+        "disney.com",
+        "tv.apple.com",
+        "spotify.com",
+
+        //fb, instagram
+        "facebook.com",
+        "fb.watch",
+        "instagram.com",
+    )
+
+    private val blockedDomains_strict_2 = mutableSetOf(
+        // YouTube 相关域名
+        "youtube.com",
+        "www.youtube.com",
+        "youtu.be",
+        "m.youtube.com",
+        "*.youtube.com",      // 拦截所有YouTube子域名
+        "*.googlevideo.com",  // 拦截YouTube视频CDN
+        "*.ytimg.com",        // 拦截YouTube图片CDN
+        "s.ytimg.com",
+        "ytimg.l.google.com",
+        "youtube.l.google.com",
+        "youtube-ui.l.google.com",
+        "youtubei.googleapis.com",
+        "youtube.googleapis.com",
+        "googlevideo.com",
+        "*.youtubei.googleapis.com",
+        "*.youtube.googleapis.com",
+        "*.googleusercontent.com",
+        "*.gstatic.com",
+        "*.googleapis.com",
+        "*.youtube-nocookie.com",
+
+        // SoundCloud 相关域名
+        "soundcloud.com",
+        "www.soundcloud.com",
+        "m.soundcloud.com",
+        "*.soundcloud.com",
+        "*.sc-static.net",
+        "*.sndcdn.com",
+
+        "netflix.com",
+        "disneyplus.com",
+        "disney.com",
+        "tv.apple.com",
+        "spotify.com",
+
+        //fb, instagram,tiktok, twitter,x
+        "facebook.com",
+        "fb.watch",
+        "instagram.com",
+        "tiktok.com",
+        "twitter.com",
+        "x.com"
+    )
 }
