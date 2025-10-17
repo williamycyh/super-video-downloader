@@ -629,6 +629,14 @@ class WebTabFragment : BaseWebTabFragment() {
                 videoDetectionTabViewModel.cancelAllCheckJobs()
             }
         }
+
+        override fun onTabsCounterClicked() {
+            TODO("Not yet implemented")
+        }
+
+        override fun onSettingsClicked() {
+            TODO("Not yet implemented")
+        }
     }
 
     private fun getWebViewClientCompat(webView: WebView?): CustomWebViewClient? {

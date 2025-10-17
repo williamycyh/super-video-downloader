@@ -214,7 +214,7 @@ abstract class BaseWebTabFragment : BaseFragment() {
         )
     }
 
-    private fun navigateToHistory() {
+    fun navigateToHistory() {
         try {
             val currentFragment = this
             val activityFragmentContainer =
@@ -237,7 +237,7 @@ abstract class BaseWebTabFragment : BaseFragment() {
             .setText(url).startChooser()
     }
 
-    private fun navigateToSettings() {
+    fun navigateToSettings() {
         try {
             val currentFragment = this
             val activityFragmentContainer =
@@ -291,7 +291,7 @@ abstract class BaseWebTabFragment : BaseFragment() {
         }
     }
 
-    private fun navigateToBookMarks() {
+    fun navigateToBookMarks() {
         try {
             val currentFragment = this
             val activityFragmentContainer =

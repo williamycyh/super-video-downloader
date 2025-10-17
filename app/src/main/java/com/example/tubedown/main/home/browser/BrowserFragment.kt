@@ -105,6 +105,10 @@ interface BrowserListener {
     fun onBrowserBackClicked()
 
     fun onBrowserForwardClicked()
+    
+    fun onTabsCounterClicked()
+    
+    fun onSettingsClicked()
 }
 
 const val HOME_TAB_INDEX = 0

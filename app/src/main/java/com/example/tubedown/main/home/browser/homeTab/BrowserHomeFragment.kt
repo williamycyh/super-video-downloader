@@ -46,6 +46,12 @@ interface BrowserHomeListener : BrowserListener {
 
     override fun onBrowserForwardClicked() {
     }
+    
+    override fun onTabsCounterClicked() {
+    }
+    
+    override fun onSettingsClicked() {
+    }
 }
 
 class BrowserHomeFragment : BaseWebTabFragment() {
@@ -138,6 +144,9 @@ class BrowserHomeFragment : BaseWebTabFragment() {
             mainViewModel.openedText.set(null)
         }
 
+        // Setup tabs counter
+        setupTabsCounter()
+
         loadAd()
     }
 
@@ -187,6 +196,15 @@ class BrowserHomeFragment : BaseWebTabFragment() {
         override fun onBrowserMenuClicked() {
             showPopupMenu()
         }
+        
+        override fun onTabsCounterClicked() {
+            // Open the navigation drawer to show tabs
+            mainViewModel.openNavDrawerEvent.call()
+        }
+        
+        override fun onSettingsClicked() {
+            navigateToSettings()
+        }
     }
 
     private fun handleFirstStartGuide() {
@@ -234,6 +252,25 @@ class BrowserHomeFragment : BaseWebTabFragment() {
         } else {
             Toast.makeText(requireContext(), "Please enter search text", Toast.LENGTH_SHORT).show()
         }
+    }
+    
+    private fun setupTabsCounter() {
+        // Initial update
+        updateTabsCounter()
+        
+        // Listen for tabs changes
+        openPageIProvider.getTabsListChangeEvent().addOnPropertyChangedCallback(object :
+            androidx.databinding.Observable.OnPropertyChangedCallback() {
+            override fun onPropertyChanged(sender: androidx.databinding.Observable?, propertyId: Int) {
+                updateTabsCounter()
+            }
+        })
+    }
+    
+    private fun updateTabsCounter() {
+        val tabsList = openPageIProvider.getTabsListChangeEvent().get()
+        val tabsCount = tabsList?.size ?: 1 // At least 1 tab (home tab)
+        binding.tabsCounterText.text = tabsCount.toString()
     }
 
 
