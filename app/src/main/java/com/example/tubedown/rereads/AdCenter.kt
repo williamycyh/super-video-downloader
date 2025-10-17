@@ -57,34 +57,6 @@ abstract class AdCenter {
                 return
             }
 
-
-////            var ironSourceSettings: HashMap<String, String> = HashMap()
-////            ironSourceSettings.put("​applicationKey​", AdUnit.IRONSRC_APP_KEY)
-//
-//            var inMobiSettings: HashMap<String, String> = HashMap()
-//            inMobiSettings.put("accountid", BaseCommon.decodeToString("YmE5YjFhMjRhMjVhNDQxMThjZGRkOWQwNzQ3ZmNhM2U=")) //"ba9b1a24a25a44118cddd9d0747fca3e"
-//
-//            //Mintegral
-////            // Declare your Mintegral app ID and app key
-////            val mintegralConfigs: MutableMap<String, String> = HashMap()
-////            mintegralConfigs["appId"] =  AdUnit.MINTEGRAL_APP_ID
-////            mintegralConfigs["appKey"] = BaseCommon.decodeToString("MGY3OWI3NmQxY2E0NDFlNzk5YmRhYmI3NjUzZDQ1ODA=")//"0f79b76d1ca441e799bdabb7653d4580"
-//
-//
-//            val sdkConfiguration = SdkConfiguration.Builder(AdUnit.ADUNIT_banner)
-////                    .withMediatedNetworkConfiguration(IronSourceAdapterConfiguration::class.java.name, ironSourceSettings)
-//                    .withMediatedNetworkConfiguration(InMobiAdapterConfiguration::class.java.name, inMobiSettings)
-////                    .withMediatedNetworkConfiguration(MintegralAdapterConfiguration::class.java.name, mintegralConfigs)
-////                    .withLogLevel(MoPubLog.LogLevel.DEBUG)
-//                    .build()
-//
-//            MoPub.initializeSdk(activity, sdkConfiguration, object : SdkInitializationListener {
-//                override fun onInitializationFinished() {
-//                    MoPubInited = true
-//                }
-//
-//            })
-
             // Create the initialization configuration
             var decodeKey =
                 MydecodeToString("aXh5XzRIXzBUc0ljZXh1S0R0dHFIV0tOYVpxMkZVZ0RXRjl3UnVsbnF3NVQ0Mkk4TjZtM0hjXzFuZ1MyaV9hR2ZzWmJfT2dDcTNQdkE4c1FCVHFsTkNKN0VU")
