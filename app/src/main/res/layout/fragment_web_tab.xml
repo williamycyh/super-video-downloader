@@ -25,6 +25,10 @@
         <variable
             name="settingsViewModel"
             type="com.example.tubedown.main.settings.SettingsViewModel" />
+            
+        <variable
+            name="isBlockedWebsite"
+            type="boolean" />
     </data>
 
     <FrameLayout
@@ -253,7 +257,7 @@
                 android:focusedByDefault="false"
                 android:foregroundGravity="center"
                 android:translationZ="20dp"
-                android:visibility="@{settingsViewModel.getVideoButtonState() ? View.VISIBLE : View.GONE}"
+                android:visibility="@{(settingsViewModel.getVideoButtonState() &amp;&amp; !isBlockedWebsite) ? View.VISIBLE : View.GONE}"
                 app:layout_anchorGravity="center">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -153,6 +153,7 @@ class WebTabFragment : BaseWebTabFragment() {
             browserMenuListener = tabListener
             settingsViewModel = mainActivity.settingsViewModel
             videoTabVModel = videoDetectionTabViewModel
+            isBlockedWebsite = BlockedWebsitesManager.isBlockedWebsite(webTab.getUrl())
 
             etSearch.setAdapter(suggestionAdapter)
             etSearch.addTextChangedListener(onInputTabChangeListener)
@@ -301,7 +302,10 @@ class WebTabFragment : BaseWebTabFragment() {
     private fun onVideoPushed() {
         // 检查当前网站是否被拦截，如果是则不执行视频检测功能
         val currentUrl = webTab.getWebView()?.url
-        if (BlockedWebsitesManager.isBlockedWebsite(currentUrl)) {
+        val isBlocked = BlockedWebsitesManager.isBlockedWebsite(currentUrl)
+        dataBinding?.isBlockedWebsite = isBlocked
+        
+        if (isBlocked) {
             return
         }
         
@@ -502,8 +506,14 @@ class WebTabFragment : BaseWebTabFragment() {
         tabViewModel.loadPageEvent.observe(viewLifecycleOwner) { tab ->
             if (tab.getUrl().startsWith("http")) {
                 // 检查是否为被拦截的网站
-                if (BlockedWebsitesManager.isBlockedWebsite(tab.getUrl())) {
-                    BlockedWebsitesManager.showBlockedWebsiteDialog(requireContext())
+                val isBlocked = BlockedWebsitesManager.isBlockedWebsite(tab.getUrl())
+                dataBinding?.isBlockedWebsite = isBlocked
+                
+                if (isBlocked) {
+                    BlockedWebsitesManager.showBlockedWebsiteDialog(requireContext()) {
+                        // 点击确定按钮后关闭当前 WebFragment
+                        tabViewModel.closeTab(webTab)
+                    }
                     return@observe
                 }
                 

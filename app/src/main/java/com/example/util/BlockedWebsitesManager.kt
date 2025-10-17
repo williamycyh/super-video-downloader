@@ -21,47 +21,31 @@ object BlockedWebsitesManager {
         "*.youtube.com",      // 拦截所有YouTube子域名
         "*.googlevideo.com",  // 拦截YouTube视频CDN
         "*.ytimg.com",        // 拦截YouTube图片CDN
+        "s.ytimg.com",
+        "ytimg.l.google.com",
+        "youtube.l.google.com",
+        "youtube-ui.l.google.com",
+        "youtubei.googleapis.com",
+        "youtube.googleapis.com",
+        "googlevideo.com",
+        "*.youtubei.googleapis.com",
+        "*.youtube.googleapis.com",
+        "*.googleusercontent.com",
+        "*.gstatic.com",
+        "*.googleapis.com",
+        "*.youtube-nocookie.com",
         
         // SoundCloud 相关域名
         "soundcloud.com",
         "www.soundcloud.com",
-        "m.soundcloud.com"
+        "m.soundcloud.com",
+        "*.soundcloud.com",
+        "*.sc-static.net",
+        "*.sndcdn.com"
     )
     
-    // 支持的网站列表（用于提示用户）
-//    private val supportedWebsites = listOf(
-//        "TikTok",
-//        "Twitter",
-//        "Dailymotion",
-//        "Pinterest"
-//    )
-    
-    /**
-     * 添加新的被拦截域名
-     * @param domain 要添加的域名
-     */
-    fun addBlockedDomain(domain: String) {
-        blockedDomains.add(domain.lowercase())
-    }
-    
-    /**
-     * 添加多个被拦截域名
-     * @param domains 要添加的域名列表
-     */
-    fun addBlockedDomains(domains: List<String>) {
-        domains.forEach { domain ->
-            blockedDomains.add(domain.lowercase())
-        }
-    }
-    
-    /**
-     * 移除被拦截的域名
-     * @param domain 要移除的域名
-     */
-    fun removeBlockedDomain(domain: String) {
-        blockedDomains.remove(domain.lowercase())
-    }
-    
+
+
     /**
      * 获取所有被拦截的域名列表
      * @return 被拦截域名列表的副本
@@ -82,7 +66,7 @@ object BlockedWebsitesManager {
             val uri = Uri.parse(url)
             val host = uri.host?.lowercase()
             
-            return blockedDomains.any { blockedDomain ->
+            return getBlockedDomains().any { blockedDomain ->
                 isHostBlocked(host, blockedDomain.lowercase())
             }
         } catch (e: Exception) {
@@ -147,15 +131,17 @@ object BlockedWebsitesManager {
     /**
      * 显示被拦截网站的提示弹窗
      * @param context 上下文
+     * @param onPositiveClick 点击确定按钮时的回调函数，可选
      */
-    fun showBlockedWebsiteDialog(context: Context) {
+    fun showBlockedWebsiteDialog(context: Context, onPositiveClick: (() -> Unit)? = null) {
         MaterialAlertDialogBuilder(context)
             .setTitle(context.getString(R.string.blocked_website_title))
             .setMessage(context.getString(R.string.blocked_website_message))
             .setPositiveButton(context.getString(R.string.blocked_website_ok)) { dialog, _ ->
+                onPositiveClick?.invoke()
                 dialog.dismiss()
             }
-            .setCancelable(true)
+            .setCancelable(false)
             .show()
     }
     

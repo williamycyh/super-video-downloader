@@ -152,17 +152,23 @@ open class VideoDetectionTabViewModel @Inject constructor(
         AppLogger.d("VideoDetectionTabViewModel: Detected videos list size: ${detectedVideosList.get()?.size ?: 0}")
 
         if (state is DownloadButtonStateCanNotDownload) {
-            webTabModel?.getTabTextInput()?.get()?.let {
-                if (it.startsWith("http")) {
-                    AppLogger.d("VideoDetectionTabViewModel: Starting page analysis for: $it")
+            webTabModel?.getTabTextInput()?.get()?.let { url ->
+                if (url.startsWith("http")) {
+                    // 检查是否为被拦截的网站
+                    if (com.example.util.BlockedWebsitesManager.isBlockedWebsite(url)) {
+                        AppLogger.d("VideoDetectionTabViewModel: Blocked website detected, skipping video analysis: $url")
+                        return
+                    }
+                    
+                    AppLogger.d("VideoDetectionTabViewModel: Starting page analysis for: $url")
                     viewModelScope.launch(executorRegular) {
                         onStartPage(
-                            it.trim(),
+                            url.trim(),
                             webTabModel?.userAgent?.get() ?: BrowserFragment.MOBILE_USER_AGENT
                         )
                     }
                 } else {
-                    AppLogger.d("VideoDetectionTabViewModel: URL doesn't start with http: $it")
+                    AppLogger.d("VideoDetectionTabViewModel: URL doesn't start with http: $url")
                 }
             } ?: run {
                 AppLogger.d("VideoDetectionTabViewModel: No URL available in tab text input")
@@ -361,9 +367,19 @@ open class VideoDetectionTabViewModel @Inject constructor(
     }
 
     fun setButtonState(state: DownloadButtonState) {
+        // 检查当前网站是否被拦截
+        val currentUrl = webTabModel?.getTabTextInput()?.get()
+        val isBlocked = currentUrl?.let { com.example.util.BlockedWebsitesManager.isBlockedWebsite(it) } ?: false
+        
         when (state) {
             is DownloadButtonStateCanDownload -> {
-                downloadButtonState.set(state)
+                // 如果网站被拦截，不设置为可下载状态
+                if (!isBlocked) {
+                    downloadButtonState.set(state)
+                } else {
+                    AppLogger.d("VideoDetectionTabViewModel: Blocked website detected, preventing download button activation")
+                    downloadButtonState.set(DownloadButtonStateCanNotDownload())
+                }
             }
 
             is DownloadButtonStateCanNotDownload -> {
@@ -378,11 +394,17 @@ open class VideoDetectionTabViewModel @Inject constructor(
                         downloadButtonState.set(DownloadButtonStateCanNotDownload())
                     }
                 } else {
-                    downloadButtonState.set(
-                        DownloadButtonStateCanDownload(
-                            detectedVideosList.get()?.first()
+                    // 如果网站被拦截，即使检测到视频也不设置为可下载状态
+                    if (!isBlocked) {
+                        downloadButtonState.set(
+                            DownloadButtonStateCanDownload(
+                                detectedVideosList.get()?.first()
+                            )
                         )
-                    )
+                    } else {
+                        AppLogger.d("VideoDetectionTabViewModel: Blocked website detected, preventing download button activation despite detected videos")
+                        downloadButtonState.set(DownloadButtonStateCanNotDownload())
+                    }
                 }
             }
 
