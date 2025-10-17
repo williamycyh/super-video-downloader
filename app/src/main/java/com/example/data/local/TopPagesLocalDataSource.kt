@@ -49,13 +49,14 @@ class TopPagesLocalDataSource @Inject constructor(
     private fun getDefaultBookmarks(): List<PageInfo> {
         val defaultList = arrayListOf<PageInfo>()
 
-        defaultList.add(PageInfo(link = "https://www.imdb.com"))
+//        defaultList.add(PageInfo(link = "https://www.imdb.com"))
+        defaultList.add(PageInfo(link = "https://www.pinterest.com/videos"))
         defaultList.add(PageInfo(link = "https://www.tiktok.com"))
         defaultList.add(PageInfo(link = "https://www.dailymotion.com"))
-        defaultList.add(PageInfo(link = "https://www.instagram.com"))
+//        defaultList.add(PageInfo(link = "https://www.instagram.com"))
         defaultList.add(PageInfo(link = "https://www.twitter.com"))
-        defaultList.add(PageInfo(link = "https://www.pinterest.com/videos"))
-        defaultList.add(PageInfo(link = "https://www.twitch.tv"))
+
+//        defaultList.add(PageInfo(link = "https://www.twitch.tv"))
 
         return defaultList.mapIndexed { index, page ->
             page.name = Uri.parse(page.link).host.toString()
