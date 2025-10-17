@@ -1,6 +1,7 @@
 <resources>
     <string name="app_icon">app icon</string>
     <string name="app_name">SaveX</string>
+    <string name="app_name_desc">SaveX, Save Video</string>
     <string name="browser_search_hint">Search in DuckDuckGo or enter url</string>
 
     <string name="title_video">Downloaded</string>
@@ -109,4 +110,10 @@
     <string name="bookmarks_list">Bookmarks</string>
     <string name="is_auto_dark">Auto Theme Mode</string>
     <string name="check_every_request_on_audio">Check every request on audio</string>
+    
+    <!-- Splash Screen -->
+    <string name="disclaimer_text">This app allows video downloads only. Please ensure you respect copyright laws.</string>
+    <string name="privacy_agreement_text">点击开始代表同意隐私协议</string>
+    <string name="start_button_text">Start</string>
+    <string name="privacy_policy_url">https://sites.google.com/view/tnvddown/home</string>
 </resources>
