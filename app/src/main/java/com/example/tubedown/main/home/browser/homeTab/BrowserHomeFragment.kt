@@ -1,5 +1,7 @@
 package com.example.tubedown.main.home.browser.homeTab
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.model.Suggestion
@@ -21,6 +25,7 @@ import com.example.tubedown.main.home.browser.BaseWebTabFragment
 import com.example.tubedown.main.home.browser.BrowserListener
 import com.example.tubedown.main.home.browser.TabManagerProvider
 import com.example.tubedown.main.home.browser.webTab.WebTabFactory
+import com.example.tubedown.rereads.MyCommon
 import com.example.util.AppUtil
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -100,6 +105,15 @@ class BrowserHomeFragment : BaseWebTabFragment() {
                     false
                 } else false
             }
+            
+            // Setup button click listeners
+            this.btnPaste.setOnClickListener {
+                pasteFromClipboard()
+            }
+            
+            this.btnSearch.setOnClickListener {
+                performSearch()
+            }
         }
 
         return binding.root
@@ -123,6 +137,8 @@ class BrowserHomeFragment : BaseWebTabFragment() {
             openNewTab(openingText)
             mainViewModel.openedText.set(null)
         }
+
+        loadAd()
     }
 
     // Bug fix for not updating home page grid after adding new bookmark
@@ -183,4 +199,55 @@ class BrowserHomeFragment : BaseWebTabFragment() {
     override fun shareWebLink() {}
 
     override fun bookmarkCurrentUrl() {}
+    
+    private fun pasteFromClipboard() {
+        try {
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = clipboard.primaryClip
+            
+            if (clipData != null && clipData.itemCount > 0) {
+                val item = clipData.getItemAt(0)
+                val text = item.text?.toString()
+                
+                if (!text.isNullOrEmpty()) {
+                    binding.homeEtSearch.setText(text)
+                    binding.homeEtSearch.setSelection(text.length) // Move cursor to end
+                } else {
+                    Toast.makeText(requireContext(), "Clipboard is empty", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(requireContext(), "Clipboard is empty", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Failed to paste from clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun performSearch() {
+        val inputText = binding.homeEtSearch.text.toString()
+        if (inputText.isNotEmpty()) {
+            binding.homeEtSearch.clearFocus()
+            homeViewModel.viewModelScope.launch {
+                binding.homeEtSearch.text.clear()
+                openNewTab(inputText)
+            }
+        } else {
+            Toast.makeText(requireContext(), "Please enter search text", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun loadAd() {
+//        AdCenter.Companion.initInmobi(this);
+
+//        MyCommon.loadFullScreen(this);
+        binding.nativeAdFrame.post {
+            if (!MyCommon.showFullScreen(activity)) {
+                MyCommon.loadFullScreenAndShow(activity)
+            }
+
+            val myCommon = MyCommon()
+            myCommon.loadBigNative(activity, binding.nativeAdFrame);
+        }
+    }
 }
