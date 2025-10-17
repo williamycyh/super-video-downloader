@@ -76,13 +76,13 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun checkFirstLaunch() {
-        val isFirstLaunch = sharedPrefHelper.getIsFirstStart()
+        val isFirstSplashShown = sharedPrefHelper.getIsFirstSplashShown()
         
-        if (isFirstLaunch) {
-            // 首次启动，显示隐私协议和开始按钮
+        if (!isFirstSplashShown) {
+            // 首次显示闪屏，显示隐私协议和开始按钮
             showFirstLaunchUI()
         } else {
-            // 非首次启动，显示简洁界面并自动跳转
+            // 非首次显示闪屏，显示简洁界面并自动跳转
             showNormalSplash()
         }
     }
@@ -112,8 +112,8 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun startMainActivity() {
-        // 标记已完成首次启动
-        sharedPrefHelper.setIsFirstStart(false)
+        // 标记已完成首次闪屏显示
+        sharedPrefHelper.setIsFirstSplashShown(true)
         
         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         finish()

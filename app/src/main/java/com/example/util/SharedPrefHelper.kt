@@ -22,6 +22,7 @@ class SharedPrefHelper @Inject constructor(
         private const val PROXY_IP_PORT = "PROXY_IP_PORT"
         private const val IS_PROXY_TURN_ON = "IS_PROXY_TURN_ON"
         private const val IS_FIRST_START = "IS_FIRST_START"
+        private const val IS_FIRST_SPLASH_SHOWN = "IS_FIRST_SPLASH_SHOWN"
         private const val IS_SHOW_VIDEO_ALERT = "IS_SHOW_VIDEO_ALERT"
         private const val IS_SHOW_VIDEO_ACTION_BUTTON = "IS_SHOW_VIDEO_ACTION_BUTTON"
         private const val IS_PRESENT = "IS_PRESENT"
@@ -120,6 +121,17 @@ class SharedPrefHelper @Inject constructor(
     fun setIsFirstStart(isFirstStart: Boolean) {
         sharedPreferences.edit().let {
             it.putBoolean(IS_FIRST_START, isFirstStart)
+            it.apply()
+        }
+    }
+
+    fun getIsFirstSplashShown(): Boolean {
+        return sharedPreferences.getBoolean(IS_FIRST_SPLASH_SHOWN, false)
+    }
+
+    fun setIsFirstSplashShown(isShown: Boolean) {
+        sharedPreferences.edit().let {
+            it.putBoolean(IS_FIRST_SPLASH_SHOWN, isShown)
             it.apply()
         }
     }
