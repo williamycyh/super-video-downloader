@@ -24,7 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-import com.inmobi.ads.InMobiInterstitial;
+//import com.inmobi.ads.InMobiInterstitial;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class MyCommon {
 
     static Context sActivity;
     static int sAdType = 0;
-    static InMobiInterstitial sInMobiInterstitial;
+//    static InMobiInterstitial sInMobiInterstitial;
     //    static MBNewInterstitialHandler sMbInterstitalVideoHandler;
     static boolean sfullscreenShowRightWay = false;
     static AdFullScreenAd.FullScreenLoadResult fullScreenAdInterface = new AdFullScreenAd.FullScreenLoadResult() {

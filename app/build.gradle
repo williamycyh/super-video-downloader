@@ -91,7 +91,7 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
-            testCoverageEnabled true
+//            testCoverageEnabled true
         }
         release {
             signingConfig signingConfigs.release
@@ -129,12 +129,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
-
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     namespace 'com.example'
     lint {
@@ -290,7 +289,7 @@ dependencies {
     implementation 'com.android.support:customtabs:28.+'
     implementation 'com.applovin.mediation:mintegral-adapter:16.9.91.0'
     implementation 'com.applovin.mediation:facebook-adapter:6.20.0.0'
-    implementation 'com.applovin.mediation:unityads-adapter:4.16.1.0'
+    implementation 'com.applovin.mediation:unityads-adapter:4.16.2.0'
     implementation 'com.applovin.mediation:google-adapter:24.6.0.0'
     implementation 'com.applovin.mediation:vungle-adapter:7.5.1.0'
 
