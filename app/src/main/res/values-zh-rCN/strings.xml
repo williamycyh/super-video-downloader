@@ -109,4 +109,24 @@
     <string name="help_tips">• 使用桌面模式可能提高视频检测成功率\n• 多线程下载可能在某些情况下导致文件损坏，建议使用单线程\n• 定期清理浏览器缓存和Cookie可以提高性能\n•</string>
 
     <string name="help_troubleshooting">• 如果视频无法检测，请尝试刷新页面或重新播放视频\n• 检查网络连接是否稳定\n• 某些视频可能需要登录账户才能下载\n• 如果问题持续存在，请联系技术支持</string>
+
+    <string name="help_welcome_title">欢迎使用 SaveX App</string>
+    <string name="help_quick_start_guide">快速上手指南</string>
+    <string name="help_video_detection_title">视频检测</string>
+    <string name="help_video_download_title">视频下载</string>
+    <string name="help_tips_title">使用技巧</string>
+    <string name="help_troubleshooting_title">问题解决</string>
+
+    <string name="privacy_agreement_text">点击开始代表同意隐私协议</string>
+    <string name="disclaimer">免责声明</string>
+    <string name="disclaimer_content">重新发布别人的内容前，请先得到对方的许可\n\n任何未经授权的行为（重新上传或下载内容）或侵犯知识产权的行为，用户需全权负责。</string>
+    <string name="blocked_website_title">提示</string>
+    <string name="blocked_website_message">由于法律限制，该网站上的视频均无法下载。</string>
+    <string name="blocked_website_ok">确定</string>
+
+    <string name="help_tab_detection">检测</string>
+    <string name="help_tab_download">下载</string>
+    <string name="help_tab_disclaimer">声明</string>
+    <string name="help_tab_tips">技巧</string>
+    <string name="help_tab_troubleshooting">故障</string>
 </resources>

@@ -60,6 +60,8 @@ import com.example.util.AppUtil
 import com.example.util.FileNameCleaner
 import com.example.util.proxy_utils.CustomProxyController
 import com.example.util.proxy_utils.OkHttpProxyClient
+import com.example.tubedown.rereads.MyCommon
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -360,6 +362,11 @@ class WebTabFragment : BaseWebTabFragment() {
                 ) ?: false
             })
         )
+
+        // 显示插屏广告
+        activity?.let { activity ->
+            MyCommon.showFullScreen(activity)
+        }
 
         mainActivity.mainViewModel.downloadVideoEvent.value = info
 
