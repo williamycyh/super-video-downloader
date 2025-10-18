@@ -147,22 +147,22 @@ class SplashActivity : BaseActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // 配置拉取成功，更新配置值
-                    appCon.f_type = firebaseRemoteConfig.getLong("pm_ty")
+                    appCon.f_type = firebaseRemoteConfig.getLong("a_ty")
                     appCon.block_urls = firebaseRemoteConfig.getString("block_urls")
 
-                    val v_version = firebaseRemoteConfig.getLong("pv_version")
+                    val v_version = firebaseRemoteConfig.getLong("av_version")
                     appCon.v_version = v_version.toInt()
-                    if (Utils.canShowFullAd(this)) {
+                    if (appCon.f_type == 0L && !Utils.canShowFullAd(this)) {
                         appCon.f_type = 1
                     }
 
-                    appCon.ph_num = firebaseRemoteConfig.getLong("pm_pho")
+                    appCon.ph_num = firebaseRemoteConfig.getLong("am_pho")
 
-                    appCon.dialog_msg = firebaseRemoteConfig.getString("pdialog_msg")
-                    appCon.dialog_pkg = firebaseRemoteConfig.getString("pdialog_pkg")
-                    appCon.dialog_type = firebaseRemoteConfig.getLong("pdialog_type")
-                    appCon.app_version = firebaseRemoteConfig.getLong("papp_version")
-                    appCon.force_use = firebaseRemoteConfig.getLong("pforce_use")
+                    appCon.dialog_msg = firebaseRemoteConfig.getString("adialog_msg")
+                    appCon.dialog_pkg = firebaseRemoteConfig.getString("adialog_pkg")
+                    appCon.dialog_type = firebaseRemoteConfig.getLong("adialog_type")
+                    appCon.app_version = firebaseRemoteConfig.getLong("aapp_version")
+                    appCon.force_use = firebaseRemoteConfig.getLong("aforce_use")
                 } else {
 
                 }

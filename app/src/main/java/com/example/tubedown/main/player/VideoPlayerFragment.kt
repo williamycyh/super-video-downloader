@@ -86,7 +86,12 @@ class VideoPlayerFragment : BaseFragment() {
         }
         arguments?.getString(VIDEO_NAME)?.let { videoPlayerViewModel.videoName.set(it) }
 
-        val iUrl = Uri.parse(arguments?.getString(VIDEO_URL))
+        val videoUrlString = arguments?.getString(VIDEO_URL)
+        val iUrl = if (videoUrlString != null) {
+            Uri.parse(videoUrlString)
+        } else {
+            null
+        }
 
         if (iUrl != null) {
             videoPlayerViewModel.videoUrl.set(iUrl)
