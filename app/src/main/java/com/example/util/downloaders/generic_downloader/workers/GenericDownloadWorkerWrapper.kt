@@ -53,21 +53,21 @@ open class GenericDownloadWorkerWrapper(
     }
 
     fun showLongRunningNotificationAsync(id: Int, notification: NotificationCompat.Builder) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            setForegroundAsync(
-                ForegroundInfo(
-                    id, // taskId.hashcode()
-                    notification.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                )
-            )
-        } else {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            setForegroundAsync(
+//                ForegroundInfo(
+//                    id, // taskId.hashcode()
+//                    notification.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC
+//                )
+//            )
+//        } else {
             setForegroundAsync(
                 ForegroundInfo(
                     id, // taskId.hashcode()
                     notification.build()
                 )
             )
-        }
+//        }
     }
 
     override fun handleAction(
