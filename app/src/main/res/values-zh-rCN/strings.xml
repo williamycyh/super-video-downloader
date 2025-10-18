@@ -120,4 +120,10 @@
     <string name="blocked_website_title">提示</string>
     <string name="blocked_website_message">由于法律限制，该网站上的视频均无法下载。</string>
     <string name="blocked_website_ok">确定</string>
+
+    <string name="help_tab_detection">检测</string>
+    <string name="help_tab_download">下载</string>
+    <string name="help_tab_disclaimer">声明</string>
+    <string name="help_tab_tips">技巧</string>
+    <string name="help_tab_troubleshooting">故障</string>
 </resources>

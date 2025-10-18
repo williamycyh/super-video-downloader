@@ -141,9 +141,16 @@
     <string name="privacy_policy_url">https://sites.google.com/view/tnvddown/home</string>
 
     <string name="privacy_agreement_text">By clicking "Start", you agree to the Privacy Policy.</string>
-    <string name="disclaimer">Disclaimer</string>
-    <string name="disclaimer_content">Please obtain permission from the content owner before reposting their content.\n\nAny unauthorized actions (re-uploading or downloading of content) or infringement of intellectual property rights are the sole responsibility of the user.</string>
     <string name="blocked_website_title">Notice</string>
     <string name="blocked_website_message">Videos from this website cannot be downloaded due to legal restrictions.</string>
     <string name="blocked_website_ok">OK</string>
+    
+    <!-- Help Page Tab Labels -->
+    <string name="disclaimer">Disclaimer</string>
+    <string name="disclaimer_content">Please obtain permission from the content owner before reposting their content.\n\nAny unauthorized actions (re-uploading or downloading of content) or infringement of intellectual property rights are the sole responsibility of the user.</string>
+    <string name="help_tab_detection">Detection</string>
+    <string name="help_tab_download">Download</string>
+    <string name="help_tab_disclaimer">Disclaimer</string>
+    <string name="help_tab_tips">Tips</string>
+    <string name="help_tab_troubleshooting">Troubleshooting</string>
 </resources>

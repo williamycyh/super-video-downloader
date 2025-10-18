@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
+import com.example.R
 import com.example.databinding.FragmentHelpBinding
 import com.example.tubedown.main.base.BaseFragment
 import com.example.tubedown.main.home.MainActivity
+import com.google.android.material.tabs.TabLayoutMediator
 import javax.inject.Inject
 
 class HelpFragment : BaseFragment() {
@@ -41,10 +43,10 @@ class HelpFragment : BaseFragment() {
                 parentFragmentManager.popBackStack()
             }
             
-            // Setup FAB button
-            getStartedOkButton.setOnClickListener {
-                parentFragmentManager.popBackStack()
-            }
+                // Setup OK button
+                helpOkButton.setOnClickListener {
+                    parentFragmentManager.popBackStack()
+                }
         }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
@@ -57,6 +59,24 @@ class HelpFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         helpViewModel.start()
+        setupViewPager()
+    }
+
+    private fun setupViewPager() {
+        val adapter = HelpPagerAdapter(requireActivity())
+        dataBinding.helpViewpager.adapter = adapter
+        
+            // 设置页面指示器
+            TabLayoutMediator(dataBinding.helpTabLayout, dataBinding.helpViewpager) { tab, position ->
+                tab.text = when (position) {
+                    0 -> getString(R.string.help_tab_detection)
+                    1 -> getString(R.string.help_tab_download)
+                    2 -> getString(R.string.help_tab_disclaimer)
+                    3 -> getString(R.string.help_tab_tips)
+                    4 -> getString(R.string.help_tab_troubleshooting)
+                    else -> ""
+                }
+            }.attach()
     }
 
     override fun onDestroyView() {

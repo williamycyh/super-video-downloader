@@ -20,16 +20,17 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:backgroundTint="@color/colorPrimaryDark">
+            app:backgroundTint="@color/white"
+            app:elevation="2dp">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:title="@string/help"
-                app:titleTextColor="@color/colorPrimary"
+                app:titleTextColor="@color/black"
                 app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-                app:navigationIconTint="@color/colorPrimary" />
+                app:navigationIconTint="@color/black" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -45,353 +46,97 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:orientation="vertical">
 
                 <!-- Welcome Section -->
-                <com.google.android.material.card.MaterialCardView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:paddingBottom="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/help_24px"
+                        android:background="@drawable/circle_background_primary"
+                        android:padding="12dp"
+                        android:layout_marginBottom="12dp"
+                        android:contentDescription="@string/help_welcome_title"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_welcome_title"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_quick_start_guide"
+                        android:textColor="@color/color_gray"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- Horizontal Help Cards -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/help_viewpager"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:clipToPadding="false"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:overScrollMode="never" />
+
+                <!-- Page Indicators -->
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/help_tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/white"
+                    app:tabIndicatorColor="@color/colorPrimary"
+                    app:tabSelectedTextColor="@color/colorPrimary"
+                    app:tabTextColor="@color/color_gray"
+                    app:tabIndicatorHeight="3dp"
+                    app:tabMode="scrollable"
+                    app:tabPaddingStart="12dp"
+                    app:tabPaddingEnd="12dp"
+                    app:tabTextAppearance="@style/TextAppearance.Material3.LabelMedium" />
+
+
+                <!-- Bottom Action Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/help_ok_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_marginBottom="24dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/colorPrimary">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="24dp"
-                        android:gravity="center">
-
-                        <ImageView
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:src="@drawable/help_24px"
-                            android:layout_marginBottom="16dp"
-                            app:tint="@color/white" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_welcome_title"
-                            android:textColor="@color/white"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_quick_start_guide"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:alpha="0.9" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- How to Detect Videos -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="16dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_video_24dp"
-                                android:layout_marginEnd="12dp"
-                                app:tint="@color/colorPrimary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/help_video_detection_title"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/help_step_1"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/step_number_background"
-                                android:padding="8dp"
-                                android:minWidth="24dp"
-                                android:minHeight="24dp"
-                                android:gravity="center" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_video_detection"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_gray"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- How to Download Videos -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="16dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_download_24dp"
-                                android:layout_marginEnd="12dp"
-                                app:tint="@color/colorPrimary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/help_video_download_title"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/help_step_2"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/white"
-                                android:background="@drawable/step_number_background"
-                                android:padding="8dp"
-                                android:minWidth="24dp"
-                                android:minHeight="24dp"
-                                android:gravity="center" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_video_download"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_gray"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Tips Section -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="16dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_lightbulb_24dp"
-                                android:layout_marginEnd="12dp"
-                                app:tint="@color/colorPrimary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/help_tips_title"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_tips"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_gray"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Troubleshooting Section -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="16dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_support_24dp"
-                                android:layout_marginEnd="12dp"
-                                app:tint="@color/colorPrimary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/help_troubleshooting_title"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/help_troubleshooting"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_gray"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- 免责声明 -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp"
-                    app:strokeColor="@color/color_gray_1"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="12dp">
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_warning_24dp"
-                                android:contentDescription="@string/disclaimer"
-                                app:tint="@color/colorAccent" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="12dp"
-                                android:text="@string/disclaimer"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/black" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/disclaimer_content"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_gray"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
+                    android:text="@string/ok"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/colorPrimary"
+                    app:cornerRadius="12dp"
+                    app:elevation="2dp" />
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>
 
-        <!-- Bottom Action Button -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/get_started_ok_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="24dp"
-            android:contentDescription="@string/ok"
-            app:srcCompat="@drawable/ic_check_24dp"
-            app:tint="@color/white"
-            app:backgroundTint="@color/colorPrimary"
-            app:fabSize="normal" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
