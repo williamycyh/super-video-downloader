@@ -74,6 +74,14 @@ public class MyCommon {
     };
 
     public static void loadFullScreenAndShow(Context activity){
+        if(activity == null){
+            return;
+        }
+        if(activity instanceof Activity){
+            if(((Activity) activity).isFinishing()){
+                return;
+            }
+        }
         if(!Utils.canShowFullAd(activity)){
             return;
         }
@@ -84,6 +92,9 @@ public class MyCommon {
     }
 
     public static void loadFullScreen(Context activity){
+        if(activity == null){
+            return;
+        }
         if(!Utils.canShowFullAd(activity)){
             return;
         }
@@ -93,6 +104,14 @@ public class MyCommon {
     }
 
     public static boolean showFullScreen(Context activity){
+        if(activity == null){
+            return false;
+        }
+        if(activity instanceof Activity){
+            if(((Activity) activity).isFinishing()){
+                return false;
+            }
+        }
         if(!Utils.canShowFullAd(activity)){
             return false;
         }

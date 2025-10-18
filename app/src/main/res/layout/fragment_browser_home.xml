@@ -117,13 +117,20 @@
             app:items="@{mainVModel.bookmarksList}" />
 
 
+        <FrameLayout
+            android:id="@+id/native_ad_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="16dp"
             android:layout_gravity="bottom|center"
-            android:gravity="center">
-
-        </LinearLayout>
+            android:gravity="center" />
     </LinearLayout>
 
 </layout>

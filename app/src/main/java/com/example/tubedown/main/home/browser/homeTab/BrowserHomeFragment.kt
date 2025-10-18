@@ -21,6 +21,7 @@ import com.example.tubedown.main.home.browser.BaseWebTabFragment
 import com.example.tubedown.main.home.browser.BrowserListener
 import com.example.tubedown.main.home.browser.TabManagerProvider
 import com.example.tubedown.main.home.browser.webTab.WebTabFactory
+import com.example.tubedown.rereads.MyCommon
 import com.example.util.AppUtil
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,6 +67,8 @@ class BrowserHomeFragment : BaseWebTabFragment() {
     private lateinit var topPageAdapter: TopPageAdapter
 
     private lateinit var suggestionAdapter: SuggestionAdapter
+
+    private val myCommon = MyCommon()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -122,6 +125,15 @@ class BrowserHomeFragment : BaseWebTabFragment() {
         if (openingText != null) {
             openNewTab(openingText)
             mainViewModel.openedText.set(null)
+        }
+
+        binding.nativeAdContainer.post {
+            val currentActivity = activity
+            if (currentActivity != null) {
+                myCommon.loadBigNative(currentActivity, binding.nativeAdContainer)
+            } else {
+                binding.nativeAdContainer.visibility = View.GONE
+            }
         }
     }
 
