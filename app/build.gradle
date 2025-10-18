@@ -60,8 +60,8 @@ android {
         applicationId "downloaderpark.highspeed.downloader.park"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
-        versionCode = 500020
-        versionName = "5.2.0"
+        versionCode = 500021
+        versionName = "5.2.1"
         testInstrumentationRunner "util.TestRunner"
 
         if (splitApks) {
