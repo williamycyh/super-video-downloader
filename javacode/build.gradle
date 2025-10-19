@@ -44,13 +44,21 @@ repositories {
     mavenCentral()
 }
 
+repositories {
+    flatDir {
+        dirs 'libs' // 指向 AAR 所在的本地目录
+    }
+}
+
 dependencies {
     // Minimal dependencies for the custom library
     implementation 'com.google.code.gson:gson:2.8.9'
     
     // FFmpegKit for video processing
-    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
-    
+//    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
+//    implementation files('libs/ffmpeg-kit-lts-ndk-r25-16k.aar')
+    implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
+
     testImplementation 'junit:junit:4.13.2'
 }
 
