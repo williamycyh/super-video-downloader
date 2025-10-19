@@ -145,6 +145,13 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    ndkVersion "28.0.12433566"
+}
+
+repositories {
+    flatDir {
+        dirs 'libs' // 指向 AAR 所在的本地目录
+    }
 }
 
 dependencies {
@@ -235,7 +242,11 @@ dependencies {
     implementation project(':yt-dlp-java')
     
     // FFmpegKit for video processing
-    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
+//    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
+//    implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
+//    implementation files('libs/ffmpeg-kit-main-ndk-r25-16k.aar')
+    implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
+
 
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
