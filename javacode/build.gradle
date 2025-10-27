@@ -58,6 +58,7 @@ dependencies {
 //    implementation 'com.arthenica:ffmpeg-kit-full:6.0-2'
 //    implementation files('libs/ffmpeg-kit-lts-ndk-r25-16k.aar')
     implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
+//    implementation 'com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.0.0'
 
     testImplementation 'junit:junit:4.13.2'
 }
