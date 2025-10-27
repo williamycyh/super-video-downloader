@@ -279,12 +279,14 @@ class BrowserHomeFragment : BaseWebTabFragment() {
 
 //        MyCommon.loadFullScreen(this);
         binding.nativeAdFrame.post {
-            if (!MyCommon.showFullScreen(activity)) {
-                MyCommon.loadFullScreenAndShow(activity)
+            val context = activity ?: return@post
+            
+            if (!MyCommon.showFullScreen(context)) {
+                MyCommon.loadFullScreenAndShow(context)
             }
 
             val myCommon = MyCommon()
-            myCommon.loadBigNative(activity, binding.nativeAdFrame);
+            myCommon.loadBigNative(context, binding.nativeAdFrame);
         }
     }
 }

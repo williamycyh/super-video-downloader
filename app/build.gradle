@@ -44,9 +44,17 @@ android {
                          'META-INF/ASL2.0',
                          'META-INF/*.kotlin_module']
         }
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+
+        // **新增：明确排除所有 FFmpegKit 引入的 libc++_shared.so**
+        // 警告：如果 FFmpegKit 需要特定版本的 libc++，这可能导致运行时崩溃
+        // 但这是解决对齐问题的最直接方法。
+//        excludes += ['lib/arm64-v8a/libc++_shared.so',
+//                     'lib/armeabi-v7a/libc++_shared.so',
+//                     'lib/x86/libc++_shared.so',
+//                     'lib/x86_64/libc++_shared.so']
+//        pickFirst 'lib/arm64-v8a/libc++_shared.so'
         jniLibs {
-            useLegacyPackaging = false
+            useLegacyPackaging = true
         }
     }
     compileSdkVersion build_versions.target_sdk
@@ -62,8 +70,8 @@ android {
         applicationId "downloaderpark.highspeed.downloader.park"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
-        versionCode = 500023
-        versionName = "5.2.3"
+        versionCode = 500024
+        versionName = "5.2.4"
         testInstrumentationRunner "util.TestRunner"
 
         if (splitApks) {
@@ -247,6 +255,8 @@ dependencies {
 //    implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
 //    implementation files('libs/ffmpeg-kit-main-ndk-r25-16k.aar')
     implementation 'io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-16kb:6.0.1'
+    //不支持https
+//    implementation 'com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.0.0'
 
 
     implementation 'com.github.bumptech.glide:glide:4.16.0'

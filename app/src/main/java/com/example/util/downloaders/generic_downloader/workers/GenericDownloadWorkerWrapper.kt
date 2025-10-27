@@ -1,7 +1,7 @@
 package com.example.util.downloaders.generic_downloader.workers
 
 import android.content.Context
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -53,21 +53,21 @@ open class GenericDownloadWorkerWrapper(
     }
 
     fun showLongRunningNotificationAsync(id: Int, notification: NotificationCompat.Builder) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            setForegroundAsync(
-//                ForegroundInfo(
-//                    id, // taskId.hashcode()
-//                    notification.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC
-//                )
-//            )
-//        } else {
+        if (Build.VERSION.SDK_INT >= 34) { // Android 14 (UPSIDE_DOWN_CAKE)
+            setForegroundAsync(
+                ForegroundInfo(
+                    id, // taskId.hashcode()
+                    notification.build(), FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            )
+        } else {
             setForegroundAsync(
                 ForegroundInfo(
                     id, // taskId.hashcode()
                     notification.build()
                 )
             )
-//        }
+        }
     }
 
     override fun handleAction(
