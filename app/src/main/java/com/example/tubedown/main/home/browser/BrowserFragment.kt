@@ -10,9 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.ServiceWorkerClient
 import android.webkit.ServiceWorkerController
 import android.webkit.WebResourceRequest
@@ -33,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.R
 import com.example.databinding.FragmentBrowserBinding
 import com.example.tubedown.component.adapter.WebTabsAdapter
@@ -47,15 +46,9 @@ import com.example.tubedown.main.home.browser.webTab.WebTab
 import com.example.tubedown.main.home.browser.webTab.WebTabFragment
 import com.example.tubedown.main.progress.WrapContentLinearLayoutManager
 import com.example.tubedown.main.settings.SettingsViewModel
-import com.example.util.AppLogger
-import com.example.util.AppUtil
-import com.example.util.CookieUtils
-import com.example.util.SharedPrefHelper
-import com.example.util.SingleLiveEvent
-import com.example.util.VideoUtils
+import com.example.util.*
 import com.example.util.proxy_utils.CustomProxyController
 import com.example.util.proxy_utils.OkHttpProxyClient
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -204,11 +197,7 @@ class BrowserFragment : BaseFragment(), BrowserServicesProvider {
                         }
                     }
                 } else if (contentType == ContentType.VIDEO && isMp4Check || contentType == ContentType.AUDIO && isCheckOnAudio) {
-                    videoDetectionModel.checkRegularVideoOrAudio(
-                        requestWithCookies,
-                        isCheckOnAudio,
-                        isMp4Check
-                    )
+                    videoDetectionModel.checkRegularVideoOrAudio(requestWithCookies, isCheckOnAudio, isMp4Check)
                 }
             }
 

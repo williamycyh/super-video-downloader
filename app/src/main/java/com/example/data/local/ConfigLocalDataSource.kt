@@ -15,6 +15,7 @@ class ConfigLocalDataSource @Inject constructor(
     override fun getSupportedPages(): Flowable<List<SupportedPage>> {
         return configDao.getSupportedPages().toFlowable()
     }
+
     override fun saveSupportedPages(supportedPages: List<SupportedPage>) {
         supportedPages.map { configDao.insertSupportedPage(it) }
     }

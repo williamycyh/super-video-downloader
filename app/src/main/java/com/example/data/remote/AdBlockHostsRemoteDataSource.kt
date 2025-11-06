@@ -48,8 +48,7 @@ class AdBlockHostsRemoteDataSource @Inject constructor(
 
     private suspend fun fetchListFromUrl(url: String): kotlinx.coroutines.flow.Flow<Set<AdHost>> {
         return flow {
-            okHttpClient.getProxyOkHttpClient().newCall(Request.Builder().url(url).build())
-                .execute()
+            okHttpClient.getProxyOkHttpClient().newCall(Request.Builder().url(url).build()).execute()
                 .use { response ->
                     response.takeIf { it.isSuccessful }?.body?.byteStream()?.use { stream ->
                         emit(readAdServersFromStream(stream))

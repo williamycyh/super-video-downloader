@@ -9,17 +9,15 @@ import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
 import com.example.BuildConfig
 
-class AdFullScreenAd : AdCenter() {
+class AdFullScreenAd: AdCenter() {
     val TAG = "FullScreenAd"
-    var activity: Context? = null
+    var activity:Context? = null
 
-    public fun setFullScreenLoadResult(result: FullScreenLoadResult) {
+    public fun setFullScreenLoadResult(result: FullScreenLoadResult){
         mFullScreenLoadResult = result
     }
-
     var mFullScreenLoadResult: FullScreenLoadResult? = null
-
-    interface FullScreenLoadResult {
+    interface FullScreenLoadResult{
         fun onAdLoaded()
         fun onAdDisplayed()
         fun onAdHidden()
@@ -29,21 +27,20 @@ class AdFullScreenAd : AdCenter() {
     }
 
     override fun initQueue() {
-        if (BuildConfig.DEBUG) {
+        if(BuildConfig.DEBUG){
             return
         }
 
         queue.offer(Ad_Type_Mopub)
 //        queue.offer(Ad_Type_IRONSOURCE)
     }
-
     var admobclicked = false
 
     var mopubId = ""
     var admobId = ""
     var fbId = ""
-    fun loadFullScreen(activity: Context, mopubId: String) {
-        if (!isAdShow()) {
+    fun loadFullScreen(activity: Context, mopubId: String){
+        if(!isAdShow()){
             return
         }
         initQueue()
@@ -54,23 +51,23 @@ class AdFullScreenAd : AdCenter() {
         loadByOrder()
     }
 
-    fun loadByOrder() {
+    fun loadByOrder(){
         var type = queue.poll()
 
-        if (type == Ad_Type_Mopub && !TextUtils.isEmpty(mopubId)) {
+        if(type == Ad_Type_Mopub && !TextUtils.isEmpty(mopubId)){
             Log.d(TAG, "loadByOrder Ad_Type_Mopub")
             loadMopubDelay()
-        } else if (type == Ad_Type_IRONSOURCE) {
+        } else if(type == Ad_Type_IRONSOURCE){
             Log.d(TAG, "loadByOrder Ad_Type_IRONSOURCE")
 //            loadIronAd()
         }
     }
 
-    fun showAd(): Boolean {
-        if (!Utils.canShowFullAd(activity)) {
+    fun showAd(): Boolean{
+        if(!Utils.canShowFullAd(activity)){
             return false
         }
-        if (mInterstitial?.isReady == true) {
+        if(mInterstitial?.isReady == true){
             mInterstitial?.showAd()
             mInterstitial = null
             loadByOrder()
@@ -79,20 +76,20 @@ class AdFullScreenAd : AdCenter() {
         return false
     }
 
-    fun isReady(): Boolean {
-        if (mInterstitial?.isReady == true
+    fun isReady(): Boolean{
+        if(mInterstitial?.isReady == true
 //                || IronSource.isInterstitialReady()
 //                || mAdmobInterstitialAd?.isLoaded == true
 //                || isFbReady()
-        ) {
+        ){
             return true
         }
         return false
     }
 
     ///////////////////////mopub///////////////////
-    fun loadMopubDelay() {
-        if (MoPubInited) {
+    fun loadMopubDelay(){
+        if(MoPubInited){
             loadMopub()
         } else {
             android.os.Handler().postDelayed({
@@ -123,7 +120,7 @@ class AdFullScreenAd : AdCenter() {
         }
 
         override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
-            if (queue.size <= 0 && failCount < 3) {
+            if(queue.size <= 0 && failCount < 3){
                 queue.offer(Ad_Type_Mopub)
                 failCount = failCount + 1;
             }
@@ -138,8 +135,8 @@ class AdFullScreenAd : AdCenter() {
         }
 
     }
-    var mInterstitial: MaxInterstitialAd? = null
-    fun loadMopub() {
+    var mInterstitial:MaxInterstitialAd? = null
+    fun loadMopub(){
         mInterstitial = MaxInterstitialAd(mopubId, activity)
         mInterstitial?.setListener(maxLinstener)
 
@@ -147,11 +144,11 @@ class AdFullScreenAd : AdCenter() {
         mInterstitial?.loadAd()
     }
 
-    fun isMopubReady() {
+    fun isMopubReady(){
         mInterstitial?.isReady
     }
 
-    fun showMopub() {
+    fun showMopub(){
         mInterstitial?.showAd()
     }
 }

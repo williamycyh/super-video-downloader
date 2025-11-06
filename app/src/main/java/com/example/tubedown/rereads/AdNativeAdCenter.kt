@@ -16,22 +16,22 @@ import com.example.BuildConfig
 import com.example.R
 
 
-class AdNativeAdCenter : AdCenter() {
+class AdNativeAdCenter: AdCenter() {
     val TAG = "NativeAdCenter"
 
     var ADMOB_AD_UNIT_ID = ""//ca-app-pub-4642862715300910/1070445143
     var FB_PLACEMENT_ID = ""
     var MOPUB_ID = ""
     var INMOBI = 0L
-    var container: ViewGroup? = null
+    var container:ViewGroup? = null
     var context: Activity? = null
 
     init {
     }
 
     override
-    fun initQueue() {
-        if (BuildConfig.DEBUG) {
+    fun initQueue(){
+        if(BuildConfig.DEBUG){
             return
         }
         //优先级
@@ -51,22 +51,18 @@ class AdNativeAdCenter : AdCenter() {
 //        fun onNativeLoadFail(adType: Int, errorCode: Int)
 //    }
 
-    fun setNativeLoadResult(result: NativeLoadResult) {
+    fun setNativeLoadResult(result: NativeLoadResult){
         mNativeLoadResult = result
     }
-
     var mNativeLoadResult: NativeLoadResult? = null
-
-    interface NativeLoadResult {
-        fun onResult(success: Boolean)
+    interface NativeLoadResult{
+       fun onResult(success: Boolean)
     }
 
     var mIsSmall = false;
-    fun loadNativeAds(
-        context: Activity, container: ViewGroup,
-        mopubId: String, inmobi: Long, isSmall: Boolean
-    ) {
-        if (!isAdShow()) {
+    fun loadNativeAds(context: Activity, container: ViewGroup,
+                      mopubId: String, inmobi:Long, isSmall: Boolean){
+        if(!isAdShow()){
             Log.d(TAG, "loadNativeAds no show")
             return
         }
@@ -79,17 +75,17 @@ class AdNativeAdCenter : AdCenter() {
         this.INMOBI = inmobi
         this.context = context
 
-        try {
+        try{
             loadByOrder(context)
-        } catch (e: IllegalArgumentException) {
+        }catch (e: IllegalArgumentException){
         }
 
     }
 
-    fun loadByOrder(context: Activity) {
+    fun loadByOrder(context:Activity){
         var type = queue.poll()
 
-        if (type == null) {
+        if(type == null){
             mNativeLoadResult?.onResult(false)
             return
         }
@@ -113,9 +109,9 @@ class AdNativeAdCenter : AdCenter() {
 //                loadFB(context)
 //            }
 //        } else
-        if (type == Ad_Type_Mopub) {
+            if(type == Ad_Type_Mopub){
             Log.d(TAG, "loadByOrder Ad_Type_Mopub")
-            if (TextUtils.isEmpty(MOPUB_ID)) {
+            if(TextUtils.isEmpty(MOPUB_ID)){
                 loadByOrder(context)
             } else {
                 loadMopubDelay(context)
@@ -123,22 +119,22 @@ class AdNativeAdCenter : AdCenter() {
         }
     }
 
-    fun loadMopubDelay(context: Activity) {
-        if (MoPubInited) {
+    fun loadMopubDelay(context: Activity){
+        if(MoPubInited){
             loadMopub(context)
         } else {
             Handler().postDelayed({
                 loadMopubDelay(context)
-            }, 100)
+            },100)
         }
     }
 
 
-    fun disableAdmobClick(view: View?, clickable: Boolean) {
+    fun disableAdmobClick(view: View?, clickable: Boolean){
         setClickable(view, clickable)
     }
 
-    fun disableFbClick(view: View?, clickable: Boolean) {
+    fun disableFbClick(view: View?, clickable: Boolean){
         setClickable(view, clickable)
     }
 
@@ -202,7 +198,8 @@ class AdNativeAdCenter : AdCenter() {
         }
     }
 
-    private fun createNativeAdViewForMin(): MaxNativeAdView {
+    private fun createNativeAdViewForMin(): MaxNativeAdView
+    {
         val binder: MaxNativeAdViewBinder =
             MaxNativeAdViewBinder.Builder(R.layout.d_native_min_layout)
                 .setTitleTextViewId(R.id.d_nativetitletextview)
@@ -215,7 +212,7 @@ class AdNativeAdCenter : AdCenter() {
         return MaxNativeAdView(binder, context)
     }
 
-    private fun createNativeAdViewForBig(): MaxNativeAdView {
+    private fun createNativeAdViewForBig(): MaxNativeAdView{
 
         var builderExtend = ApproveNativeBuilder(R.layout.d_native_big_layout)
         builderExtend.setTitleTextViewId(R.id.d__title_text_view)

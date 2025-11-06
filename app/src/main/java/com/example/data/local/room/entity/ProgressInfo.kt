@@ -7,7 +7,7 @@ import androidx.room.TypeConverters
 import com.example.util.FileUtil.Companion.getFileSizeReadable
 import com.example.util.RoomConverter
 import com.example.util.downloaders.generic_downloader.models.VideoTaskState
-import java.util.UUID
+import java.util.*
 
 @Entity(tableName = "ProgressInfo")
 @TypeConverters(RoomConverter::class)
@@ -54,9 +54,7 @@ data class ProgressInfo(
     // НЕ ТРОГАТЬ VAR!!!! иначе пиздец с миграцией
     var progressSize: String = ""
         get() {
-            return getFileSizeReadable(progressDownloaded.toDouble()) + "/" + getFileSizeReadable(
-                progressTotal.toDouble()
-            ) + " - $downloadStatusFormatted"
+            return getFileSizeReadable(progressDownloaded.toDouble()) + "/" + getFileSizeReadable(progressTotal.toDouble()) + " - $downloadStatusFormatted"
         }
 
     // НЕ ТРОГАТЬ VAR!!!! иначе пиздец с миграцией

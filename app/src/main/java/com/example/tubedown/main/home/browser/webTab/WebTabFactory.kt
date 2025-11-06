@@ -16,8 +16,7 @@ class WebTabFactory {
                         String.format(BrowserViewModel.SEARCH_URL, input),
                         null,
                         null,
-                        emptyMap()
-                    )
+                        emptyMap())
                 }
             }
 

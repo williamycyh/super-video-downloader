@@ -7,8 +7,10 @@ data class LocalVideo(
     var uri: Uri,
     var name: String
 ) {
+
     var size: String = ""
 
     val thumbnailPath: Uri
         get() = uri
+
 }

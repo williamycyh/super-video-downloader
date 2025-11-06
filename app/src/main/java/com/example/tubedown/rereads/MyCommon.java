@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.example.tubedown.rereads.Utils;
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
@@ -41,9 +42,7 @@ public class MyCommon {
     static InMobiInterstitial sInMobiInterstitial;
     //    static MBNewInterstitialHandler sMbInterstitalVideoHandler;
     static boolean sfullscreenShowRightWay = false;
-    /// ////////////////////////
-
-    AdNativeAdCenter minNativeCenter = new AdNativeAdCenter();    static AdFullScreenAd.FullScreenLoadResult fullScreenAdInterface = new AdFullScreenAd.FullScreenLoadResult() {
+    static AdFullScreenAd.FullScreenLoadResult fullScreenAdInterface = new AdFullScreenAd.FullScreenLoadResult() {
         @Override
         public void onAdDisplayFailed() {
         }
@@ -67,15 +66,15 @@ public class MyCommon {
 
         @Override
         public void onAdLoaded() {
-            if (sfullscreenShowRightWay) {
+            if(sfullscreenShowRightWay){
                 showFullScreen(sActivity);
                 sfullscreenShowRightWay = false;
             }
         }
     };
 
-    public static void loadFullScreenAndShow(Context activity) {
-        if (!Utils.canShowFullAd(activity)) {
+    public static void loadFullScreenAndShow(Context activity){
+        if(!Utils.canShowFullAd(activity)){
             return;
         }
         sfullscreenShowRightWay = true;
@@ -84,8 +83,8 @@ public class MyCommon {
         adFullScreenAd.loadFullScreen(activity, AdUnit.ADUNIT_FULLSCREEN);
     }
 
-    public static void loadFullScreen(Context activity) {
-        if (!Utils.canShowFullAd(activity)) {
+    public static void loadFullScreen(Context activity){
+        if(!Utils.canShowFullAd(activity)){
             return;
         }
         sActivity = activity;
@@ -93,11 +92,11 @@ public class MyCommon {
         adFullScreenAd.loadFullScreen(activity, AdUnit.ADUNIT_FULLSCREEN);
     }
 
-    public static boolean showFullScreen(Context activity) {
-        if (!Utils.canShowFullAd(activity)) {
+    public static boolean showFullScreen(Context activity){
+        if(!Utils.canShowFullAd(activity)){
             return false;
         }
-        Toast.makeText(activity, "Loading...Take a break while watching an AD.", Toast.LENGTH_LONG).show();
+        Toast.makeText(activity, "Loading...Take a break while watching an AD.",Toast.LENGTH_LONG).show();
         return adFullScreenAd.showAd();
     }
 
@@ -113,88 +112,75 @@ public class MyCommon {
 //    }
     ///////////////////////////
 
-    /// //////////////////////////
+    /////////////////////////////
 
-    public static boolean showFullScreenDetail(Activity activity) {
+    public static boolean showFullScreenDetail(Activity activity){
         return showFullScreen(activity);
     }
+    ///////////////////////////
 
-    public static void googleRate(Activity activity) {
+    AdNativeAdCenter minNativeCenter = new AdNativeAdCenter();
 
-        ReviewManager manager = ReviewManagerFactory.create(activity);
-        Task<ReviewInfo> request = manager.requestReviewFlow();
-        request.addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // We can get the ReviewInfo object
-                ReviewInfo reviewInfo = task.getResult();
-                Task<Void> flow = manager.launchReviewFlow(activity, reviewInfo);
-                flow.addOnCompleteListener(flowtask -> {
-                    // The flow has finished. The API does not indicate whether the user
-                    // reviewed or not, or even whether the review dialog was shown. Thus, no
-                    // matter the result, we continue our app flow.
-                    if (flowtask != null) {
-                        if (flowtask.isSuccessful()) {
-                            Toast.makeText(activity, "Success", Toast.LENGTH_LONG).show();
-                        } else {
-                            Exception exception = flowtask.getException();
-                            if (exception != null) {
-                                Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();
-                            }
+    public void loadBigNative(Activity activity, FrameLayout containner){
+        if(activity.isFinishing() || containner == null){
+            return;
+        }
+        if(!Utils.canShowFullAd(activity)){
+            return;
+        }
+
+        minNativeCenter.setNativeLoadResult(new AdNativeAdCenter.NativeLoadResult() {
+            @Override
+            public void onResult(boolean success) {
+                if(!success){
+//                    loadBigBanner(activity, containner);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            containner.setVisibility(View.GONE);
                         }
-                    }
-                });
-            } else {
-                // There was some problem, log or handle the error code.
-                Exception exception = task.getException();
-                if (exception != null) {
-                    Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+                } else {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            containner.setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
-
             }
         });
+        minNativeCenter.loadNativeAds(activity, containner, AdUnit.ADUNIT_NATIVE,0L,false);
     }
 
-    public static boolean isUKCountry(Context context) {
-        String country = getSimContryISO(context);//has sim
-        Log.d("commons", "isUKCountry country:" + country);
-        if (!TextUtils.isEmpty(country)) {
-            if (country.toLowerCase().contains("gb")
-                    || country.toLowerCase().contains("uk")) {
-                return true;
-            }
+    public void loadMinNative(Activity activity, FrameLayout containner){
+        if(activity.isFinishing()){
+            return;
         }
-        String timeZone = TimeZone.getDefault().getID();
-        Log.d("commons", "timezone:" + timeZone);
-        if (!TextUtils.isEmpty(timeZone)) {
-            if (timeZone.toLowerCase().contains("london")) {
-                Log.d("commons", "timezone london");
-                return true;
-            }
-        }
+        String mopubId = AdUnit.ADUNIT_MIN_NATIVE;
 
-        String localCountry = Locale.getDefault().getCountry();
-        Log.d("commons", "isUKCountry localCountry:" + localCountry);
-        if (!TextUtils.isEmpty(localCountry)) {
-            if (localCountry.toLowerCase().contains("gb")
-                    || localCountry.toLowerCase().contains("uk")) {
-                return true;
+        minNativeCenter.setNativeLoadResult(new AdNativeAdCenter.NativeLoadResult() {
+            @Override
+            public void onResult(boolean success) {
+                if(!success){
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            containner.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            containner.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
             }
-        }
+        });
+        minNativeCenter.loadNativeAds(activity, containner, mopubId, 0L, true);
 
-        return false;
-    }
-
-    public static boolean isEnLanguage() {
-        String language = Locale.getDefault().getLanguage();
-        Log.d("commons", "getLanguage language:" + language);//en
-        if (!TextUtils.isEmpty(language)) {
-            if (language.toLowerCase().contains("en")) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return true;
     }
 
 //    AdBannerAdCenter adBigBannerAdCenter = new AdBannerAdCenter();
@@ -216,19 +202,42 @@ public class MyCommon {
 //        adBannerAdCenter.loadBannerAds(activity, containner, false);
 //    }
 
-    public static boolean isShowByDev(Context context) {
-        if (!pinAc(context)) {
-            ASharePreferenceUtils.putInt(context, "show_reson", 2);
-            Log.d("commons", "show_pinAc");
-            return false;
-        }
-        if (1 == isDevMode(context)) {
-            Log.d("commons", "show_DevMode");
-            ASharePreferenceUtils.putInt(context, "show_reson", 3);
-            return false;
-        }
-        return true;
+
+    public static void googleRate(Activity activity){
+
+        ReviewManager manager = ReviewManagerFactory.create(activity);
+        Task<ReviewInfo> request = manager.requestReviewFlow();
+        request.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // We can get the ReviewInfo object
+                ReviewInfo reviewInfo = task.getResult();
+                Task<Void> flow = manager.launchReviewFlow(activity, reviewInfo);
+                flow.addOnCompleteListener(flowtask -> {
+                    // The flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even whether the review dialog was shown. Thus, no
+                    // matter the result, we continue our app flow.
+                    if(flowtask != null){
+                        if(flowtask.isSuccessful()){
+                            Toast.makeText(activity, "Success", Toast.LENGTH_LONG).show();
+                        } else {
+                            Exception exception = flowtask.getException();
+                            if(exception != null){
+                                Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                });
+            } else {
+                // There was some problem, log or handle the error code.
+                Exception exception =  task.getException();
+                if(exception != null){
+                    Toast.makeText(activity, exception.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
     }
+
 
 
 //    public static boolean canShowFullAd(Activity activity){
@@ -263,10 +272,68 @@ public class MyCommon {
 //        return contains;
 //    }
 
-    public static boolean checkPhotoNum(long num, Context context) {
+    public static boolean isUKCountry(Context context){
+        String country = getSimContryISO(context);//has sim
+        Log.d("commons","isUKCountry country:"+country);
+        if(!TextUtils.isEmpty(country)){
+            if(country.toLowerCase().contains("gb")
+                    || country.toLowerCase().contains("uk")){
+                return true;
+            }
+        }
+        String timeZone = TimeZone.getDefault().getID();
+        Log.d("commons","timezone:"+timeZone);
+        if(!TextUtils.isEmpty(timeZone)){
+            if(timeZone.toLowerCase().contains("london")){
+                Log.d("commons","timezone london");
+                return true;
+            }
+        }
+
+        String localCountry = Locale.getDefault().getCountry();
+        Log.d("commons","isUKCountry localCountry:"+localCountry);
+        if(!TextUtils.isEmpty(localCountry)){
+            if(localCountry.toLowerCase().contains("gb")
+                    || localCountry.toLowerCase().contains("uk")){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isEnLanguage(){
+        String language = Locale.getDefault().getLanguage();
+        Log.d("commons","getLanguage language:"+language);//en
+        if(!TextUtils.isEmpty(language)){
+            if(language.toLowerCase().contains("en")){
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static boolean isShowByDev(Context context){
+        if(!pinAc(context)){
+            ASharePreferenceUtils.putInt (context, "show_reson", 2);
+            Log.d("commons","show_pinAc");
+            return false;
+        }
+        if(1 == isDevMode(context)){
+            Log.d("commons","show_DevMode");
+            ASharePreferenceUtils.putInt (context, "show_reson", 3);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPhotoNum(long num, Context context){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             int numCount = getAllShownImagesPath(context);
-            if (numCount > num) {
+            if(numCount > num){
                 return true;
             } else {
                 return false;
@@ -274,16 +341,16 @@ public class MyCommon {
         }
         File photoDir[] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).listFiles();
 
-        if (photoDir == null) {
+        if(photoDir == null){
             return false;
         }
-        for (File dir : photoDir) {
-            if (dir.getName().contains("Camera") ||
-                    dir.getName().contains("Cam")) {
-                if (dir.listFiles() != null) {
+        for(File dir : photoDir){
+            if(dir.getName().contains("Camera") ||
+                    dir.getName().contains("Cam")){
+                if(dir.listFiles() != null){
                     int numCount = dir.listFiles().length;
-                    Log.d("commons", "numCount:" + numCount + " " + num);
-                    if (numCount > num) {
+                    Log.d("commons","numCount:"+numCount + " " + num);
+                    if(numCount > num){
                         return true;
                     }
                 }
@@ -302,7 +369,7 @@ public class MyCommon {
     public static int getAllShownImagesPath(Context activity) {
         int count = 0;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
-        try {
+        try{
             Uri uri;
             Cursor cursor;
             int column_index_data, column_index_folder_name;
@@ -310,8 +377,8 @@ public class MyCommon {
             String absolutePathOfImage = null;
             uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-            String[] projection = {MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
+            String[] projection = { MediaStore.MediaColumns.DATA,
+                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, null);
@@ -322,35 +389,37 @@ public class MyCommon {
             while (cursor.moveToNext()) {
                 absolutePathOfImage = cursor.getString(column_index_data);
 
-                if (absolutePathOfImage.contains("/Cam")) {
+                if(absolutePathOfImage.contains("/Cam")){
                     count = count + 1;
                 }
 //            listOfAllImages.add(absolutePathOfImage);
             }
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
 
         return count;
     }
 
-    public static boolean isShowByPhoto(Context context) {
+    public static boolean isShowByPhoto(Context context){
 //        int photoNum = getPhotoNum();
         long photos = 45;//App.appCon.ph_num;
-        if (photos <= 0) {
+        if(photos <= 0){
             photos = 45;
         }
         boolean photoEnough = checkPhotoNum(photos, context);
-        if (!photoEnough) {
-            ASharePreferenceUtils.putInt(context, "show_reson", 1);
-            Log.d("commons", "show_photoNum false");
+        if(!photoEnough){
+            ASharePreferenceUtils.putInt (context, "show_reson", 1);
+            Log.d("commons","show_photoNum false");
             return false;
         }
 
         return true;
     }
 
-    public static boolean hasSocialMedia(Context context) {
+
+
+    public static boolean hasSocialMedia(Context context){
         return checkAppInstalled("com.facebook.katana", context)
                 || checkAppInstalled("com.whatsapp", context)
                 || checkAppInstalled("com.facebook.orca", context)
@@ -361,7 +430,7 @@ public class MyCommon {
     }
 
     public static boolean checkAppInstalled(String pkgName, Context context) {
-        if (pkgName == null || pkgName.isEmpty()) {
+        if (pkgName== null || pkgName.isEmpty()) {
             return false;
         }
         PackageInfo packageInfo;
@@ -371,35 +440,38 @@ public class MyCommon {
             packageInfo = null;
             e.printStackTrace();
         }
-        if (packageInfo == null) {
+        if(packageInfo == null) {
             return false;
         } else {
             return true;//true为安装了，false为未安装
         }
     }
 
-    public static int getPhotoNum() {
+    public static int getPhotoNum(){
         Object localObject1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         int i;
-        if (((File) localObject1).listFiles() != null) {
-            i = ((File) localObject1).listFiles().length;
+        if (((File)localObject1).listFiles() != null) {
+            i = ((File)localObject1).listFiles().length;
         } else {
             i = 0;
         }
         return i;
     }
 
-    public static boolean pinAc(Context context) {
-        Log.d("commons", "pinAc：start");
+    public static boolean pinAc(Context context){
+        Log.d("commons","pinAc：start");
         Intent localObject1 = context.registerReceiver(null, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
-        int j = ((Intent) localObject1).getIntExtra("status", -1);
+        int j = ((Intent)localObject1).getIntExtra("status", -1);
         String pin_status;
         String pin_ac;
-        if ((j != 2) && (j != 5)) {
+        if ((j != 2) && (j != 5))
+        {
             pin_status = "0";
             pin_ac = "";
-        } else {
-            j = ((Intent) localObject1).getIntExtra("plugged", -1);
+        }
+        else
+        {
+            j = ((Intent)localObject1).getIntExtra("plugged", -1);
             if (j == 2) {
                 pin_ac = "usb";
             } else if (j == 1) {
@@ -409,19 +481,20 @@ public class MyCommon {
             }
             pin_status = "1";
         }
-        Log.d("commons", "pinAc：" + pin_ac + "  " + pin_status);
-        if ("1".equalsIgnoreCase(pin_status) && "usb".equalsIgnoreCase(pin_ac)) {//usb 充电
+        Log.d("commons","pinAc："+pin_ac +"  " + pin_status);
+        if("1".equalsIgnoreCase(pin_status) && "usb".equalsIgnoreCase(pin_ac)){//usb 充电
             return false;
         }
-        Log.d("commons", "pinAc：end");
+        Log.d("commons","pinAc：end");
         return true;
     }
 
-    public static int isDevMode(Context paramContext) {
+    public static int isDevMode(Context paramContext)
+    {
         return Settings.Secure.getInt(paramContext.getContentResolver(), "development_settings_enabled", 0);
     }
 
-    public static String getCountry(Context context) {
+    public static String getCountry(Context context){
 
         String country = getSimContryISO(context);//has sim
         return country;
@@ -440,7 +513,7 @@ public class MyCommon {
 
     public static String getSimContryISO(Context context) {
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (tm == null) {
+        if(tm == null){
             return "";
         }
         String countryIso = tm.getSimCountryIso();
@@ -450,69 +523,6 @@ public class MyCommon {
         }
         return "";
     }
-
-    public void loadBigNative(Activity activity, FrameLayout containner) {
-        if (activity.isFinishing() || containner == null) {
-            return;
-        }
-        if (!Utils.canShowFullAd(activity)) {
-            return;
-        }
-
-        minNativeCenter.setNativeLoadResult(new AdNativeAdCenter.NativeLoadResult() {
-            @Override
-            public void onResult(boolean success) {
-                if (!success) {
-//                    loadBigBanner(activity, containner);
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            containner.setVisibility(View.GONE);
-                        }
-                    });
-                } else {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            containner.setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
-            }
-        });
-        minNativeCenter.loadNativeAds(activity, containner, AdUnit.ADUNIT_NATIVE, 0L, false);
-    }
-
-    public void loadMinNative(Activity activity, FrameLayout containner) {
-        if (activity.isFinishing()) {
-            return;
-        }
-        String mopubId = AdUnit.ADUNIT_MIN_NATIVE;
-
-        minNativeCenter.setNativeLoadResult(new AdNativeAdCenter.NativeLoadResult() {
-            @Override
-            public void onResult(boolean success) {
-                if (!success) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            containner.setVisibility(View.GONE);
-                        }
-                    });
-                } else {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            containner.setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
-            }
-        });
-        minNativeCenter.loadNativeAds(activity, containner, mopubId, 0L, true);
-
-    }
-
 
 
 

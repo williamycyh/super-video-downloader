@@ -1,7 +1,7 @@
 package com.example.tubedown.component.binding
 
-import android.widget.AutoCompleteTextView
 import androidx.databinding.BindingAdapter
+import android.widget.AutoCompleteTextView
 import com.example.data.local.model.Suggestion
 import com.example.data.local.room.entity.HistoryItem
 import com.example.tubedown.component.adapter.SuggestionAdapter

@@ -15,9 +15,11 @@ class ProgressLocalDataSource @Inject constructor(
     override fun getProgressInfos(): Flowable<List<ProgressInfo>> {
         return progressDao.getProgressInfos()
     }
+
     override fun saveProgressInfo(progressInfo: ProgressInfo) {
         progressDao.insertProgressInfo(progressInfo)
     }
+
     override fun deleteProgressInfo(progressInfo: ProgressInfo) {
         progressDao.deleteProgressInfo(progressInfo)
     }

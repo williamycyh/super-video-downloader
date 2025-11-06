@@ -1,7 +1,7 @@
 package com.example.util
 
 import android.webkit.WebResourceResponse
-import java.io.ByteArrayInputStream
+import java.io.*
 
 
 object AdBlockerHelper {

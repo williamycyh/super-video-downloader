@@ -1,17 +1,16 @@
 package com.example.tubedown.main.home
 
-//import io.reactivex.Flowable
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.spy
 import com.example.data.repository.ConfigRepository
 import com.example.data.repository.TopPagesRepository
 import com.example.data.repository.VideoRepository
 import com.example.tubedown.main.home.browser.BrowserViewModel
 import com.example.util.scheduler.BaseSchedulers
 import com.example.util.scheduler.StubbedSchedulers
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.spy
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+//import io.reactivex.Flowable
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

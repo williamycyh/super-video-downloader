@@ -1,13 +1,12 @@
 package com.example.tubedown.main.home.browser
 
-import androidx.databinding.ObservableField
-import androidx.databinding.ObservableInt
+import androidx.databinding.*
 import androidx.lifecycle.MutableLiveData
 import com.example.data.local.room.entity.VideoInfo
 import com.example.tubedown.main.base.BaseViewModel
 import com.example.tubedown.main.home.browser.webTab.WebTab
-import com.example.tubedown.main.settings.SettingsViewModel
 import com.example.util.SingleLiveEvent
+import com.example.tubedown.main.settings.SettingsViewModel
 import javax.inject.Inject
 
 //@OpenForTesting

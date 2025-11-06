@@ -1,12 +1,12 @@
 package com.example.data.local
 
-//import io.reactivex.Maybe
-import com.example.data.local.room.dao.ConfigDao
-import com.example.data.local.room.entity.SupportedPage
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
+import com.example.data.local.room.dao.ConfigDao
+import com.example.data.local.room.entity.SupportedPage
 import io.reactivex.rxjava3.core.Maybe
+//import io.reactivex.Maybe
 import org.junit.Before
 import org.junit.Test
 
@@ -22,10 +22,7 @@ class ConfigLocalDataSourceTest {
     fun setup() {
         configDao = mock()
         configLocalDataSource = ConfigLocalDataSource(configDao)
-        supportedPages = listOf(
-            SupportedPage(id = "id1", name = "name1"),
-            SupportedPage(id = "id2", name = "name2")
-        )
+        supportedPages = listOf(SupportedPage(id = "id1", name = "name1"), SupportedPage(id = "id2", name = "name2"))
     }
 
     @Test

@@ -3,20 +3,8 @@ package com.example.data.local.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.data.local.room.dao.AdHostDao
-import com.example.data.local.room.dao.ConfigDao
-import com.example.data.local.room.dao.HistoryDao
-import com.example.data.local.room.dao.PageDao
-import com.example.data.local.room.dao.ProgressDao
-import com.example.data.local.room.dao.VideoDao
-import com.example.data.local.room.entity.AdHost
-import com.example.data.local.room.entity.DownloadUrlsConverter
-import com.example.data.local.room.entity.FormatsConverter
-import com.example.data.local.room.entity.HistoryItem
-import com.example.data.local.room.entity.PageInfo
-import com.example.data.local.room.entity.ProgressInfo
-import com.example.data.local.room.entity.SupportedPage
-import com.example.data.local.room.entity.VideoInfo
+import com.example.data.local.room.dao.*
+import com.example.data.local.room.entity.*
 
 const val DB_VERSION = 5
 

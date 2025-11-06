@@ -310,8 +310,7 @@ class ChromeBrowser : Browser() {
      */
 
     fun getCookiesNetscapeForDomain(domain: String?, cookiesStore: File): String {
-        val dm: String =
-            domain?.let { InternetDomainName.from(it).topPrivateDomain().toString() }.toString()
+        val dm: String = domain?.let { InternetDomainName.from(it).topPrivateDomain().toString() }.toString()
 
         return processCookiesToNetscape(cookiesStore, dm)
     }
@@ -401,7 +400,7 @@ class ChromeBrowser : Browser() {
      * @return
      */
     protected override fun decrypt(encryptedCookie: EncryptedCookie?): DecryptedCookie? {
-        return null
+       return null
     }
 
     companion object {

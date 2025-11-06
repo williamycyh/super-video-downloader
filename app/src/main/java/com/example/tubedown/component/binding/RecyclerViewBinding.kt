@@ -9,16 +9,7 @@ import com.example.data.local.room.entity.HistoryItem
 import com.example.data.local.room.entity.PageInfo
 import com.example.data.local.room.entity.ProgressInfo
 import com.example.data.local.room.entity.VideoInfo
-import com.example.tubedown.component.adapter.BookmarksAdapter
-import com.example.tubedown.component.adapter.HistoryAdapter
-import com.example.tubedown.component.adapter.HistorySearchAdapter
-import com.example.tubedown.component.adapter.ProgressAdapter
-import com.example.tubedown.component.adapter.ProxiesAdapter
-import com.example.tubedown.component.adapter.SuggestionAdapter
-import com.example.tubedown.component.adapter.TopPageAdapter
-import com.example.tubedown.component.adapter.VideoAdapter
-import com.example.tubedown.component.adapter.VideoInfoAdapter
-import com.example.tubedown.component.adapter.WebTabsAdapter
+import com.example.tubedown.component.adapter.*
 import com.example.tubedown.main.home.browser.webTab.WebTab
 
 object RecyclerViewBinding {

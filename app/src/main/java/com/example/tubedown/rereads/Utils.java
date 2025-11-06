@@ -2,11 +2,14 @@ package com.example.tubedown.rereads;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -25,34 +28,27 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.core.content.ContextCompat;
 
 import com.example.BuildConfig;
+import com.example.tubedown.rereads.ASharePreferenceUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class Utils {
     public static AppCon appCon = new AppCon();
-    /// /        BackgroundThread.post(new Runnable() {
-    /// /            @Override
-    /// /            public void run() {
-    /// /
-    /// /            }
-    /// /        });
-//    }
 
-    static ProgressDialog progressDialog;
-    private static String lastvideoPath_merging = "";
-
-    public static String decodeToString(String str) {
+    public static String decodeToString(String str){
         try {
             String mystr = new String(Base64.decode(str.getBytes("UTF-8"), Base64.DEFAULT));
             return mystr;
@@ -63,62 +59,13 @@ public class Utils {
         return "";
     }
 
-
-//    public static void showListDialog(List<FileItem> files, final Context context){
-//        if(context == null){
-//            return;
-//        }
-//        if(context instanceof Activity && ((Activity)context).isFinishing()){
-//            return;
-//        }
-//        final List<FileAdapter.ListData> newList = new ArrayList<>();
-//        for(FileItem item : files){
-//            YFile yFile = item.getyFile();
-////            if (yFile.getFormat().getHeight() == -1 || yFile.getFormat().getHeight() >= 360) {
-//            StringBuilder text = new StringBuilder();
-//
-//            if((yFile.getFormat().getHeight() == -1)){
-//                text.append("Audio/Music");
-//                text.append(":  ");
-//                text.append(yFile.getFormat().getExt());
-//                text.append("  ");
-//                text.append(yFile.getFormat().getAudioBitrate());
-//                text.append("kbit/s");
-//            } else {
-//
-//                if(yFile.getFormat().isDashContainer() && item.getVoiceFile() == null){// no audio
-////                    text.append("  ");
-////                    text.append(activity.getString(R.string.noaudio));
-//                    continue;
-//                } else {
-//                    text.append("Video");
-//                    text.append(":  ");
-//                    text.append(yFile.getFormat().getExt());
-//                    text.append("  ");
-//                    text.append(yFile.getFormat().getHeight() +"p");
-//                }
-//            }
-//            FileAdapter.ListData data = new FileAdapter.ListData();
-//
-//            data.name = text.toString();
-////            if(yFile.getFormat().getHeight() > 360){
-////                data.prov = 1;
-////            } else {
-////                data.prov = 0;
-////            }
-//            data.prov = 0;
-//            data.item = item;
-//            newList.add(data);
-//        }
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context,3);
-
+    private static String lastvideoPath_merging = "";
     public static boolean mergeAudio(final Activity activity, String videoPath, String audioPath, String muxPath) {
         try {
-            if (lastvideoPath_merging.equals(videoPath)) {
+            if(lastvideoPath_merging.equals(videoPath)){
                 return false;
             }
-            Log.d("merge", "mergeAudio start");
+            Log.d("merge","mergeAudio start");
             lastvideoPath_merging = videoPath;
             MediaExtractor videoExtractor = new MediaExtractor();
             videoExtractor.setDataSource(videoPath);
@@ -177,7 +124,7 @@ public class Utils {
                 }
                 videoBufferInfo.size = readVideoSampleSize;
                 long sampleTime = videoExtractor.getSampleTime();
-                if (lastVideoSampleTime != 0 && sampleTime < lastVideoSampleTime) {
+                if(lastVideoSampleTime != 0 && sampleTime < lastVideoSampleTime){
                     videoExtractor.advance();
                     continue;
                 }
@@ -190,7 +137,7 @@ public class Utils {
                 mediaMuxer.writeSampleData(writeVideoTrackIndex, byteBuffer, videoBufferInfo);
                 videoExtractor.advance();
             }
-            Log.d("merge", "mergeAudio: merged video");
+            Log.d("merge","mergeAudio: merged video");
             long lastAudioSampleTime = 0L;
             while (true) {
                 int readAudioSampleSize = audioExtractor.readSampleData(byteBuffer, 0);
@@ -199,7 +146,7 @@ public class Utils {
                 }
                 audioBufferInfo.size = readAudioSampleSize;
                 long sampleTime = audioExtractor.getSampleTime();
-                if (lastAudioSampleTime != 0 && sampleTime < lastAudioSampleTime) {
+                if(lastAudioSampleTime != 0 && sampleTime < lastAudioSampleTime){
                     audioExtractor.advance();
                     continue;
                 }
@@ -207,11 +154,11 @@ public class Utils {
                 audioBufferInfo.presentationTimeUs = sampleTime;//+= sampleTime;
                 audioBufferInfo.offset = 0;
                 //noinspection WrongConstant
-                audioBufferInfo.flags = audioExtractor.getSampleFlags();//MediaCodec.BUFFER_FLAG_SYNC_FRAME;
+                audioBufferInfo.flags =  audioExtractor.getSampleFlags();//MediaCodec.BUFFER_FLAG_SYNC_FRAME;
                 mediaMuxer.writeSampleData(writeAudioTrackIndex, byteBuffer, audioBufferInfo);
                 audioExtractor.advance();
             }
-            Log.d("merge", "mergeAudio: merged voice");
+            Log.d("merge","mergeAudio: merged voice");
             mediaMuxer.stop();
             mediaMuxer.release();
             videoExtractor.release();
@@ -219,8 +166,8 @@ public class Utils {
             lastvideoPath_merging = "";
             boolean videoD = new File(videoPath).delete();
             boolean voiceD = new File(audioPath).delete();
-            Log.d("merge", "mergeAudio: delete file:" + videoD + "  " + voiceD);
-            if (activity != null && !activity.isFinishing()) {
+            Log.d("merge","mergeAudio: delete file:"+videoD +"  " +voiceD);
+            if(activity != null && !activity.isFinishing()){
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -230,10 +177,10 @@ public class Utils {
             }
             return true;
         } catch (IOException e) {
-            Log.d("muxvideo", "muxVideoAndAudio: IOException :" + e.getMessage());
+            Log.d("muxvideo","muxVideoAndAudio: IOException :" + e.getMessage());
             e.printStackTrace();
             boolean voiceD = new File(audioPath).delete();
-            if (activity != null && !activity.isFinishing()) {
+            if(activity != null && !activity.isFinishing()){
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -241,11 +188,11 @@ public class Utils {
                     }
                 });
             }
-        } catch (IllegalStateException e) {
-            Log.d("muxvideo", "muxVideoAndAudio: IllegalStateException :" + e.getMessage());
+        } catch (IllegalStateException e){
+            Log.d("muxvideo","muxVideoAndAudio: IllegalStateException :" + e.getMessage());
             e.printStackTrace();
             boolean voiceD = new File(audioPath).delete();
-            if (activity != null && !activity.isFinishing()) {
+            if(activity != null && !activity.isFinishing()){
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -258,7 +205,56 @@ public class Utils {
         return false;
     }
 
-    /// /        builder.setTitle("Choose One");
+
+//    public static void showListDialog(List<FileItem> files, final Context context){
+//        if(context == null){
+//            return;
+//        }
+//        if(context instanceof Activity && ((Activity)context).isFinishing()){
+//            return;
+//        }
+//        final List<FileAdapter.ListData> newList = new ArrayList<>();
+//        for(FileItem item : files){
+//            YFile yFile = item.getyFile();
+////            if (yFile.getFormat().getHeight() == -1 || yFile.getFormat().getHeight() >= 360) {
+//            StringBuilder text = new StringBuilder();
+//
+//            if((yFile.getFormat().getHeight() == -1)){
+//                text.append("Audio/Music");
+//                text.append(":  ");
+//                text.append(yFile.getFormat().getExt());
+//                text.append("  ");
+//                text.append(yFile.getFormat().getAudioBitrate());
+//                text.append("kbit/s");
+//            } else {
+//
+//                if(yFile.getFormat().isDashContainer() && item.getVoiceFile() == null){// no audio
+////                    text.append("  ");
+////                    text.append(activity.getString(R.string.noaudio));
+//                    continue;
+//                } else {
+//                    text.append("Video");
+//                    text.append(":  ");
+//                    text.append(yFile.getFormat().getExt());
+//                    text.append("  ");
+//                    text.append(yFile.getFormat().getHeight() +"p");
+//                }
+//            }
+//            FileAdapter.ListData data = new FileAdapter.ListData();
+//
+//            data.name = text.toString();
+////            if(yFile.getFormat().getHeight() > 360){
+////                data.prov = 1;
+////            } else {
+////                data.prov = 0;
+////            }
+//            data.prov = 0;
+//            data.item = item;
+//            newList.add(data);
+//        }
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context,3);
+////        builder.setTitle("Choose One");
 //        FileAdapter adapter = new FileAdapter(context, newList);
 //        builder.setAdapter(adapter, new DialogInterface.OnClickListener(){
 //            @Override
@@ -305,17 +301,18 @@ public class Utils {
 //        }
 //
 //    }
+
     public static void jumpToGp(Activity context, String pkg) {
         String url = "market://details?id=" + pkg;
         Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         context.startActivity(it);
     }
 
-    public static String MydecodeToString(String str) {
+    public static String MydecodeToString(String str){
         try {
             String mystr = new String(Base64.decode(str.getBytes("UTF-8"), Base64.DEFAULT));
 
-            if (mystr.length() > 4) {
+            if(mystr.length() > 4){
                 return mystr.substring(4);
             }
         } catch (UnsupportedEncodingException e) {
@@ -324,23 +321,38 @@ public class Utils {
         return "";
     }
 
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
 
-    public static boolean hasPermissions(Context context) {
-        if (context == null) {
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+
+    public static boolean hasPermissions(Context context){
+        if(context == null){
             return false;
         }
         String[] permissionArray = new String[]{
                 Manifest.permission.READ_EXTERNAL_STORAGE};
-        for (int i = 0; i < permissionArray.length; i++) {
+        for (int i = 0; i <permissionArray.length; i++) {
             if (ContextCompat.checkSelfPermission(context, permissionArray[i]) !=
                     PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
+        }
+        return true;
+    }
+
+    public static boolean canShowFullAd(Context activity){
+        try {
+            if(!isShowByDev(activity)){
+                return false;
+            }
+        } catch (Exception e){
+        }
+
+        if(appCon.v_version == BuildConfig.VERSION_CODE){
+            return false;
         }
         return true;
     }
@@ -361,85 +373,71 @@ public class Utils {
     //https://www.youtube.com/watch?v=7ynrOq3vBq4
     //https://www.youtube.com/watch?v=-KqxoCdbzrc10  //-KqxoCdbzrc 可以
 
-    public static boolean canShowFullAd(Context activity) {
-        try {
-            if (!isShowByDev(activity)) {
-                return false;
-            }
-        } catch (Exception e) {
-        }
-
-        if (appCon.v_version == BuildConfig.VERSION_CODE) {
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isneedshow(Context context) {
+    public static boolean isneedshow(Context context){
         boolean showed = ASharePreferenceUtils.getBoolean(context, "is_showed", false);
-        if (showed) {
+        if(showed){
             return true;
         }
 //        boolean permission = hasPermissions(context);
 //        if(!permission){
 //            return false;
 //        }
-        int reson = ASharePreferenceUtils.getInt(context, "show_reson", 0);
-        if (reson > 0) {
+        int reson = ASharePreferenceUtils.getInt (context, "show_reson", 0);
+        if(reson > 0){
             return false;
         }
 
         long type = appCon.f_type;
-        if (type == 1) {
+        if(type == 1){
             return false;
         }
-        if (type == 2) {
-            if (!isShowByDev(context)) {
+        if(type == 2){
+            if(!isShowByDev(context)){
                 return false;
             }
             String country = getCountry(context);
-            if (TextUtils.isEmpty(country)) {
+            if(TextUtils.isEmpty(country)){
             } else {
                 country = country.toLowerCase();
-                if (country.contains("ph") || country.contains("us") || country.contains("cn")
+                if(country.contains("ph") || country.contains("us") || country.contains("cn")
                         || country.contains("hk") || country.contains("tw") || country.contains("gb")
                         || country.contains("uk") || country.contains("ru") || country.contains("ar")
-                        || country.contains("sg")) {
+                        || country.contains("sg")){
                 } else {
-                    if (hasSocialMedia(context)) {
-                        ASharePreferenceUtils.putBoolean(context, "is_showed", true);
+                    if(hasSocialMedia(context)){
+                        ASharePreferenceUtils.putBoolean(context,"is_showed", true);
                         return true;
                     }
                 }
             }
-            if (isShowByPhoto(context)) {
-                ASharePreferenceUtils.putBoolean(context, "is_showed", true);
+            if(isShowByPhoto(context)){
+                ASharePreferenceUtils.putBoolean(context,"is_showed", true);
                 return true;
             }
         }
-        if (type == 3) {
-            if ((isInstallMiApps(context) && isEnLanguage()) || isUKCountry(context)) {
+        if(type == 3){
+            if((isInstallMiApps(context) && isEnLanguage())|| isUKCountry(context)){
                 return false;
             }
-            if (isShowByDev(context)) {
-                ASharePreferenceUtils.putBoolean(context, "is_showed", true);
+            if(isShowByDev(context)){
+                ASharePreferenceUtils.putBoolean(context,"is_showed", true);
                 return true;
             }
         }
 
-        if (type == 4) {
-            if (isShowByDev(context)) {
-                ASharePreferenceUtils.putBoolean(context, "is_showed", true);
+        if(type == 4){
+            if(isShowByDev(context)){
+                ASharePreferenceUtils.putBoolean(context,"is_showed", true);
                 return true;
             }
         }
 
-        if (type == 5) {
-            if (appCon.v_version == BuildConfig.VERSION_CODE) {
+        if(type == 5){
+            if(appCon.v_version == BuildConfig.VERSION_CODE){
                 return false;
             }
-            if (isShowByDev(context)) {
-                ASharePreferenceUtils.putBoolean(context, "is_showed", true);
+            if(isShowByDev(context)){
+                ASharePreferenceUtils.putBoolean(context,"is_showed", true);
                 return true;
             }
         }
@@ -447,21 +445,21 @@ public class Utils {
         return false;
     }
 
-    public static boolean canShowTube(Context context) {
-        if (isShowedTubeOldVersion(context)) {
+    public static boolean canShowTube(Context context){
+        if(isShowedTubeOldVersion(context)){
             return true;
         }
-        if (appCon.v_version == BuildConfig.VERSION_CODE) {
+        if(appCon.v_version == BuildConfig.VERSION_CODE){
             return false;
         }
-        if (appCon.show_tube != 1) {
+        if(appCon.show_tube != 1){
             return false;
         }
-        if (canShowTubeCountry(context)) {
-            if (isInstallMiApps(context) && isUKCountry(context)) {
+        if(canShowTubeCountry(context)){
+            if(isInstallMiApps(context) && isUKCountry(context)){
                 return false;
             }
-            if (!isShowByDev(context)) {
+            if(!isShowByDev(context)){
                 return false;
             }
             return true;
@@ -469,9 +467,19 @@ public class Utils {
         return false;
     }
 
-    private static boolean isShowedTubeOldVersion(Context context) {
+    private static boolean isShowedTubeOldVersion(Context context){
         boolean showed = ASharePreferenceUtils.getBoolean(context, "isf_showed", false);
         return showed;
+    }
+
+    public static boolean isInstallMiApps(Context context){
+        boolean player = checkAppInstalled("com.miui.player", context);
+        boolean fileex = checkAppInstalled("com.mi.android.globalFileexplorer", context);
+        Log.d("commons","player " + player +" fileex " +fileex);
+        if(player || fileex){
+            return true;
+        }
+        return false;
     }
 
 //    public static boolean isTimeZoneUK() {
@@ -485,28 +493,18 @@ public class Utils {
 //        return contains;
 //    }
 
-    public static boolean isInstallMiApps(Context context) {
-        boolean player = checkAppInstalled("com.miui.player", context);
-        boolean fileex = checkAppInstalled("com.mi.android.globalFileexplorer", context);
-        Log.d("commons", "player " + player + " fileex " + fileex);
-        if (player || fileex) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean canShowTubeCountry(Context context) {
+    private static boolean canShowTubeCountry(Context context){
         String country = getSimContryISO(context);//has sim
-        Log.d("commons", "canShowTubeCountry country:" + country);
-        if (!TextUtils.isEmpty(country)) {
-            if (country.equalsIgnoreCase("id")//Indonesia
+        Log.d("commons","canShowTubeCountry country:"+country);
+        if(!TextUtils.isEmpty(country)){
+            if(country.equalsIgnoreCase("id")//Indonesia
                     || country.equalsIgnoreCase("in")//India
                     || country.equalsIgnoreCase("ru")//Russian Federation
                     || country.equalsIgnoreCase("ng")//Nigeria
                     || country.equalsIgnoreCase("br")//Brazil
                     || country.equalsIgnoreCase("pk")//Pakistan
                     || country.equalsIgnoreCase("th")//Thailand
-            ) {
+            ){
                 return true;
             }
         }
@@ -531,12 +529,12 @@ public class Utils {
         return false;
     }
 
-    public static boolean isUKCountry(Context context) {
+    public static boolean isUKCountry(Context context){
         String country = getSimContryISO(context);//has sim
-        Log.d("commons", "isUKCountry country:" + country);
-        if (!TextUtils.isEmpty(country)) {
-            if (country.toLowerCase().contains("gb")
-                    || country.toLowerCase().contains("uk")) {
+        Log.d("commons","isUKCountry country:"+country);
+        if(!TextUtils.isEmpty(country)){
+            if(country.toLowerCase().contains("gb")
+                    || country.toLowerCase().contains("uk")){
                 return true;
             }
         }
@@ -550,10 +548,10 @@ public class Utils {
 //        }
 
         String localCountry = Locale.getDefault().getCountry();
-        Log.d("commons", "isUKCountry localCountry:" + localCountry);
-        if (!TextUtils.isEmpty(localCountry)) {
-            if (localCountry.toLowerCase().contains("gb")
-                    || localCountry.toLowerCase().contains("uk")) {
+        Log.d("commons","isUKCountry localCountry:"+localCountry);
+        if(!TextUtils.isEmpty(localCountry)){
+            if(localCountry.toLowerCase().contains("gb")
+                    || localCountry.toLowerCase().contains("uk")){
                 return true;
             }
         }
@@ -561,11 +559,11 @@ public class Utils {
         return false;
     }
 
-    public static boolean isEnLanguage() {
+    public static boolean isEnLanguage(){
         String language = Locale.getDefault().getLanguage();
-        Log.d("commons", "getLanguage language:" + language);//en
-        if (!TextUtils.isEmpty(language)) {
-            if (language.toLowerCase().contains("en")) {
+        Log.d("commons","getLanguage language:"+language);//en
+        if(!TextUtils.isEmpty(language)){
+            if(language.toLowerCase().contains("en")){
                 return true;
             } else {
                 return false;
@@ -574,24 +572,25 @@ public class Utils {
         return true;
     }
 
-    public static boolean isShowByDev(Context context) {
-        if (!pinAc(context)) {
-            ASharePreferenceUtils.putInt(context, "show_reson", 2);
-            Log.d("commons", "show_pinAc");
+
+    public static boolean isShowByDev(Context context){
+        if(!pinAc(context)){
+            ASharePreferenceUtils.putInt (context, "show_reson", 2);
+            Log.d("commons","show_pinAc");
             return false;
         }
-        if (1 == isDevMode(context)) {
-            Log.d("commons", "show_DevMode");
-            ASharePreferenceUtils.putInt(context, "show_reson", 3);
+        if(1 == isDevMode(context)){
+            Log.d("commons","show_DevMode");
+            ASharePreferenceUtils.putInt (context, "show_reson", 3);
             return false;
         }
         return true;
     }
 
-    public static boolean checkPhotoNum(long num, Context context) {
+    public static boolean checkPhotoNum(long num, Context context){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             int numCount = getAllShownImagesPath(context);
-            if (numCount > num) {
+            if(numCount > num){
                 return true;
             } else {
                 return false;
@@ -599,16 +598,16 @@ public class Utils {
         }
         File photoDir[] = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).listFiles();
 
-        if (photoDir == null) {
+        if(photoDir == null){
             return false;
         }
-        for (File dir : photoDir) {
-            if (dir.getName().contains("Camera") ||
-                    dir.getName().contains("Cam")) {
-                if (dir.listFiles() != null) {
+        for(File dir : photoDir){
+            if(dir.getName().contains("Camera") ||
+                    dir.getName().contains("Cam")){
+                if(dir.listFiles() != null){
                     int numCount = dir.listFiles().length;
-                    Log.d("commons", "numCount:" + numCount + " " + num);
-                    if (numCount > num) {
+                    Log.d("commons","numCount:"+numCount + " " + num);
+                    if(numCount > num){
                         return true;
                     }
                 }
@@ -627,7 +626,7 @@ public class Utils {
     public static int getAllShownImagesPath(Context activity) {
         int count = 0;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
-        try {
+        try{
             Uri uri;
             Cursor cursor;
             int column_index_data, column_index_folder_name;
@@ -635,47 +634,49 @@ public class Utils {
             String absolutePathOfImage = null;
             uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-            String[] projection = {MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
+            String[] projection = { MediaStore.MediaColumns.DATA,
+                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, null);
 
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_index_folder_name = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-            while (cursor.moveToNext()) {
-                absolutePathOfImage = cursor.getString(column_index_data);
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        while (cursor.moveToNext()) {
+            absolutePathOfImage = cursor.getString(column_index_data);
 
-                if (absolutePathOfImage.contains("/Cam")) {
-                    count = count + 1;
-                }
-//            listOfAllImages.add(absolutePathOfImage);
+            if(absolutePathOfImage.contains("/Cam")){
+                count = count + 1;
             }
-        } catch (Exception e) {
+//            listOfAllImages.add(absolutePathOfImage);
+          }
+        }catch (Exception e){
             e.printStackTrace();
         }
 
         return count;
     }
 
-    public static boolean isShowByPhoto(Context context) {
+    public static boolean isShowByPhoto(Context context){
 //        int photoNum = getPhotoNum();
         long photos = appCon.ph_num;
-        if (photos <= 0) {
+        if(photos <= 0){
             photos = 45;
         }
         boolean photoEnough = checkPhotoNum(photos, context);
-        if (!photoEnough) {
-            ASharePreferenceUtils.putInt(context, "show_reson", 1);
-            Log.d("commons", "show_photoNum false");
+        if(!photoEnough){
+            ASharePreferenceUtils.putInt (context, "show_reson", 1);
+            Log.d("commons","show_photoNum false");
             return false;
         }
 
         return true;
     }
 
-    public static boolean hasSocialMedia(Context context) {
+
+
+    public static boolean hasSocialMedia(Context context){
         return checkAppInstalled("com.facebook.katana", context)
                 || checkAppInstalled("com.whatsapp", context)
                 || checkAppInstalled("com.facebook.orca", context)
@@ -686,7 +687,7 @@ public class Utils {
     }
 
     public static boolean checkAppInstalled(String pkgName, Context context) {
-        if (pkgName == null || pkgName.isEmpty()) {
+        if (pkgName== null || pkgName.isEmpty()) {
             return false;
         }
         PackageInfo packageInfo;
@@ -696,35 +697,38 @@ public class Utils {
             packageInfo = null;
             e.printStackTrace();
         }
-        if (packageInfo == null) {
+        if(packageInfo == null) {
             return false;
         } else {
             return true;//true为安装了，false为未安装
         }
     }
 
-    public static int getPhotoNum() {
+    public static int getPhotoNum(){
         Object localObject1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         int i;
-        if (((File) localObject1).listFiles() != null) {
-            i = ((File) localObject1).listFiles().length;
+        if (((File)localObject1).listFiles() != null) {
+            i = ((File)localObject1).listFiles().length;
         } else {
             i = 0;
         }
         return i;
     }
 
-    public static boolean pinAc(Context context) {
-        Log.d("commons", "pinAc：start");
+    public static boolean pinAc(Context context){
+        Log.d("commons","pinAc：start");
         Intent localObject1 = context.registerReceiver(null, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
-        int j = ((Intent) localObject1).getIntExtra("status", -1);
+        int j = ((Intent)localObject1).getIntExtra("status", -1);
         String pin_status;
         String pin_ac;
-        if ((j != 2) && (j != 5)) {
+        if ((j != 2) && (j != 5))
+        {
             pin_status = "0";
             pin_ac = "";
-        } else {
-            j = ((Intent) localObject1).getIntExtra("plugged", -1);
+        }
+        else
+        {
+            j = ((Intent)localObject1).getIntExtra("plugged", -1);
             if (j == 2) {
                 pin_ac = "usb";
             } else if (j == 1) {
@@ -734,19 +738,20 @@ public class Utils {
             }
             pin_status = "1";
         }
-        Log.d("commons", "pinAc：" + pin_ac + "  " + pin_status);
-        if ("1".equalsIgnoreCase(pin_status) && "usb".equalsIgnoreCase(pin_ac)) {//usb 充电
+        Log.d("commons","pinAc："+pin_ac +"  " + pin_status);
+        if("1".equalsIgnoreCase(pin_status) && "usb".equalsIgnoreCase(pin_ac)){//usb 充电
             return false;
         }
-        Log.d("commons", "pinAc：end");
+        Log.d("commons","pinAc：end");
         return true;
     }
 
-    public static int isDevMode(Context paramContext) {
+    public static int isDevMode(Context paramContext)
+    {
         return Settings.Secure.getInt(paramContext.getContentResolver(), "development_settings_enabled", 0);
     }
 
-    public static String getCountry(Context context) {
+    public static String getCountry(Context context){
 
         String country = getSimContryISO(context);//has sim
         return country;
@@ -765,7 +770,7 @@ public class Utils {
 
     public static String getSimContryISO(Context context) {
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (tm == null) {
+        if(tm == null){
             return "";
         }
         String countryIso = tm.getSimCountryIso();
@@ -775,14 +780,13 @@ public class Utils {
         }
         return "";
     }
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
 
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-    /// ////////////////////////////////////////////////////////
-
-    public static void share(Activity context, File file) {
+    public static void share(Activity context, File file){
         //todo
 //        Intent shareIntent = new Intent();
 //        Uri uri;
@@ -807,16 +811,70 @@ public class Utils {
 //        context.startActivity(Intent.createChooser(shareIntent, "Share To"));
 
     }
-
-    public static boolean isUrl(String url) {
-        if (TextUtils.isEmpty(url)) {
+    public static boolean isUrl(String url){
+        if(TextUtils.isEmpty(url)){
             return false;
         }
-        if (url.startsWith("http") || url.startsWith("https")
-                || url.startsWith("www") || url.startsWith("file")) {
+        if(url.startsWith("http") || url.startsWith("https")
+                || url.startsWith("www") || url.startsWith("file")){
             return true;
         }
         return false;
+    }
+
+
+    private static void downloadCheck(long id, File audioFile, Activity activity){
+        DownloadManager.Query query=new DownloadManager.Query();
+        DownloadManager dm= (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
+        query.setFilterById(id);
+
+        Cursor c = dm.query(query);
+        if (c!=null){
+            Log.d("merge","downloadCheck start");
+            try {
+                if (c.moveToFirst()){
+                    //获取文件下载路径
+                    int fileUriIdx = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                    String fileUri = c.getString(fileUriIdx);
+                    String filename = null;
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                        if (fileUri != null) {
+                            filename = Uri.parse(fileUri).getPath();
+                        }
+                    } else {
+                        //Android 7.0以上的方式：请求获取写入权限，这一步报错
+                        //过时的方式：DownloadManager.COLUMN_LOCAL_FILENAME
+                        int fileNameIdx = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
+                        filename = c.getString(fileNameIdx);
+                    }
+
+                    int status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+
+//                    int reaonIndex = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
+//
+//                    String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_URI));
+//
+//                    int toatalsize = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+//
+//                    Log.d("muxvideo","downloadCheck:"+status  +"  reaonIndex:"+reaonIndex +"  " +toatalsize);
+                    if (status==DownloadManager.STATUS_SUCCESSFUL){
+                        if(filename != null && filename.toLowerCase().endsWith(".mp4")){
+                            if(audioFile.exists()){//need merge
+                                String outputFile = filename.replace(".mp4","") +"_merged" + ".mp4";
+                                Log.d("merge","onReceive: start merge outputfile:"+outputFile);
+                                boolean result = Utils.mergeAudio(activity, filename, audioFile.getAbsolutePath(), outputFile);
+                            }
+                        }
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.d("merge","Exception:"+e.getMessage());
+                return;
+            }finally {
+                c.close();
+            }
+        }
     }
 
 
@@ -859,72 +917,26 @@ public class Utils {
 //                hideProgress(activity);
 //            }
 //        }).start();
+////        BackgroundThread.post(new Runnable() {
+////            @Override
+////            public void run() {
+////
+////            }
+////        });
+//    }
 
-    private static void downloadCheck(long id, File audioFile, Activity activity) {
-        DownloadManager.Query query = new DownloadManager.Query();
-        DownloadManager dm = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
-        query.setFilterById(id);
-
-        Cursor c = dm.query(query);
-        if (c != null) {
-            Log.d("merge", "downloadCheck start");
-            try {
-                if (c.moveToFirst()) {
-                    //获取文件下载路径
-                    int fileUriIdx = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
-                    String fileUri = c.getString(fileUriIdx);
-                    String filename = null;
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                        if (fileUri != null) {
-                            filename = Uri.parse(fileUri).getPath();
-                        }
-                    } else {
-                        //Android 7.0以上的方式：请求获取写入权限，这一步报错
-                        //过时的方式：DownloadManager.COLUMN_LOCAL_FILENAME
-                        int fileNameIdx = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
-                        filename = c.getString(fileNameIdx);
-                    }
-
-                    int status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-
-//                    int reaonIndex = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
-//
-//                    String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_URI));
-//
-//                    int toatalsize = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-//
-//                    Log.d("muxvideo","downloadCheck:"+status  +"  reaonIndex:"+reaonIndex +"  " +toatalsize);
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        if (filename != null && filename.toLowerCase().endsWith(".mp4")) {
-                            if (audioFile.exists()) {//need merge
-                                String outputFile = filename.replace(".mp4", "") + "_merged" + ".mp4";
-                                Log.d("merge", "onReceive: start merge outputfile:" + outputFile);
-                                boolean result = Utils.mergeAudio(activity, filename, audioFile.getAbsolutePath(), outputFile);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.d("merge", "Exception:" + e.getMessage());
-                return;
-            } finally {
-                c.close();
-            }
-        }
-    }
-
-    private static void showMergeProgress(Activity activity) {
-        if (activity == null || activity.isFinishing()) {
+    static ProgressDialog progressDialog;
+    private static void showMergeProgress(Activity activity){
+        if(activity == null || activity.isFinishing()){
             return;
         }
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (activity == null || activity.isFinishing()) {
+                if(activity == null || activity.isFinishing()){
                     return;
                 }
-                if (progressDialog != null && progressDialog.isShowing()) {
+                if(progressDialog != null && progressDialog.isShowing()){
                     return;
                 }
                 progressDialog = new ProgressDialog(activity);
@@ -936,17 +948,17 @@ public class Utils {
 
     }
 
-    private static void hideProgress(Activity activity) {
-        if (activity == null || activity.isFinishing()) {
+    private static void hideProgress(Activity activity){
+        if(activity == null || activity.isFinishing()){
             return;
         }
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (activity == null || activity.isFinishing()) {
+                if(activity == null || activity.isFinishing()){
                     return;
                 }
-                if (progressDialog != null && progressDialog.isShowing()) {
+                if(progressDialog != null && progressDialog.isShowing()){
                     progressDialog.dismiss();
                 }
             }
@@ -998,13 +1010,13 @@ public class Utils {
 //        });
 //    }
 
-    public static String getClipboard(Context context) {
-        try {
+    public static String getClipboard(Context context){
+        try{
             ClipboardManager cm = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
             ClipData data = cm.getPrimaryClip();
             ClipData.Item item = data.getItemAt(0);
             return item.getText().toString();
-        } catch (Exception e) {
+        }catch (Exception e){
 
         }
         return "";

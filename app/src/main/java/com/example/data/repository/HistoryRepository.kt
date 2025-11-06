@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface HistoryRepository {
-    fun getAllHistory(): Flowable<List<HistoryItem>>
+    fun getAllHistory() : Flowable<List<HistoryItem>>
 
     fun saveHistory(history: HistoryItem)
 

@@ -3,8 +3,8 @@ package com.example.util
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import com.example.data.local.model.Proxy
 import com.google.gson.Gson
+import com.example.data.local.model.Proxy
 import javax.inject.Inject
 import javax.inject.Singleton
 

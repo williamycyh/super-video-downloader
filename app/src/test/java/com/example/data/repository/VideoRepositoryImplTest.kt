@@ -1,9 +1,9 @@
 package com.example.data.repository
 
+import com.nhaarman.mockito_kotlin.mock
 import com.example.data.local.VideoLocalDataSource
 import com.example.data.local.room.entity.VideoInfo
 import com.example.data.remote.VideoRemoteDataSource
-import com.nhaarman.mockito_kotlin.mock
 import org.junit.Before
 
 class VideoRepositoryImplTest {

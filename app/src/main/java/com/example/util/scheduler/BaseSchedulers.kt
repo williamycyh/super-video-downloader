@@ -2,9 +2,9 @@ package com.example.util.scheduler
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler
+import javax.inject.Inject
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.Executors
-import javax.inject.Inject
 
 interface BaseSchedulers {
     val computation: Scheduler

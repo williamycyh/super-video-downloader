@@ -4,6 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="webTab"
+            type="com.example.tubedown.main.home.browser.webTab.WebTab" />
+
+        <variable
+            name="tabListener"
+            type="com.example.tubedown.component.adapter.WebTabsListener" />
+
+    </data>
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/item_web_tab_button"
         android:layout_width="match_parent"
@@ -25,14 +37,6 @@
                 android:padding="4dp"
                 app:bitmap="@{webTab.favicon}" />
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/closeTab"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:onClick="@{(v) -> tabListener.onCloseTabClicked(webTab)}"
-                android:padding="4dp"
-                android:src="@drawable/tab_close_24px" />
-
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tab_title"
                 android:layout_width="0dp"
@@ -45,18 +49,14 @@
                 android:textSize="@dimen/text_medium"
                 android:textStyle="bold"
                 tools:text="Title" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/closeTab"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:onClick="@{(v) -> tabListener.onCloseTabClicked(webTab)}"
+                android:padding="4dp"
+                android:src="@drawable/tab_close_24px" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
-    <data>
-
-        <variable
-            name="webTab"
-            type="com.example.tubedown.main.home.browser.webTab.WebTab" />
-
-        <variable
-            name="tabListener"
-            type="com.example.tubedown.component.adapter.WebTabsListener" />
-
-    </data>
 </layout>

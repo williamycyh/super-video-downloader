@@ -2,6 +2,20 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="suggestion"
+            type="com.example.data.local.room.entity.HistoryItem" />
+
+        <variable
+            name="listener"
+            type="com.example.tubedown.component.adapter.SuggestionTabListener" />
+
+    </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -20,19 +34,5 @@
             tools:text="@{suggestion.url}" />
 
     </LinearLayout>
-
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="suggestion"
-            type="com.example.data.local.room.entity.HistoryItem" />
-
-        <variable
-            name="listener"
-            type="com.example.tubedown.component.adapter.SuggestionTabListener" />
-
-    </data>
 
 </layout>

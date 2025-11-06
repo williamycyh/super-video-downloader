@@ -1,11 +1,11 @@
 package com.example.data.local
 
-import com.example.data.local.room.dao.ProgressDao
-import com.example.data.local.room.entity.ProgressInfo
-import com.example.data.local.room.entity.VideoInfo
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
+import com.example.data.local.room.dao.ProgressDao
+import com.example.data.local.room.entity.ProgressInfo
+import com.example.data.local.room.entity.VideoInfo
 import io.reactivex.rxjava3.core.Flowable
 import org.junit.Before
 import org.junit.Test

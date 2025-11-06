@@ -4,8 +4,8 @@ import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
-import com.example.R
 import com.google.android.material.color.MaterialColors
+import com.example.R
 import dagger.android.support.DaggerFragment
 
 abstract class BaseFragment : DaggerFragment() {

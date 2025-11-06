@@ -38,8 +38,8 @@ class FileUtil @Inject constructor() {
         // For downloads
         var IS_APP_DATA_DIR_USE = false
 
-        const val FOLDER_NAME = "SaveX"
-        const val TMP_DATA_FOLDER_NAME = "SaveX_tmp_data"
+        const val FOLDER_NAME = "SuperX"
+        const val TMP_DATA_FOLDER_NAME = "superx_tmp_data"
 
         private const val KB = 1024
         private const val MB = 1024 * 1024

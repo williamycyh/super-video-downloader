@@ -5,6 +5,7 @@ data class Suggestion(
 
     var icon: Int = 0
 
+
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

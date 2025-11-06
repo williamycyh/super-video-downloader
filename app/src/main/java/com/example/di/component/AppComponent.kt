@@ -1,14 +1,7 @@
 package com.example.di.component
 
 import com.example.DLApplication
-import com.example.di.module.ActivityBindingModule
-import com.example.di.module.AppModule
-import com.example.di.module.DatabaseModule
-import com.example.di.module.MyWorkerModule
-import com.example.di.module.NetworkModule
-import com.example.di.module.RepositoryModule
-import com.example.di.module.UtilModule
-import com.example.di.module.ViewModelModule
+import com.example.di.module.*
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector

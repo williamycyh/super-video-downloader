@@ -1,11 +1,11 @@
 package com.example.data.repository
 
-import com.example.data.local.ConfigLocalDataSource
-import com.example.data.local.room.entity.SupportedPage
-import com.example.data.remote.ConfigRemoteDataSource
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
+import com.example.data.local.ConfigLocalDataSource
+import com.example.data.local.room.entity.SupportedPage
+import com.example.data.remote.ConfigRemoteDataSource
 import io.reactivex.rxjava3.core.Flowable
 import org.junit.Assert.assertEquals
 import org.junit.Before

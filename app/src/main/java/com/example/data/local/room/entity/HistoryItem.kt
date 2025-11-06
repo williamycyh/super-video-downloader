@@ -5,8 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 
 @Entity(tableName = "HistoryItem")

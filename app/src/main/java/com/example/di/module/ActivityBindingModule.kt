@@ -1,10 +1,10 @@
 package com.example.di.module
 
 import com.example.di.ActivityScoped
-import com.example.di.module.activity.MainModule
-import com.example.di.module.activity.VideoPlayerModule
 import com.example.tubedown.main.home.MainActivity
+import com.example.di.module.activity.MainModule
 import com.example.tubedown.main.player.VideoPlayerActivity
+import com.example.di.module.activity.VideoPlayerModule
 import com.example.tubedown.main.splash.SplashActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector

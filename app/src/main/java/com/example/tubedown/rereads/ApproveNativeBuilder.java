@@ -6,7 +6,7 @@ import androidx.annotation.IdRes;
 
 import com.applovin.mediation.nativeAds.MaxNativeAdViewBinder;
 
-public class ApproveNativeBuilder extends MaxNativeAdViewBinder.Builder {
+public class ApproveNativeBuilder extends MaxNativeAdViewBinder.Builder{
     public ApproveNativeBuilder(View view) {
         super(view);
     }

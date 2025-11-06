@@ -32,7 +32,7 @@ data class Proxy(
             )
         }
 
-        fun fromMap(tmp: Map<*, *>): Proxy {
+        fun fromMap(tmp: Map<*, *>) : Proxy {
             return Proxy(
                 id = tmp["id"].toString(),
                 host = tmp["host"].toString().replace("null", "").trim(),

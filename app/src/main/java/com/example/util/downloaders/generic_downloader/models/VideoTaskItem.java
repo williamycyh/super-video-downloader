@@ -34,6 +34,34 @@ public class VideoTaskItem implements Cloneable {
 
     private String lineInfo;
 
+    public float getPercentFromBytes() {
+        if (getTotalSize() == 0) return 0;
+
+       return (1F * getDownloadSize() / getTotalSize()) * 100F;
+    }
+
+    public float getPercentFromBytes(long downloadSize, long totalSize) {
+        if (totalSize == 0) return 0;
+
+        return (1F * downloadSize / totalSize) * 100F;
+    }
+
+    public void setLineInfo(String info) {
+        this.lineInfo = info;
+    }
+
+    public String  getLineInfo() {
+        return this.lineInfo;
+    }
+
+    public void setMId(String id) {
+        mId = id;
+    }
+
+    public String getMId() {
+        return mId;
+    }
+
     public VideoTaskItem(String url) {
         this(url, "", "", "");
     }
@@ -45,188 +73,144 @@ public class VideoTaskItem implements Cloneable {
         mGroupName = groupName;
     }
 
-    public float getPercentFromBytes() {
-        if (getTotalSize() == 0) return 0;
-
-        return (1F * getDownloadSize() / getTotalSize()) * 100F;
-    }
-
-    public float getPercentFromBytes(long downloadSize, long totalSize) {
-        if (totalSize == 0) return 0;
-
-        return (1F * downloadSize / totalSize) * 100F;
-    }
-
-    public String getLineInfo() {
-        return this.lineInfo;
-    }
-
-    public void setLineInfo(String info) {
-        this.lineInfo = info;
-    }
-
-    public String getMId() {
-        return mId;
-    }
-
-    public void setMId(String id) {
-        mId = id;
+    public void setErrorMessage(String message) {
+        mErrorMessage = message;
     }
 
     public String getErrorMessage() {
-        return mErrorMessage;
-    }
-
-    public void setErrorMessage(String message) {
-        mErrorMessage = message;
+        return  mErrorMessage;
     }
 
     public String getUrl() {
         return mUrl;
     }
 
-    public String getCoverUrl() {
-        return mCoverUrl;
-    }
+    public void setCoverUrl(String coverUrl) { mCoverUrl = coverUrl; }
 
-    public void setCoverUrl(String coverUrl) {
-        mCoverUrl = coverUrl;
-    }
+    public String getCoverUrl() { return mCoverUrl; }
 
-    public String getCoverPath() {
-        return mCoverPath;
-    }
+    public void setCoverPath(String coverPath) { mCoverPath = coverPath; }
 
-    public void setCoverPath(String coverPath) {
-        mCoverPath = coverPath;
-    }
+    public String getCoverPath() { return mCoverPath; }
 
-    public String getTitle() {
-        return mTitle;
-    }
+    public void setTitle(String title) { mTitle = title; }
 
-    public void setTitle(String title) {
-        mTitle = title;
-    }
+    public String getTitle() { return mTitle; }
 
-    public String getGroupName() {
-        return mGroupName;
-    }
+    public void setGroupName(String groupName) { mGroupName = groupName; }
 
-    public void setGroupName(String groupName) {
-        mGroupName = groupName;
+    public String getGroupName() { return mGroupName; }
+
+    public void setDownloadCreateTime(long time) {
+        mDownloadCreateTime = time;
     }
 
     public long getDownloadCreateTime() {
         return mDownloadCreateTime;
     }
 
-    public void setDownloadCreateTime(long time) {
-        mDownloadCreateTime = time;
+    public void setTaskState(int state) {
+        mTaskState = state;
     }
 
     public int getTaskState() {
         return mTaskState;
     }
 
-    public void setTaskState(int state) {
-        mTaskState = state;
+    public void setMimeType(String mimeType) {
+        mMimeType = mimeType;
     }
 
     public String getMimeType() {
         return mMimeType;
     }
 
-    public void setMimeType(String mimeType) {
-        mMimeType = mimeType;
+    public void setFinalUrl(String finalUrl) {
+        mFinalUrl = finalUrl;
     }
 
     public String getFinalUrl() {
         return mFinalUrl;
     }
 
-    public void setFinalUrl(String finalUrl) {
-        mFinalUrl = finalUrl;
+    public void setErrorCode(int errorCode) {
+        mErrorCode = errorCode;
     }
 
     public int getErrorCode() {
         return mErrorCode;
     }
 
-    public void setErrorCode(int errorCode) {
-        mErrorCode = errorCode;
+    public void setVideoType(int type) {
+        mVideoType = type;
     }
 
     public int getVideoType() {
         return mVideoType;
     }
 
-    public void setVideoType(int type) {
-        mVideoType = type;
+    public void setTotalTs(int count) {
+        mTotalTs = count;
     }
 
     public int getTotalTs() {
         return mTotalTs;
     }
 
-    public void setTotalTs(int count) {
-        mTotalTs = count;
+    public void setCurTs(int count) {
+        mCurTs = count;
     }
 
     public int getCurTs() {
         return mCurTs;
     }
 
-    public void setCurTs(int count) {
-        mCurTs = count;
+    public void setSpeed(float speed) {
+        mSpeed = speed;
     }
 
     public float getSpeed() {
         return mSpeed;
     }
 
-    public void setSpeed(float speed) {
-        mSpeed = speed;
+    public void setPercent(float percent) {
+        mPercent = percent;
     }
 
     public float getPercent() {
         return mPercent;
     }
 
-    public void setPercent(float percent) {
-        mPercent = percent;
+    public void setDownloadSize(long size) {
+        mDownloadSize = size;
     }
 
     public long getDownloadSize() {
         return mDownloadSize;
     }
 
-    public void setDownloadSize(long size) {
-        mDownloadSize = size;
+    public void setTotalSize(long size) {
+        mTotalSize = size;
     }
 
     public long getTotalSize() {
         return mTotalSize;
     }
 
-    public void setTotalSize(long size) {
-        mTotalSize = size;
+    public void setFileHash(String md5) {
+        mFileHash = md5;
     }
 
     public String getFileHash() {
         return mFileHash;
     }
 
-    public void setFileHash(String md5) {
-        mFileHash = md5;
+    public void setSaveDir(String path) {
+        mSaveDir = path;
     }
 
     public String getSaveDir() {
         return mSaveDir;
-    }
-
-    public void setSaveDir(String path) {
-        mSaveDir = path;
     }
 
     public void setIsCompleted(boolean completed) {
@@ -245,36 +229,36 @@ public class VideoTaskItem implements Cloneable {
         return mIsInDatabase;
     }
 
-    public long getLastUpdateTime() {
-        return mLastUpdateTime;
-    }
-
     public void setLastUpdateTime(long time) {
         mLastUpdateTime = time;
     }
 
-    public String getFileName() {
-        return mFileName;
+    public long getLastUpdateTime() {
+        return mLastUpdateTime;
     }
 
     public void setFileName(String name) {
         mFileName = name;
     }
 
-    public String getFilePath() {
-        return mFilePath;
+    public String getFileName() {
+        return mFileName;
     }
 
     public void setFilePath(String path) {
         mFilePath = path;
     }
 
-    public boolean isPaused() {
-        return mPaused;
+    public String getFilePath() {
+        return mFilePath;
     }
 
     public void setPaused(boolean paused) {
         mPaused = paused;
+    }
+
+    public boolean isPaused() {
+        return mPaused;
     }
 
     public boolean isRunningTask() {

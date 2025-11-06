@@ -8,11 +8,11 @@ import com.example.di.FragmentScoped
 import com.example.tubedown.main.bookmarks.BookmarksFragment
 import com.example.tubedown.main.help.HelpFragment
 import com.example.tubedown.main.history.HistoryFragment
-import com.example.tubedown.main.home.MainActivity
 import com.example.tubedown.main.home.browser.BrowserFragment
-import com.example.tubedown.main.home.browser.detectedVideos.DetectedVideosTabFragment
+import com.example.tubedown.main.home.MainActivity
 import com.example.tubedown.main.home.browser.homeTab.BrowserHomeFragment
 import com.example.tubedown.main.home.browser.webTab.WebTabFragment
+import com.example.tubedown.main.home.browser.detectedVideos.DetectedVideosTabFragment
 import com.example.tubedown.main.progress.ProgressFragment
 import com.example.tubedown.main.proxies.ProxiesFragment
 import com.example.tubedown.main.settings.SettingsFragment

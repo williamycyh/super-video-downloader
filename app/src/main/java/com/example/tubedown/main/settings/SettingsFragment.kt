@@ -1,7 +1,8 @@
 package com.example.tubedown.main.settings
 
-//import com.allVideoDownloaderXmaster.OpenForTesting
 import android.content.Context
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +12,9 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.Observable
 import androidx.databinding.Observable.OnPropertyChangedCallback
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.R
+//import com.allVideoDownloaderXmaster.OpenForTesting
 import com.example.databinding.FragmentSettingsBinding
 import com.example.tubedown.main.base.BaseFragment
 import com.example.tubedown.main.home.MainActivity

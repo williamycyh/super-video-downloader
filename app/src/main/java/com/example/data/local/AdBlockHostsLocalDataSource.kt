@@ -55,6 +55,7 @@ class AdBlockHostsLocalDataSource @Inject constructor(
 
         return hostsCache
     }
+
     override fun isAds(url: String): Boolean {
         val uri = try {
             Uri.parse(url)

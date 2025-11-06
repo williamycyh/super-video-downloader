@@ -14,6 +14,7 @@ class TopPagesLocalDataSource @Inject constructor(
     private val pageDao: PageDao,
     private val sharedPrefHelper: SharedPrefHelper
 ) : TopPagesRepository {
+
     override suspend fun getTopPages(): List<PageInfo> {
         val localBookmarks = pageDao.getPageInfos().blockingFirst(emptyList())
         if (localBookmarks.isEmpty()) {

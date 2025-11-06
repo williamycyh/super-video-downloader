@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by burro on 2017/8/21.
+ *  Created by burro on 2017/8/21.
  * 偏好存储工具类，可以存集合，对象，map等
  */
 public class ASharePreferenceUtils {

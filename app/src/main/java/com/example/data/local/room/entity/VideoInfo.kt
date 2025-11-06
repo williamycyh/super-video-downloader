@@ -1,9 +1,6 @@
 package com.example.data.local.room.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
+import androidx.room.*
 import com.google.gson.Gson
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
@@ -13,7 +10,7 @@ import okhttp3.Headers.Companion.toHeaders
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import java.util.UUID
+import java.util.*
 
 @Entity(tableName = "VideoInfo")
 data class VideoInfo(
@@ -79,7 +76,7 @@ data class VideoInfo(
 
     val isMaster get() = isM3u8 && formats.formats.size > 1
 
-    fun isTikTokVideo(): Boolean {
+    fun isTikTokVideo() : Boolean {
         return originalUrl.contains("tiktok.com")
     }
 

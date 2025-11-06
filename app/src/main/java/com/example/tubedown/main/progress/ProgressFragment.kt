@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
+import com.google.android.material.color.MaterialColors
 import com.example.R
 import com.example.databinding.FragmentProgressBinding
 import com.example.tubedown.component.adapter.ProgressAdapter
@@ -20,7 +21,6 @@ import com.example.tubedown.main.base.BaseFragment
 import com.example.tubedown.main.home.MainActivity
 import com.example.tubedown.main.home.MainViewModel
 import com.example.util.AppLogger
-import com.google.android.material.color.MaterialColors
 import javax.inject.Inject
 
 //@OpenForTesting

@@ -1,8 +1,8 @@
 package com.example.tubedown.component.binding
 
 import androidx.databinding.BindingAdapter
-import com.example.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.R
 
 object BottomNavigationViewBinding {
 

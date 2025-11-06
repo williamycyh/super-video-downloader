@@ -1,8 +1,8 @@
 package com.example.util
 
 import androidx.room.TypeConverter
-import com.example.data.local.room.entity.VideoInfo
 import com.google.gson.Gson
+import com.example.data.local.room.entity.VideoInfo
 
 class RoomConverter {
 

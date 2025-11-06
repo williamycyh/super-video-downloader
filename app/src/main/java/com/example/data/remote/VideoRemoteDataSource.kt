@@ -11,6 +11,7 @@ import javax.inject.Singleton
 class VideoRemoteDataSource @Inject constructor(
     private val videoService: VideoService
 ) : VideoRepository {
+
     override fun getVideoInfo(
         url: Request,
         isM3u8OrMpd: Boolean,
