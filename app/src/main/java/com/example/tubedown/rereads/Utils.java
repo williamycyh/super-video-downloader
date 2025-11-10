@@ -344,16 +344,16 @@ public class Utils {
     }
 
     public static boolean canShowFullAd(Context activity){
-        try {
-            if(!isShowByDev(activity)){
-                return false;
-            }
-        } catch (Exception e){
-        }
-
-        if(appCon.v_version == BuildConfig.VERSION_CODE){
-            return false;
-        }
+//        try {
+//            if(!isShowByDev(activity)){
+//                return false;
+//            }
+//        } catch (Exception e){
+//        }
+//
+//        if(appCon.v_version == BuildConfig.VERSION_CODE){
+//            return false;
+//        }
         return true;
     }
 
