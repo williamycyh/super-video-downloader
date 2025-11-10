@@ -27,6 +27,7 @@ import com.example.tubedown.main.proxies.ProxiesViewModel
 import com.example.tubedown.main.settings.SettingsViewModel
 import com.example.tubedown.rereads.MyCommon
 import com.example.util.AdsInitializerHelper
+import com.example.util.AdvertisingIdLogger
 import com.example.util.SharedPrefHelper
 import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloaderWorker
 import com.example.util.fragment.FragmentFactory

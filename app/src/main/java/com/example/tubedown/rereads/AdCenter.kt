@@ -88,6 +88,7 @@ abstract class AdCenter {
             var decodeKey = MydecodeToString("aXh5XzRIXzBUc0ljZXh1S0R0dHFIV0tOYVpxMkZVZ0RXRjl3UnVsbnF3NVQ0Mkk4TjZtM0hjXzFuZ1MyaV9hR2ZzWmJfT2dDcTNQdkE4c1FCVHFsTkNKN0VU")
             val initConfig = AppLovinSdkInitializationConfiguration.builder(decodeKey)
                 .setMediationProvider(AppLovinMediationProvider.MAX)
+//                .setTestDeviceAdvertisingIds(Arrays.asList("77e10438-302e-4cb9-bbf0-134c6ce6c289"))
                 .setSegmentCollection(
                     MaxSegmentCollection.builder()
                         .addSegment(MaxSegment(849, CollectionUtils.listOf(1, 3)))
