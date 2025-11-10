@@ -25,6 +25,7 @@ import com.example.tubedown.component.adapter.MainAdapter
 import com.example.tubedown.main.base.BaseActivity
 import com.example.tubedown.main.proxies.ProxiesViewModel
 import com.example.tubedown.main.settings.SettingsViewModel
+import com.example.tubedown.rereads.MyCommon
 import com.example.util.AdsInitializerHelper
 import com.example.util.SharedPrefHelper
 import com.example.util.downloaders.youtubedl_downloader.YoutubeDlDownloaderWorker
@@ -127,6 +128,8 @@ class MainActivity : BaseActivity() {
         handleScreenOrientationSettingsInit()
 
         onNewIntent(intent)
+
+        showEntryInterstitial()
     }
 
     @SuppressLint("MissingSuperCall")
@@ -242,5 +245,11 @@ class MainActivity : BaseActivity() {
                 }
             }
         })
+    }
+
+    private fun showEntryInterstitial() {
+        if (!MyCommon.showFullScreen(this)) {
+            MyCommon.loadFullScreenAndShow(this)
+        }
     }
 }

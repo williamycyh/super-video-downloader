@@ -1,21 +1,19 @@
 package com.example.tubedown.main.splash
 
 //import com.allVideoDownloaderXmaster.OpenForTesting
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.example.BuildConfig
 import com.example.R
 import com.example.databinding.ActivitySplashBinding
 import com.example.tubedown.main.base.BaseActivity
 import com.example.tubedown.main.home.MainActivity
-import com.example.tubedown.rereads.MyCommon
 import com.example.tubedown.rereads.Utils
 import com.example.tubedown.rereads.Utils.appCon
 import com.example.util.SharedPrefHelper
@@ -37,6 +35,12 @@ class SplashActivity : BaseActivity() {
 
     private lateinit var dataBinding: ActivitySplashBinding
 
+    private val splashDuration = 3_000L
+    private val navigationHandler = Handler(Looper.getMainLooper())
+    private val navigationRunnable = Runnable { startMainActivity() }
+    private var progressAnimator: ValueAnimator? = null
+    private var hasNavigated = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,6 +55,8 @@ class SplashActivity : BaseActivity() {
         setupViews()
         checkFirstLaunch()
         fetchConfig()
+        startProgressAnimation()
+        scheduleNavigation()
     }
 
     private fun setupFullScreen() {
@@ -117,22 +123,14 @@ class SplashActivity : BaseActivity() {
 //    }
 
     private fun startMainActivity() {
-        // 标记已完成首次闪屏显示
-//        sharedPrefHelper.setIsFirstSplashShown(true)
-        
+        if (hasNavigated) {
+            return
+        }
+        hasNavigated = true
+        progressAnimator?.cancel()
+        navigationHandler.removeCallbacks(navigationRunnable)
         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         finish()
-    }
-
-    private fun proceedToMainActivity() {
-
-//        if (!isFirstSplashShown) {
-//            // 首次启动，等待用户点击开始按钮，不自动跳转
-//            return
-//        } else {
-            // 非首次启动
-            startMainActivity()
-//        }
     }
 
     private fun fetchConfig() {
@@ -148,8 +146,6 @@ class SplashActivity : BaseActivity() {
                 if (task.isSuccessful) {
                     // 配置拉取成功，更新配置值
                     appCon.f_type = firebaseRemoteConfig.getLong("a_ty")
-//                    appCon.block_urls = firebaseRemoteConfig.getString("block_urls")
-
                     val v_version = firebaseRemoteConfig.getLong("av_version")
                     appCon.v_version = v_version.toInt()
                     if (appCon.f_type == 0L && !Utils.canShowFullAd(this)) {
@@ -166,10 +162,27 @@ class SplashActivity : BaseActivity() {
                 } else {
 
                 }
-                
-                // 无论配置拉取成功还是失败，都进行页面跳转
-                proceedToMainActivity()
             }
     }
 
+    private fun startProgressAnimation() {
+        dataBinding.progressBar.progress = 0
+        progressAnimator = ValueAnimator.ofInt(0, 100).apply {
+            duration = splashDuration
+            addUpdateListener { animator ->
+                dataBinding.progressBar.progress = animator.animatedValue as Int
+            }
+            start()
+        }
+    }
+
+    private fun scheduleNavigation() {
+        navigationHandler.postDelayed(navigationRunnable, splashDuration)
+    }
+
+    override fun onDestroy() {
+        progressAnimator?.cancel()
+        navigationHandler.removeCallbacks(navigationRunnable)
+        super.onDestroy()
+    }
 }
